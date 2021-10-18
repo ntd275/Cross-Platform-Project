@@ -3,7 +3,9 @@ import { StyleSheet, Pressable, Text, View, StatusBar, Button, ImageBackground, 
 import { LinearGradient } from 'expo-linear-gradient';
 import IconBack from '../../assets/ic_nav_header_back.svg'
 import { TextField } from 'rn-material-ui-textfield';
-import { Icon } from 'react-native-elements'
+import { Icon } from 'react-native-elements';
+import {Api} from '../api/Api'
+import AuthContext from '../components/context/AuthContext';
 
 export default function LoginScreen({ navigation }) {
     fieldRef = React.createRef();
@@ -47,6 +49,22 @@ export default function LoginScreen({ navigation }) {
         size={20}
         onPress={() => onChangePassword("")}
     /> : <></>;
+
+    const context = React.useContext(AuthContext)
+
+    const login = async () => {
+        try {
+            console.log(phonenumber,password)
+            const res = await Api.login(phonenumber,password)
+            context.dispatch({type: 'LOGIN', accessToken: res.data.token, username: res.data.username})
+        } catch (err) {
+            if (err.response && err.response.status == 400){
+                console.log(err.response.data.message)
+                return
+            }
+            console.log(err)
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -119,7 +137,7 @@ export default function LoginScreen({ navigation }) {
                         style={styles.wrapLoginButton}
                         activeOpacity={0.8}
                         underlayColor="#3f3f3f"
-                        onPress={() => { }}
+                        onPress={login}
                         disabled={!isLoginEnable}
                     >
                         <LinearGradient
