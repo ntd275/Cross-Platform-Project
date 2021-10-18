@@ -8,36 +8,36 @@ import { Icon } from 'react-native-elements'
 export default function LoginScreen({ navigation }) {
     fieldRef = React.createRef();
 
-    const [username, setUsername] = useState("");
+    const [phonenumber, setPhonenumber] = useState("");
     const [password, setPassword] = useState("");
     const [isPasswordVisiable, setPasswordVisiable] = useState(false);
     const [isLoginEnable, setLoginEnable] = useState(false);
-    const [isShowUsernameClear, setShowUsernameClear] = useState(false);
+    const [isShowPhonenumberClear, setShowPhonenumberClear] = useState(false);
     const [isShowPasswordClear, setShowPasswordClear] = useState(false);
 
     const enableColor = ["#0085ff", "#05adff"];
     const disableColor = ["#c0d3e2", "#c0d3e2"];
 
-    onChangeUsername = (text) => {
-        setUsername(text);
+    onchangePhonenumber = (text) => {
+        setPhonenumber(text);
         setLoginEnable(text !== "" && password !== "");
-        setShowUsernameClear(text !== "");
+        setShowPhonenumberClear(text !== "");
 
     }
 
     onChangePassword = (text) => {
         setPassword(text);
-        setLoginEnable(text !== "" && username !== "");
+        setLoginEnable(text !== "" && phonenumber !== "");
         setShowPasswordClear(text !== "");
 
     }
 
-    var usernameClearIcon = isShowUsernameClear ? <Icon
+    var phonenumberClearIcon = isShowPhonenumberClear ? <Icon
         name='close'
         type='material'
         color="#93939d"
         size={20}
-        onPress={() => onChangeUsername("")}
+        onPress={() => onchangePhonenumber("")}
     /> : <></>;
 
     var passwordClearIcon = isShowPasswordClear ? <Icon
@@ -73,21 +73,22 @@ export default function LoginScreen({ navigation }) {
                     </View>
                 </LinearGradient>
                 <View style={styles.istruction}>
-                    <Text>Bạn có thể đăng nhập bằng username</Text>
+                    <Text>Bạn có thể đăng nhập bằng số điện thoại</Text>
                 </View>
                 <View style={{ marginLeft: 18, marginRight: 18 }}>
                     <TextField
-                        label='Username'
+                        label='Số điện thoại'
                         fontSize={18}
                         contentInset={{ top: 16, input: 10, right: 48 }}
                         tintColor="#5dd6ef"
-                        value={username}
-                        onChangeText={text => onChangeUsername(text)}
-                        onFocus={() => { if (username !== "") setShowUsernameClear(true); }}
-                        onSubmitEditing={() => setShowUsernameClear(false)}
+                        value={phonenumber}
+                        onChangeText={text => onchangePhonenumber(text)}
+                        onFocus={() => { if (phonenumber !== "") setShowPhonenumberClear(true); }}
+                        onSubmitEditing={() => setShowPhonenumberClear(false)}
+                        keyboardType="number-pad"
                     />
                     <View style={{ position: "absolute", top: 38, right: 15 }}>
-                        {usernameClearIcon}
+                        {phonenumberClearIcon}
                     </View>
                 </View>
                 <View style={{ marginLeft: 18, marginRight: 18 }}>
