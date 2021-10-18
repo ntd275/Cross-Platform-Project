@@ -107,7 +107,7 @@ export default function LoginScreen({ navigation }) {
                     </View>
                     <View style={{ position: "absolute", top: 10, right: 0 }}>
                         <Pressable onPress={()=>{setPasswordVisiable(!isPasswordVisiable)}}>
-                            <Text style={{width: 48, height:60, textAlign: "right", fontSize: 16, color: "#93939d", fontWeight: '500', lineHeight: 60 }}>
+                            <Text style={{width: 44, height:60, textAlign: "right", fontSize: 16, color: "#93939d", fontWeight: '500', lineHeight: 60 }}>
                                 {isPasswordVisiable? "ẨN" : "HIỆN"}
                             </Text>
                         </Pressable>
