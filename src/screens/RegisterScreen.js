@@ -7,7 +7,7 @@ import { Icon } from 'react-native-elements'
 import { Api } from '../api/Api';
 import AuthContext from '../components/context/AuthContext';
 
-var countError = 0;
+let countError = 0;
 const minPasswordLength = 6;
 const maxPasswordLength = 10;
 const ERROR_PHONENUMBER_AND_PASSWORD = "Mật khẩu không được trùng với số điện thoại";
@@ -74,7 +74,7 @@ export default function RegisterScreen({ navigation }) {
     }
 
     checkPasswordValid = (password)=>{
-        var regex  = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+        let regex  = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
         if(regex.test(password)){
             if(passwordError == "" || passwordError == ERROR_PHONENUMBER_AND_PASSWORD){
                 countError += passwordError == ERROR_PHONENUMBER_AND_PASSWORD ? 0 : 1;
@@ -178,7 +178,7 @@ export default function RegisterScreen({ navigation }) {
         }
         return false;
     }
-    var phonenumberClearIcon = isShowPhonenumberClear ? <Icon
+    let phonenumberClearIcon = isShowPhonenumberClear ? <Icon
         name='close'
         type='material'
         color="#93939d"
@@ -186,7 +186,7 @@ export default function RegisterScreen({ navigation }) {
         onPress={() => onchangePhonenumber("")}
     /> : <></>;
 
-    var fullNameClearIcon = isShowFullNameClear ? <Icon
+    let fullNameClearIcon = isShowFullNameClear ? <Icon
         name='close'
         type='material'
         color="#93939d"
@@ -194,7 +194,7 @@ export default function RegisterScreen({ navigation }) {
         onPress={() => onchangeFullName("")}
     /> : <></>;
 
-    var passwordClearIcon = isShowPasswordClear ? <Icon
+    let passwordClearIcon = isShowPasswordClear ? <Icon
         name='close'
         type='material'
         color="#93939d"
@@ -202,7 +202,7 @@ export default function RegisterScreen({ navigation }) {
         onPress={() => onChangePassword("")}
     /> : <></>;
 
-    var confirPasswordClearIcon = isShowConfirmPasswordClear ? <Icon
+    let confirPasswordClearIcon = isShowConfirmPasswordClear ? <Icon
         name='close'
         type='material'
         color="#93939d"
