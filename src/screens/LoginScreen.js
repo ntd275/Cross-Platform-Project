@@ -57,7 +57,6 @@ export default function LoginScreen({ navigation }) {
         try {
             const res = await Api.login(phonenumber,password)
             context.dispatch({type: 'LOGIN', accessToken: res.data.token, username: res.data.username})
-            setNotification(null)
         } catch (err) {
             if (err.response && err.response.status == 400){
                 console.log(err.response.data.message)
