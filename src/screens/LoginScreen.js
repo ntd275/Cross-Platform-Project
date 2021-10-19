@@ -51,15 +51,17 @@ export default function LoginScreen({ navigation }) {
     /> : <></>;
 
     const context = React.useContext(AuthContext)
+    const [notification, setNotification] = React.useState(null)
 
     const login = async () => {
         try {
-            console.log(phonenumber,password)
             const res = await Api.login(phonenumber,password)
             context.dispatch({type: 'LOGIN', accessToken: res.data.token, username: res.data.username})
+            setNotification(null)
         } catch (err) {
             if (err.response && err.response.status == 400){
                 console.log(err.response.data.message)
+                setNotification("Số điện thoại hoặc mật khẩu không chính xác")
                 return
             }
             console.log(err)
@@ -96,6 +98,7 @@ export default function LoginScreen({ navigation }) {
                 <View style={{ marginLeft: 18, marginRight: 18 }}>
                     <TextField
                         label='Số điện thoại'
+                        labelTextStyle={styles.textFieldLable }
                         fontSize={18}
                         contentInset={{ top: 16, input: 10, right: 48 }}
                         tintColor="#5dd6ef"
@@ -112,6 +115,7 @@ export default function LoginScreen({ navigation }) {
                 <View style={{ marginLeft: 18, marginRight: 18 }}>
                     <TextField
                         label='Mật khẩu'
+                        labelTextStyle={styles.textFieldLable}
                         fontSize={18}
                         contentInset={{ top: 10, input: 10, right: 80, label: 0 }}
                         tintColor="#5dd6ef"
@@ -132,7 +136,10 @@ export default function LoginScreen({ navigation }) {
                         </Pressable>
                     </View>
                 </View>
-                <View style={{ marginTop: 50 }}>
+                {notification && <View>
+                    <Text style={styles.notificationText}>{notification}</Text>
+                </View>}
+                <View style={{ marginTop: 30 }}>
                     < TouchableHighlight
                         style={styles.wrapLoginButton}
                         activeOpacity={0.8}
@@ -206,4 +213,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
+    notificationText: {
+        color : "#f00",
+        left: 20,
+    },
+    textFieldLable: {
+        paddingTop: 3
+    }
 });
