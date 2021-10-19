@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, Pressable, Text, View, StatusBar, Button, ImageBackground, TouchableHighlight, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import IconBack from '../../assets/ic_nav_header_back.svg'
@@ -7,13 +7,11 @@ import { Icon } from 'react-native-elements'
 import { Api } from '../api/Api';
 import AuthContext from '../components/context/AuthContext';
 
-let countError = 0;
 const minPasswordLength = 6;
 const maxPasswordLength = 10;
 const ERROR_PHONENUMBER_AND_PASSWORD = "Mật khẩu không được trùng với số điện thoại";
 
 export default function RegisterScreen({ navigation }) {
-
     const [phonenumber, setPhonenumber] = useState("");
     const [fullname, setFullName] = useState("");
     const [password, setPassword] = useState("");
@@ -35,18 +33,24 @@ export default function RegisterScreen({ navigation }) {
     const [confirmPasswordError, setConfirmPasswordError] = useState("");
     const [phoneNumberError, setPhoneNumberError] = useState("");
 
+    useEffect(()=>{
+        setRegisterEnable(password !== "" && phonenumber !== "" && fullname !== "" && confirmPassword !== "" && checkNoneError());
+    }, [phonenumber, fullname, password, confirmPassword, phoneNumberError, passwordError, confirmPasswordError]);
+
+    checkNoneError = ()=>{
+        return (phoneNumberError == "" && passwordError == "" && confirmPasswordError == "");
+    }
+
     onchangePhonenumber = (text) => {
         setPhonenumber(text);
         setShowPhonenumberClear(text !== "");
 
         if(checkPhoneNumberValid(text)){
             if(phoneNumberError !== ""){
-                countError -= 1;
                 setPhoneNumberError("");
             }
         }else{
             if(phoneNumberError == ""){
-                countError += 1;
                 setPhoneNumberError("Số điện thoại chưa đúng định dạng");
             }
         }
@@ -54,15 +58,12 @@ export default function RegisterScreen({ navigation }) {
         if(checkPhoneNumberAndPassWordOk(text, password)){
             if(passwordError == ERROR_PHONENUMBER_AND_PASSWORD){
                 setPasswordError("");
-                countError -= 1;
             }
         }else{
             if(passwordError == ""){
-                countError += 1;
                 setPasswordError(ERROR_PHONENUMBER_AND_PASSWORD);
             }
         }
-        setRegisterEnable(text !== "" && password !== "" && fullname !== "" && confirmPassword !== "" && countError == 0);
       
     }
 
@@ -70,39 +71,25 @@ export default function RegisterScreen({ navigation }) {
     onchangeFullName = (text) => {
         setFullName(text);
         setShowFullNameClear(text !== "");
-        setRegisterEnable(text !== "" && phonenumber !== "" && password !== "" && confirmPassword !== "" && countError == 0);
     }
 
     checkPasswordValid = (password)=>{
         let regex  = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
         if(regex.test(password)){
-            if(passwordError == "" || passwordError == ERROR_PHONENUMBER_AND_PASSWORD){
-                countError += passwordError == ERROR_PHONENUMBER_AND_PASSWORD ? 0 : 1;
-                setPasswordError("Mật khẩu không được chứa ký tự đặc biệt")
-            }
             setPasswordError("Mật khẩu không được chứa ký tự đặc biệt")
             return false;
         }
 
         if(password !== "" && password.length < minPasswordLength){
-            if(passwordError == "" || passwordError == ERROR_PHONENUMBER_AND_PASSWORD){
-                countError += passwordError == ERROR_PHONENUMBER_AND_PASSWORD ? 0 : 1;
-                setPasswordError("Mật khẩu quá ngắn, tối thiểu " + minPasswordLength + " ký tự")
-            }
             setPasswordError("Mật khẩu quá ngắn, tối thiểu " + minPasswordLength + " ký tự")
             return false;
         }
         if(password.length > maxPasswordLength){
-            if(passwordError == "" || passwordError == ERROR_PHONENUMBER_AND_PASSWORD){
-                countError += passwordError == ERROR_PHONENUMBER_AND_PASSWORD ? 0 : 1;
-                setPasswordError("Mật khẩu quá dài, tối đa " + maxPasswordLength +  " ký tự")
-            }
             setPasswordError("Mật khẩu quá dài, tối đa " + maxPasswordLength +  " ký tự")
             return false;
         }
 
         if(passwordError !== "" && passwordError !== ERROR_PHONENUMBER_AND_PASSWORD){
-            countError -= 1;
             setPasswordError("");
         }
         return true;
@@ -123,12 +110,10 @@ export default function RegisterScreen({ navigation }) {
         if (confirmPassword == "" || text == "" || confirmPassword == text) {
             if (confirmPasswordError !== "") {
                 setConfirmPasswordError("");
-                countError -= 1;
             }
         } else {
             if (confirmPassword !== text) {
                 setConfirmPasswordError("Mật khẩu chưa trùng khớp");
-                countError += 1;
             }
         }
 
@@ -136,20 +121,14 @@ export default function RegisterScreen({ navigation }) {
             let isOk = checkPhoneNumberAndPassWordOk(phonenumber, text);
             if(isOk){
                 if(passwordError == ERROR_PHONENUMBER_AND_PASSWORD){
-                    countError -=1;
                     setPasswordError("");
                 }
             }else{
                 if(passwordError !== ERROR_PHONENUMBER_AND_PASSWORD){
-                    countError += 1;
                     setPasswordError(ERROR_PHONENUMBER_AND_PASSWORD)
                 }
             }
         }
-
-
-
-        setRegisterEnable(text !== "" && phonenumber !== "" && fullname !== "" && confirmPassword !== "" && countError == 0);
     }
 
     onChangeConfirmPassword = (text) => {
@@ -158,18 +137,14 @@ export default function RegisterScreen({ navigation }) {
         if (password == "" || text == "" || password == text) {
             if (confirmPasswordError !== "") {
                 setConfirmPasswordError("");
-                countError -= 1;
             }
         } else {
             if (password !== text) {
                 if (confirmPasswordError == "") {
                     setConfirmPasswordError("Mật khẩu chưa trùng khớp");
-                    countError += 1;
                 }
             }
         }
-
-        setRegisterEnable(text !== "" && phonenumber !== "" && fullname !== "" && password !== "" && countError == 0);
     }
 
     checkPhoneNumberAndPassWordOk = (phonenumber, password) => {

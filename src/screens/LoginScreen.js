@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, Pressable, Text, View, StatusBar, Button, ImageBackground, TouchableHighlight, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import IconBack from '../../assets/ic_nav_header_back.svg'
@@ -7,9 +7,12 @@ import { Icon } from 'react-native-elements';
 import { Api } from '../api/Api'
 import AuthContext from '../components/context/AuthContext';
 
-export default function LoginScreen({ navigation }) {
-    fieldRef = React.createRef();
 
+const minPasswordLength = 6;
+const maxPasswordLength = 10;
+const ERROR_PHONENUMBER_AND_PASSWORD = "Mật khẩu không được trùng với số điện thoại";
+
+export default function LoginScreen({ navigation }) {
     const [phonenumber, setPhonenumber] = useState("");
     const [password, setPassword] = useState("");
     const [isPasswordVisiable, setPasswordVisiable] = useState(false);
@@ -17,21 +20,96 @@ export default function LoginScreen({ navigation }) {
     const [isShowPhonenumberClear, setShowPhonenumberClear] = useState(false);
     const [isShowPasswordClear, setShowPasswordClear] = useState(false);
 
+    const [phoneNumberError, setPhoneNumberError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+
     const enableColor = ["#0085ff", "#05adff"];
     const disableColor = ["#c0d3e2", "#c0d3e2"];
 
-    onchangePhonenumber = (text) => {
-        setPhonenumber(text);
-        setLoginEnable(text !== "" && password !== "");
-        setShowPhonenumberClear(text !== "");
+    useEffect(()=>{
+        setLoginEnable(password !== "" && phonenumber !== "" && checkNoneError());
+    }, [phonenumber, password, phoneNumberError, passwordError]);
 
+    onchangePhonenumber = (text) => {
+        setShowPhonenumberClear(text !== "");
+        if(checkPhoneNumberValid(text)){
+            if(phoneNumberError !== ""){
+                setPhoneNumberError("");
+            }
+        }else{
+            if(phoneNumberError == ""){
+                setPhoneNumberError("Số điện thoại chưa đúng định dạng");
+            }
+        }
+
+        if(checkPhoneNumberAndPassWordOk(text, password)){
+            if(passwordError == ERROR_PHONENUMBER_AND_PASSWORD){
+                setPasswordError("");
+            }
+        }else{
+            if(passwordError == ""){
+                setPasswordError(ERROR_PHONENUMBER_AND_PASSWORD);
+            }
+        }
+        setPhonenumber(text);
+    }
+
+    checkNoneError = ()=>{
+        return (phoneNumberError == "" && passwordError == "");
     }
 
     onChangePassword = (text) => {
         setPassword(text);
-        setLoginEnable(text !== "" && phonenumber !== "");
         setShowPasswordClear(text !== "");
+        if(checkPasswordValid(text)){
+            let isOk = checkPhoneNumberAndPassWordOk(phonenumber, text);
+            if(isOk){
+                if(passwordError == ERROR_PHONENUMBER_AND_PASSWORD){
+                    setPasswordError("");
+                }
+            }else{
+                if(passwordError !== ERROR_PHONENUMBER_AND_PASSWORD){
+                    setPasswordError(ERROR_PHONENUMBER_AND_PASSWORD)
+                }
+            }
+        }
+    }
 
+    checkPasswordValid = (password)=>{
+        let regex  = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+        if(regex.test(password)){
+            setPasswordError("Mật khẩu không được chứa ký tự đặc biệt")
+            return false;
+        }
+
+        if(password !== "" && password.length < minPasswordLength){
+            setPasswordError("Mật khẩu quá ngắn, tối thiểu " + minPasswordLength + " ký tự")
+            return false;
+        }
+        if(password.length > maxPasswordLength){
+            setPasswordError("Mật khẩu quá dài, tối đa " + maxPasswordLength +  " ký tự")
+            return false;
+        }
+
+        if(passwordError !== "" && passwordError !== ERROR_PHONENUMBER_AND_PASSWORD){
+            setPasswordError("");
+        }
+        return true;
+    }
+
+    checkPhoneNumberValid = (phonenumber)=>{
+        let regex = /(^(09|03|07|08|05|02)([0-9]{8}$))/g;
+        if(phonenumber == "" || regex.test(phonenumber)){
+            return true;
+        }
+        return false;
+    }
+
+    checkPhoneNumberAndPassWordOk = (phonenumber, password) => {
+        if (phonenumber == "" || password == "" || phonenumber !== password) {
+            return true;
+        }
+        return false;
     }
 
     var phonenumberClearIcon = isShowPhonenumberClear ? <Icon
@@ -107,7 +185,8 @@ export default function LoginScreen({ navigation }) {
                             onFocus={() => { if (phonenumber !== "") setShowPhonenumberClear(true); }}
                             onSubmitEditing={() => setShowPhonenumberClear(false)}
                             onBlur={() => setShowPhonenumberClear(false)}
-                            keyboardType="number-pad"
+                            keyboardType="name-phone-pad"
+                            error={phoneNumberError}
                         />
                         <View style={{ position: "absolute", top: 38, right: 15 }}>
                             {phonenumberClearIcon}
@@ -126,6 +205,7 @@ export default function LoginScreen({ navigation }) {
                             onFocus={() => { if (password !== "") setShowPasswordClear(true); }}
                             onSubmitEditing={() => setShowPasswordClear(false)}
                             onBlur={() => setShowPasswordClear(false)}
+                            error={passwordError}
                         />
                         <View style={{ position: "absolute", top: 30, right: 42 }}>
                             {passwordClearIcon}
