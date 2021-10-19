@@ -131,7 +131,7 @@ export default function RegisterScreen({ navigation }) {
         }
 
         if(checkPasswordValid(text)){
-            isOk = checkPhoneNumberAndPassWordOk(phonenumber, text);
+            let isOk = checkPhoneNumberAndPassWordOk(phonenumber, text);
             if(isOk){
                 if(passwordError == ERROR_PHONENUMBER_AND_PASSWORD){
                     countError -=1;
