@@ -4,6 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import IconBack from '../../assets/ic_nav_header_back.svg'
 import { TextField } from 'rn-material-ui-textfield';
 import { Icon } from 'react-native-elements'
+import { Api } from '../api/Api';
+import AuthContext from '../components/context/AuthContext';
 
 var countError = 0;
 const minPasswordLength = 6;
@@ -131,7 +133,7 @@ export default function RegisterScreen({ navigation }) {
         }
 
         if(checkPasswordValid(text)){
-            isOk = checkPhoneNumberAndPassWordOk(phonenumber, text);
+            let isOk = checkPhoneNumberAndPassWordOk(phonenumber, text);
             if(isOk){
                 if(passwordError == ERROR_PHONENUMBER_AND_PASSWORD){
                     countError -=1;
@@ -207,6 +209,24 @@ export default function RegisterScreen({ navigation }) {
         size={20}
         onPress={() => onChangeConfirmPassword("")}
     /> : <></>;
+
+    const authContext = React.useContext(AuthContext)
+    const [notification, setNotification] = React.useState(null)
+
+    const register = async () => {
+        try {
+            const res = await Api.register(phonenumber,password,fullname)
+            console.log(res.data)
+            authContext.dispatch({type: 'LOGIN',accessToken: res.data.token, username: res.data.data.username})
+        } catch(err){
+            if (err.response && err.response.status == 400) {
+                console.log(err.response.data.message)
+                setNotification("Số điện thoại đăng ký đã tồn tại")
+                return
+            }
+            console.log(err)
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -324,12 +344,15 @@ export default function RegisterScreen({ navigation }) {
                             </Pressable>
                         </View>
                     </View>
+                    {notification && <View>
+                        <Text style={styles.notificationText}>{notification}</Text>
+                    </View>}
                     <View style={{ marginTop: 50 }}>
                         < TouchableHighlight
                             style={styles.wrapRegisterButton}
                             activeOpacity={0.8}
                             underlayColor="#3f3f3f"
-                            onPress={() => { }}
+                            onPress={register}
                             disabled={!isRegisterEnable}
                         >
                             <LinearGradient
@@ -401,5 +424,9 @@ const styles = StyleSheet.create({
     },
     textFieldLable: {
         paddingTop: 3
+    },
+    notificationText: {
+        color: "#f00",
+        left: 20,
     },
 });

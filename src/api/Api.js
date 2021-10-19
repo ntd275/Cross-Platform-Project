@@ -8,6 +8,13 @@ export const Api = {
             phonenumber : phonenumber,
             password: password,
         })
+    },
+    register: (phonenumber, password, username) => {
+        return axios.post(`${BaseURL}/users/register`,{
+            phonenumber,
+            password,
+            username
+        })
     }
 }
 
