@@ -117,7 +117,7 @@ export default function LoginScreen({ navigation }) {
                         label='Mật khẩu'
                         labelTextStyle={styles.textFieldLable}
                         fontSize={18}
-                        contentInset={{ top: 10, input: 10, right: 80, label: 0 }}
+                        contentInset={{ top: 10, input: 10, right: 80}}
                         tintColor="#5dd6ef"
                         secureTextEntry={!isPasswordVisiable}
                         value={password}
