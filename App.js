@@ -7,6 +7,7 @@ import LoginStackScreen from './src/screens/LoginStackScreen';
 import AuthContext from './src/components/context/AuthContext';
 import { loginReducer} from './src/components/reducer/loginReducer';
 import ProfileStackScreen from './src/screens/tabs/ProfileStackScreen';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator();
 
@@ -24,6 +25,15 @@ export default function App() {
     dispatch
   }
 
+  getTabBarVisibility = (route) => {
+    const routeName = getFocusedRouteNameFromRoute(route)
+    const hideTabBarScreen = ["SettingScreen"]
+    if (hideTabBarScreen.includes(routeName)) {
+      return {display : "none"};
+    }
+    return {};
+  }
+
   return (
     <AuthContext.Provider value={authContext}>
       <NavigationContainer>
@@ -35,7 +45,13 @@ export default function App() {
         >
           <Tab.Screen name="MessageStackScreen" component={MessageStackScreen} />
           <Tab.Screen name="ContactStackScreen" component={ContactStackScreen} />
-          <Tab.Screen name="ProfileStackScreen" component={ProfileStackScreen} />
+          <Tab.Screen name="ProfileStackScreen" component={ProfileStackScreen} 
+            options={({route}) => ({
+              tabBarStyle: 
+                {...getTabBarVisibility(route)}
+              })
+            }
+          />
         </Tab.Navigator>)}
       </NavigationContainer>
     </AuthContext.Provider>
