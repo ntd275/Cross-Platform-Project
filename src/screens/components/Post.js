@@ -3,6 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, Pressable, Text, StatusBar, View, Button } from 'react-native';
 import { Avatar, Icon, Image } from "react-native-elements";
 import ImageView from "react-native-image-viewing";
+import { Video, AVPlaybackStatus } from 'expo-av';
+import RBSheet from "react-native-raw-bottom-sheet";
+import IconMenuDelete from '../../../assets/ic_bottom_sheet_menu_delete.svg'
+import IconMenuReport from '../../../assets/ic_bottom_sheet_menu_report.svg'
+import IconMenuBan from '../../../assets/ic_bottom_sheet_menu_ban.svg'
+import IconMenuHide from '../../../assets/ic_hide_social.svg'
 
 export default function Post() {
     const images = [
@@ -20,7 +26,12 @@ export default function Post() {
         },
     ];
 
-    const video = "";
+    const videoURL = "";  //http://13.76.46.159:8000/files/test.mp4  
+    //http://13.76.46.159:8000/files/big_buck_bunny.mp4
+
+    const video = React.useRef(null);
+    const refRBSheet = React.useRef(null);
+    const [status, setStatus] = React.useState({});
 
     const [visible, setIsVisible] = useState(false);
     const [imageIndex, setImageIndex] = useState(1);
@@ -37,6 +48,7 @@ export default function Post() {
 
     var showMenu = () => {
         console.log("showing menu ...");
+        refRBSheet.current.open();
     }
 
     var clickLike = () => {
@@ -56,47 +68,89 @@ export default function Post() {
 
     let media = <></>
     let addition = <></>
-    if (!video) {
-        if (images.length > 1) {
-            let additionImages = [];
-            let imageHeight = (images.length <= 2) ? (400) : ((400 - 3 * (images.length - 2)) / (images.length - 1));
-            for (let i = 1; i < images.length; i++) {
-                additionImages.push(
-                    <View key={i}>
-                        <Image
-                            source={[images[i]]}
-                            style={{ height: imageHeight, resizeMode: 'cover'}}
-                            onPress={() => { setImageIndex(i); setIsVisible(true) }}
-                        />
-                    </View>
-                );
-            }
-            addition = <View style={{ flex: 1, paddingTop: 20, flexDirection: "column", left: 3, justifyContent:"space-between" }}>
-                {additionImages}
-            </View>
+    if (!videoURL) {
+        if (images.length > 0) {
+            if (images.length > 1) {
+                let additionImages = [];
+                let imageHeight = (images.length <= 2) ? (400) : ((400 - 3 * (images.length - 2)) / (images.length - 1));
+                for (let i = 1; i < images.length; i++) {
+                    additionImages.push(
+                        <View key={i}>
+                            <Image
+                                source={[images[i]]}
+                                style={{ height: imageHeight, resizeMode: 'cover' }}
+                                onPress={() => { setImageIndex(i); setIsVisible(true) }}
+                            />
+                        </View>
+                    );
+                }
+                addition = <View style={{ flex: 1, paddingTop: 20, flexDirection: "column", left: 3, justifyContent: "space-between" }}>
+                    {additionImages}
+                </View>
 
-        }
-        media = <>
-            <ImageView
-                images={images}
-                imageIndex={imageIndex}
-                visible={visible}
-                onRequestClose={() => setIsVisible(false)}
-                swipeToCloseEnabled={true}
-                FooterComponent={(props) => {
-                    return <View><Text style={styles.imageViewFooter}>{props.imageIndex + 1} / {images.length}</Text></View>
-                }}
-            />
-            <View style={{ flex: 1, paddingTop: 20 }}>
-                <Image
-                    source={[images[0]]}
-                    style={{ height: 400, resizeMode: 'cover' }}
-                    onPress={() => { setImageIndex(0); setIsVisible(true) }}
+            }
+            media = <>
+                <ImageView
+                    images={images}
+                    imageIndex={imageIndex}
+                    visible={visible}
+                    onRequestClose={() => setIsVisible(false)}
+                    swipeToCloseEnabled={true}
+                    FooterComponent={(props) => {
+                        return <View><Text style={styles.imageViewFooter}>{props.imageIndex + 1} / {images.length}</Text></View>
+                    }}
                 />
-            </View>
-            {addition}
-        </>
+                <View style={{ flex: 1, paddingTop: 20 }}>
+                    <Image
+                        source={[images[0]]}
+                        style={{ height: 400, resizeMode: 'cover' }}
+                        onPress={() => { setImageIndex(0); setIsVisible(true) }}
+                    />
+                </View>
+                {addition}
+            </>
+        }
+    } else {
+        media = <View style={{ flex: 1, paddingTop: 20 }}>
+            <Video
+                ref={video}
+                style={styles.video}
+                source={{
+                    uri: videoURL,
+                }}
+                useNativeControls={true}
+                resizeMode="contain"
+                isLooping={true}
+                onPlaybackStatusUpdate={status => setStatus(() => status)}
+            />
+        </View>
     }
+
+
+    var onBuffer = () => {
+        console.log("buffering video");
+    }
+
+    var videoError = () => {
+        console.log("video error");
+    }
+
+    var onPressDelete = () => {
+        console.log("pressed Delete");
+        // refRBSheet.current.close();
+    }
+    var onPressHide = () => {
+        console.log("pressed Hide");
+    }
+
+    var onPressBlock = () => {
+        console.log("pressed Block");
+    }
+
+    var onPressReport = () => {
+        console.log("pressed Report");
+    }
+
 
     return (
         <ScrollView>
@@ -162,6 +216,59 @@ export default function Post() {
                         <Text style={{ marginLeft: 6, fontSize: 18, lineHeight: 34 }}>{numComment}</Text>
                     </View>
                 </View>
+                <RBSheet
+                    ref={refRBSheet}
+                    closeOnDragDown={true}
+                    closeOnPressMask={true}
+                    animationType= "fade"
+                    height= {320}
+                    customStyles={{
+                        wrapper: {
+                            backgroundColor: 'rgba(0,0,0,0.28)',
+                        },
+                        container:{
+                            borderTopLeftRadius: 20,
+                            borderTopEndRadius: 20
+                        },
+                        draggableIcon: {
+                            opacity: 0
+                        }
+                    }}
+                >
+                    <View style={{justifyContent: "center", flexDirection: "column", height: 320, marginTop: -20}}>
+                        <Pressable style={[styles.menuOption, {height: 72}]} onPress={onPressDelete}>
+                            <IconMenuDelete flex={1} style={{marginTop: "auto", marginBottom: "auto"}} />
+                            <View flex={10} style={styles.inMenuOption}>
+                                <Text style={{fontSize: 16, fontWeight: '400', marginBottom: 4}}>Xoá bài đăng</Text>
+                                <Text style={{fontSize: 14, color: "#9ea1a6"}}>Bài đăng này sẽ ẩn khỏi nhật ký</Text>
+                            </View>
+                        </Pressable>
+
+                        <Pressable style={[styles.menuOption, {height: 90}]} onPress={onPressHide}>
+                            <IconMenuHide flex={1} style={{marginTop: "auto", marginBottom: "auto"}} />
+                            <View flex={10} style={styles.inMenuOption}>
+                                <Text style={{fontSize: 16, fontWeight: '400', marginBottom: 4}}>Ẩn nhật ký của {userName}</Text>
+                                <Text style={{fontSize: 14, color: "#9ea1a6"}}>Toàn bộ bài đăng và khoảnh khắc của người này sẽ bị ẩn đi</Text>
+                            </View>
+                        </Pressable>
+
+                        <Pressable style={[styles.menuOption, {height: 90}]} onPress={onPressBlock}>
+                            <IconMenuBan flex={1} style={{marginTop: "auto", marginBottom: "auto"}} />
+                            <View flex={10} style={styles.inMenuOption}>
+                                <Text style={{fontSize: 16, fontWeight: '400', marginBottom: 4}}>Chặn {userName} xem nhật ký của tôi</Text>
+                                <Text style={{fontSize: 14, color: "#9ea1a6"}}>Người này sẽ không thấy toàn bộ bài đăng và khoảnh khắc của bạn</Text>
+                            </View>
+                        </Pressable>
+
+                        <Pressable style={[styles.menuOption, {height: 68}]} onPress={onPressReport}>
+                            <IconMenuReport flex={1} style={{marginTop: "auto", marginBottom: "auto"}} />
+                            <View flex={10} style={styles.reportMenuOption}>
+                                <Text style={{fontSize: 16, fontWeight: '400'}}>Báo xấu</Text>
+                            </View>
+                        </Pressable>
+           
+                    </View>
+                </RBSheet>
             </View>
         </ScrollView>
     )
@@ -219,4 +326,26 @@ const styles = StyleSheet.create({
         paddingRight: 2,
         fontWeight: "500"
     },
+    video: {
+        alignSelf: 'center',
+        width: "100%",
+        height: 400,
+    },
+    menuOption:{
+        flexDirection: "row", 
+        paddingLeft: 14,
+        paddingRight: 18,
+    },
+    inMenuOption:{
+        flexDirection:"column",
+        justifyContent:"center",
+        marginLeft: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: "#adb1b7",
+    },
+    reportMenuOption:{
+        flexDirection:"column",
+        justifyContent:"center",
+        marginLeft: 12,
+    }
 });
