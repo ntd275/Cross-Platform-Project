@@ -142,6 +142,7 @@ export default function LoginScreen({ navigation }) {
                 return
             }
             console.log(err)
+            navigation.navigate("NoConnectionScreen",{message: "Tài khoản sẽ tự động đăng nhập khi có kết nối internet"})
         }
     }
 

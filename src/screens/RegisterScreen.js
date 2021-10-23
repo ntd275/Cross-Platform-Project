@@ -191,7 +191,6 @@ export default function RegisterScreen({ navigation }) {
     const register = async () => {
         try {
             const res = await Api.register(phonenumber,password,fullname)
-            console.log(res.data)
             authContext.dispatch({type: 'LOGIN',accessToken: res.data.token, username: res.data.data.username})
         } catch(err){
             if (err.response && err.response.status == 400) {
@@ -200,6 +199,8 @@ export default function RegisterScreen({ navigation }) {
                 return
             }
             console.log(err)
+            navigation.navigate("NoConnectionScreen",{message: "Vui lòng kiểm tra kết nối internet và thử lại"})
+            return
         }
     }
 
