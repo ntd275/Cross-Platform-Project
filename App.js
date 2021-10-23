@@ -6,6 +6,7 @@ import ContactStackScreen from './src/screens/tabs/ContactStackScreen';
 import LoginStackScreen from './src/screens/LoginStackScreen';
 import AuthContext from './src/components/context/AuthContext';
 import { loginReducer} from './src/components/reducer/loginReducer';
+import ProfileStackScreen from './src/screens/tabs/ProfileStackScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -34,6 +35,7 @@ export default function App() {
         >
           <Tab.Screen name="MessageStackScreen" component={MessageStackScreen} />
           <Tab.Screen name="ContactStackScreen" component={ContactStackScreen} />
+          <Tab.Screen name="ProfileStackScreen" component={ProfileStackScreen} />
         </Tab.Navigator>)}
       </NavigationContainer>
     </AuthContext.Provider>

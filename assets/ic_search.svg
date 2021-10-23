@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><svg xmlns:aapt="http://schemas.android.com/aapt" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4.1,10C4.1,6.74 6.74,4.1 10,4.1c3.258,0 5.9,2.641 5.9,5.9 0,3.258 -2.642,5.9 -5.9,5.9 -3.259,0 -5.9,-2.642 -5.9,-5.9zM10,2.9c-3.921,0 -7.1,3.179 -7.1,7.1s3.179,7.1 7.1,7.1c1.672,0 3.21,-0.578 4.423,-1.546l0.011,0.012 5,5c0.313,0.312 0.82,0.312 1.132,0 0.312,-0.313 0.312,-0.82 0,-1.132l-5,-5 -0.012,-0.011C16.522,13.21 17.1,11.673 17.1,10c0,-3.921 -3.179,-7.1 -7.1,-7.1z" fill="#fff" fill-rule="1"/>
+</svg>
