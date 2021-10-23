@@ -7,6 +7,15 @@ import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 const ProfileStack = createNativeStackNavigator();
 
 export default function ProfileStackScreen({route, navigation}){
+    React.useLayoutEffect(() => {
+        const routeName = getFocusedRouteNameFromRoute(route);
+        const hideScreens = ["SettingScreen"]
+        if (hideScreens.includes(routeName)){
+            navigation.setOptions({tabBarStyle:{display: 'none'}});
+        }else {
+            navigation.setOptions({tabBarStyle:{display: 'show'}});
+        }
+    }, [navigation, route]);
     return(
       <ProfileStack.Navigator
         screenOptions={{
