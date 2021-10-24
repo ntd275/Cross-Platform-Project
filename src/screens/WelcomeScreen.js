@@ -1,11 +1,16 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button, ImageBackground,  TouchableHighlight, TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View, Button, StatusBar, ImageBackground,  TouchableHighlight, TouchableOpacity} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Logo from '../../assets/logo_zalo.svg'
 
 export default function WelcomeScreen({ navigation }){
     return(
       <View style={styles.container}>
+        <StatusBar
+          backgroundColor="#00000000"
+          barStyle="light-content"
+          translucent={true}
+        />
         <ImageBackground 
           source={require('../../assets/city_light.png')}  
           style={styles.imageBackground}

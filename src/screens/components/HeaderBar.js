@@ -7,8 +7,9 @@ const HeaderBar = (props) => {
     return(
         <>
             <StatusBar
-                backgroundColor="blue"
+                backgroundColor="#00000000"
                 barStyle="light-content"
+                translucent={true}
             />
 
             <LinearGradient

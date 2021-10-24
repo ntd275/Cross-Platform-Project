@@ -30,7 +30,7 @@ export default function SettingScreen({ navigation }) {
     <View style={styles.container}>
       <ScrollView keyboardShouldPersistTaps="handled" scrollEnabled={false}>
         <View>
-          <StatusBar backgroundColor="blue" barStyle="light-content" />
+          <StatusBar backgroundColor="#00000000" barStyle="light-content" translucent={true} />
 
           <LinearGradient
             colors={["#0085ff", "#05adff"]}

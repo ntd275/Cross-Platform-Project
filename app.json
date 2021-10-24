@@ -34,7 +34,8 @@
       "sourceExts": ["js", "jsx", "ts", "tsx", "svg"]
     },
     "androidStatusBar": {
-      "translucent": true
+      "translucent": true,
+      "backgroundColor":"#00000000"
     }
     
   }

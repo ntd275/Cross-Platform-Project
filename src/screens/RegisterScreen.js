@@ -209,8 +209,9 @@ export default function RegisterScreen({ navigation }) {
             <ScrollView keyboardShouldPersistTaps="handled" scrollEnabled={false}>
                 <View>
                     <StatusBar
-                        backgroundColor="blue"
+                        backgroundColor="#00000000"
                         barStyle="light-content"
+                        translucent={true}
                     />
 
                     <LinearGradient
