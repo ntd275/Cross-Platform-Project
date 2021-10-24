@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Button, ScrollView, TextInput, FlatList, TouchableOpacity, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Button, ScrollView, TextInput, FlatList, TouchableOpacity, Pressable, KeyboardAvoidingView } from 'react-native';
 import { Avatar, ListItem, Icon } from 'react-native-elements';
 import HeaderBar from './components/HeaderBar.js'
 import Post from './components/Post.js';
 import IconSend from '../../assets/ic_send.svg'
-import IconPhoto from '../../assets/ic_photo_o.svg'
+import IconPhoto from '../../assets/icn_csc_menu_sticker_n.svg'
 
 const UserPost = (props) => {
-    return( 
+    return (
         <View style={styles.post}>
-            <Post></Post>
+            <Post mode="comment"></Post>
         </View>
     )
 }
@@ -69,28 +69,32 @@ const MyComment = () => {
     const disableSendButtonOpacity = 0.2;
 
     return (
-        <View style={{flexDirection:'row'}}>
-            <View style={styles.sendButton}>
-                <TouchableOpacity>
-                    <IconPhoto />
-                </TouchableOpacity>
-            </View>
-            <View style={styles.enterCommentText}>
-                <TextInput style={styles.enterComment}
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <View style={{ flexDirection: 'row' }}>
+                <View style={styles.sendButton}>
+                    <TouchableOpacity>
+                        <IconPhoto />
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.enterCommentText}>
+
+                    <TextInput style={styles.enterComment}
                         placeholder="Nhập bình luận"
                         returnKeyType="send"
                         enablesReturnKeyAutomatically
                         onChangeText={text => setMyComment(text)}
                         defaultValue={myComment}>
-                </TextInput>
+                    </TextInput>
+
+                </View>
+                <View style={[styles.sendButton,
+                { opacity: myComment.match(/\S/) ? 1 : disableSendButtonOpacity }]}>
+                    <TouchableOpacity disabled={!myComment.match(/\S/)}>
+                        <IconSend />
+                    </TouchableOpacity>
+                </View>
             </View>
-            <View style={[styles.sendButton, 
-                          {opacity: myComment.match(/\S/)?1:disableSendButtonOpacity}]}>
-                <TouchableOpacity disabled={!myComment.match(/\S/)}>
-                    <IconSend />
-                </TouchableOpacity>
-            </View>
-        </View>
+        </KeyboardAvoidingView>
     )
 }
 
@@ -100,12 +104,12 @@ export default function PostScreen({ navigation }) {
         <View style={styles.container}>
             <HeaderBar text="Bình luận" navigation={navigation} />
             <View style={styles.postAndComment}>
-                <PostAndComment 
+                <PostAndComment
                     post={
-                        () => {return <UserPost/>}
-                    }/>
+                        () => { return <UserPost /> }
+                    } />
             </View>
-            <MyComment/>
+            <MyComment />
         </View>
     )
 }
@@ -152,6 +156,8 @@ const styles = StyleSheet.create({
     post: {
         flex: 1,
         padding: 0,
+        borderBottomColor: "#ebebeb",
+        borderBottomWidth: 1
     },
     comment: {
         flex: 1,
@@ -164,6 +170,7 @@ const styles = StyleSheet.create({
         height: 50,
         backgroundColor: "#f9fafc",
         fontSize: 18,
+        marginTop: 3
     },
     avatar: {
         flex: 2,

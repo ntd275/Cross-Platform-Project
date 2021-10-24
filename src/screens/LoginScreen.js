@@ -154,7 +154,6 @@ export default function LoginScreen({ navigation }) {
                         backgroundColor="blue"
                         barStyle="light-content"
                     />
-
                     <LinearGradient
                         colors={["#0085ff", "#05adff"]}
                         start={[0, 1]}

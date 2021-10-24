@@ -34,7 +34,7 @@ export default function App() {
     return (
         <AuthContext.Provider value={authContext}>
         <NavigationContainer>
-            {loginState.accessToken == null? <LoginStackScreen/>:
+            {loginState.accessToken == null? <TimeLineStackScreen/>:
             (<Tab.Navigator 
             screenOptions={{
             headerShown: false

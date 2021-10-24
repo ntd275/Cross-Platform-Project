@@ -10,7 +10,7 @@ import IconMenuReport from '../../../assets/ic_bottom_sheet_menu_report.svg'
 import IconMenuBan from '../../../assets/ic_bottom_sheet_menu_ban.svg'
 import IconMenuHide from '../../../assets/ic_hide_social.svg'
 
-export default function Post() {
+export default function Post(props) {
     const images = [
         {
             uri: "https://scontent.fhan3-1.fna.fbcdn.net/v/t1.6435-9/83664896_183120826091483_966697121426178048_n.jpg?_nc_cat=102&ccb=1-5&_nc_sid=8bfeb9&_nc_ohc=6FkkOSn1HxsAX_5s72G&_nc_ht=scontent.fhan3-1.fna&oh=352f134b1cfd21372d65288dc232620e&oe=6197F36C",
