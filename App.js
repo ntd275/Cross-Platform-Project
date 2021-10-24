@@ -3,11 +3,11 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MessageStackScreen from './src/screens/tabs/MessageStackScreen';
 import ContactStackScreen from './src/screens/tabs/ContactStackScreen';
-import TimelineStackScreen from './src/screens/tabs/TimelineStackScreen';
+import TimeLineStackScreen from './src/screens/tabs/TimeLineStackScreen';
+import ProfileStackScreen from './src/screens/tabs/ProfileStackScreen';
 import LoginStackScreen from './src/screens/LoginStackScreen';
 import AuthContext from './src/components/context/AuthContext';
 import { loginReducer} from './src/components/reducer/loginReducer';
-import ProfileStackScreen from './src/screens/tabs/ProfileStackScreen';
 import IconTabMeFocus from './assets/ic_tab_me_focus.svg'
 import IconTabMe from './assets/ic_tab_me.svg'
 import IconTabMessage from './assets/ic_tab_message.svg'
@@ -19,17 +19,17 @@ const Tab = createBottomTabNavigator();
 
 
 export default function App() {
-    const initLoginState = {
-        userName : null,
-        accessToken: null,
-        isLoading: false,
-    }
+  const initLoginState = {
+    userName : null,
+    accessToken: null,
+    isLoading: false,
+  }
 
-    const [loginState, dispatch] = React.useReducer(loginReducer,initLoginState)
-    const authContext = {
-        loginState,
-        dispatch
-    }
+  const [loginState, dispatch] = React.useReducer(loginReducer,initLoginState)
+  const authContext = {
+    loginState,
+    dispatch
+  }
 
     return (
         <AuthContext.Provider value={authContext}>
@@ -61,7 +61,7 @@ export default function App() {
                 }
                 }}
             />
-            <Tab.Screen name="Nhật ký'" component={TimelineStackScreen} options={{
+            <Tab.Screen name="Nhật ký'" component={TimeLineStackScreen} options={{
                 tabBarIcon: ({focused}) => {
                 if(focused){
                     return <IconTabMeFocus/>
@@ -82,4 +82,3 @@ export default function App() {
     </AuthContext.Provider>
   );
 }
-
