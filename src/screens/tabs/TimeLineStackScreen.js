@@ -13,7 +13,7 @@ export default function TimeLineStackScreen({route, navigation}) {
     if (hideScreens.includes(routeName)){
         navigation.setOptions({tabBarStyle:{display: 'none'}});
     }else {
-        navigation.setOptions({tabBarStyle:{display: 'show'}});
+        navigation.setOptions({tabBarStyle:{display: null}});
     }
 }, [navigation, route]);
   return (
