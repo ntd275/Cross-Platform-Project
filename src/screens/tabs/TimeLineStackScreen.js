@@ -1,9 +1,9 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import TimeLineScreen from "../TimeLineScreen";
-import Post from "../components/Post"
+import PostScreen from "../PostScreen";
 const TimeLineStack = createNativeStackNavigator();
-const MessageStack = createNativeStackNavigator();
+
 export default function TimeLineStackScreen() {
   return (
     <TimeLineStack.Navigator
@@ -12,7 +12,7 @@ export default function TimeLineStackScreen() {
       }}
     >
       <TimeLineStack.Screen name="TimeLineScreen" component={TimeLineScreen} />
-      {/* <MessageStack.Screen name="Post" component={Post} /> */}
+      <TimeLineStack.Screen name="PostScreen" component={PostScreen} />
     </TimeLineStack.Navigator>
   );
 }
