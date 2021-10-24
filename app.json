@@ -24,9 +24,6 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      },
-      "androidStatusBar": {
-        "translucent": false
       }
     },
     "web": {
@@ -35,6 +32,9 @@
     "packagerOpts": {
       "config": "metro.config.js",
       "sourceExts": ["js", "jsx", "ts", "tsx", "svg"]
+    },
+    "androidStatusBar": {
+      "translucent": true
     }
     
   }
