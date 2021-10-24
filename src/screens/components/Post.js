@@ -9,7 +9,9 @@ import IconMenuDelete from '../../../assets/ic_bottom_sheet_menu_delete.svg'
 import IconMenuReport from '../../../assets/ic_bottom_sheet_menu_report.svg'
 import IconMenuBan from '../../../assets/ic_bottom_sheet_menu_ban.svg'
 import IconMenuHide from '../../../assets/ic_hide_social.svg'
-
+import IconComment from '../../../assets/ico_comment.svg'
+import IconUnLike from '../../../assets/ic_unlike.svg'
+import IconLike from '../../../assets/ic_like.svg'
 export default function Post(props) {
     const images = [
         {
@@ -25,6 +27,9 @@ export default function Post(props) {
             uri: "https://scontent.fhan4-3.fna.fbcdn.net/v/t1.6435-9/35147076_653606388304254_5729101200196894720_n.jpg?_nc_cat=100&ccb=1-5&_nc_sid=8bfeb9&_nc_ohc=dtzP9CcJUBoAX_cNvYg&_nc_ht=scontent.fhan4-3.fna&oh=10967cb3d1ab2d240d88838af25fed68&oe=6197D2B4",
         },
     ];
+
+    let isLiked = props.isLiked ? props.isLiked : false;
+    let iconLikeStatus = isLiked ? IconLike : IconUnLike
 
     const videoURL = "";  //http://13.76.46.159:8000/files/test.mp4  
     //http://13.76.46.159:8000/files/big_buck_bunny.mp4
@@ -194,25 +199,22 @@ export default function Post(props) {
             </View>
             <View style={styles.postFooter}>
                 <View style={{ flexDirection: "row", marginRight: 36 }}>
-                    <Icon
-                        name='heart-outline' // like: heart
-                        type='ionicon'
-                        color="#818181" // like: #f84c5d
-                        size={32}
-                        onPress={() => clickLike("")}
-                    />
-                    <Text style={{ marginLeft: 6, fontSize: 18, lineHeight: 34 }}>{numLike}</Text>
-                </View>
-                <View style={{ flexDirection: "row", display: props.mode == "comment" ? "none" : ""}}>
-                    <Icon
-                        style={{ marginTop: 2 }}
-                        name='comment-processing-outline'
-                        type='material-community'
-                        color="#818181eb"
-                        size={30}
+                    <Pressable
+                        style={{ marginTop: 4 }}
                         onPress={() => clickComment("")}
-                    />
-                    <Text style={{ marginLeft: 6, fontSize: 18, lineHeight: 34 }}>{numComment}</Text>
+                    >
+                        {iconLikeStatus}
+                    </Pressable>
+                    <Text style={{ marginLeft: 9, fontSize: 18, lineHeight: 34 }}>{numLike}</Text>
+                </View>
+                <View style={{ flexDirection: "row", display: props.mode == "comment" ? "none" : "" }}>
+                    <Pressable
+                        style={{ marginTop: 4 }}
+                        onPress={() => clickComment("")}
+                    >
+                        {IconComment}
+                    </Pressable>
+                    <Text style={{ marginLeft: 10, fontSize: 18, lineHeight: 34 }}>{numComment}</Text>
                 </View>
             </View>
             <RBSheet
