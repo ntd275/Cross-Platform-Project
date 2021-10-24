@@ -13,7 +13,8 @@ import IconTabMessage from './assets/ic_tab_message.svg'
 import IconTabMessageFocus from './assets/ic_tab_message_focus.svg'
 import IconTabContact from './assets/ic_tab_contact.svg'
 import IconTabContactFocus from './assets/ic_tab_contact_focus.svg'
-
+import TimeLineScreen from './src/screens/TimeLineScreen'; 
+import TimeLineStackScreen from './src/screens/tabs/TimeLineStackScreen';
 const Tab = createBottomTabNavigator();
 
 
@@ -67,9 +68,17 @@ export default function App() {
               return <IconTabMe/>
             }
           }}/>
+          <Tab.Screen name="Nhật Ký" component={TimeLineStackScreen} options={{
+            tabBarIcon: ({focused}) => {
+              if(focused){
+                return <IconTabMeFocus/>
+              }
+              return <IconTabMe/>
+            }
+          }}/>
+          
         </Tab.Navigator>)}
       </NavigationContainer>
     </AuthContext.Provider>
   );
 }
-
