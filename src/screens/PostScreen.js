@@ -3,15 +3,12 @@ import { StyleSheet, Text, View, Button, ScrollView, TextInput, FlatList } from 
 import { Avatar, ListItem } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeaderBar from './components/HeaderBar.js'
+import Post from './components/Post.js';
 
-const Post = (props) => {
+const UserPost = (props) => {
     return( 
         <View style={styles.post}>
-            <Text>
-                This is a post{"\n"}
-                This is a post{"\n"}
-                This is a post
-            </Text>
+            <Post></Post>
         </View>
     )
 }
@@ -66,7 +63,7 @@ export default function PostScreen({ navigation }) {
             <View style={styles.postAndComment}>
                 <PostAndComment 
                     post={
-                        () => {return <Post/>}
+                        () => {return <UserPost/>}
                     }/>
             </View>
             <View>
@@ -121,7 +118,7 @@ const styles = StyleSheet.create({
     },
     post: {
         flex: 1,
-        padding: 20,
+        padding: 0,
     },
     comment: {
         flex: 1,
