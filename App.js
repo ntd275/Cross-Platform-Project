@@ -14,6 +14,8 @@ import IconTabMessage from './assets/ic_tab_message.svg'
 import IconTabMessageFocus from './assets/ic_tab_message_focus.svg'
 import IconTabContact from './assets/ic_tab_contact.svg'
 import IconTabContactFocus from './assets/ic_tab_contact_focus.svg'
+import IconTabSocial from './assets/ic_tab_social.svg'
+import IconTabSocialFocus from './assets/ic_tab_social_focus.svg'
 
 const Tab = createBottomTabNavigator();
 
@@ -33,7 +35,7 @@ export default function App() {
     return (
         <AuthContext.Provider value={authContext}>
         <NavigationContainer>
-            {loginState.accessToken == null? <TimeLineStackScreen/>:
+            {loginState.accessToken == null? <LoginStackScreen/>:
             (<Tab.Navigator 
             screenOptions={{
             headerShown: false
@@ -60,12 +62,12 @@ export default function App() {
                 }
                 }}
             />
-            <Tab.Screen name="Nhật ký'" component={TimeLineStackScreen} options={{
+            <Tab.Screen name="Nhật ký" component={TimeLineStackScreen} options={{
                 tabBarIcon: ({focused}) => {
                 if(focused){
-                    return <IconTabMeFocus/>
+                    return <IconTabSocialFocus/>
                 }
-                return <IconTabMe/>
+                return <IconTabSocial/>
                 }
             }}/>
             <Tab.Screen name="Cá nhân" component={ProfileStackScreen} options={{

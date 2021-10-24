@@ -3,7 +3,8 @@ import { StyleSheet, Text, View, Button, ScrollView, TextInput, FlatList, Toucha
 import { Avatar, ListItem, Icon } from 'react-native-elements';
 import HeaderBar from './components/HeaderBar.js'
 import Post from './components/Post.js';
-import IconSend from '../../assets/ic_send.svg'
+import IconSend from '../../assets/icn_send.svg'
+import IconSendDiable from '../../assets/icn_send_disable.svg'
 import IconPhoto from '../../assets/icn_csc_menu_sticker_n.svg'
 
 const UserPost = (props) => {
@@ -66,7 +67,6 @@ const PostAndComment = (props) => {
 
 const MyComment = () => {
     const [myComment, setMyComment] = useState("");
-    const disableSendButtonOpacity = 0.2;
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -87,10 +87,9 @@ const MyComment = () => {
                     </TextInput>
 
                 </View>
-                <View style={[styles.sendButton,
-                { opacity: myComment.match(/\S/) ? 1 : disableSendButtonOpacity }]}>
+                <View style={styles.sendButton}>
                     <TouchableOpacity disabled={!myComment.match(/\S/)}>
-                        <IconSend />
+                        {myComment.match(/\S/)?<IconSend />:<IconSendDiable/>}
                     </TouchableOpacity>
                 </View>
             </View>
@@ -168,7 +167,7 @@ const styles = StyleSheet.create({
     enterComment: {
         padding: 10,
         height: 50,
-        backgroundColor: "#f9fafc",
+        backgroundColor: "#fff",
         fontSize: 18,
         marginTop: 3
     },
