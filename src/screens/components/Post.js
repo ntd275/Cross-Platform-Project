@@ -207,7 +207,7 @@ export default function Post(props) {
                     </Pressable>
                     <Text style={{ marginLeft: 9, fontSize: 18, lineHeight: 34 }}>{numLike}</Text>
                 </View>
-                <View style={{ flexDirection: "row", display: props.mode == "comment" ? "none" : "" }}>
+                <View style={{ flexDirection: "row", display: props.mode == "comment" ? "none" : null }}>
                     <Pressable
                         style={{ marginTop: 4 }}
                         onPress={() => clickComment("")}
