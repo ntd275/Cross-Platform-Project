@@ -16,7 +16,6 @@ import IconTabContactFocus from './assets/ic_tab_contact_focus.svg'
 
 const Tab = createBottomTabNavigator();
 
-
 export default function App() {
   const initLoginState = {
     userName : null,

@@ -29,7 +29,8 @@
     "react-native-svg": "12.1.1",
     "react-native-svg-transformer": "^0.14.3",
     "react-native-web": "~0.13.12",
-    "rn-material-ui-textfield": "^1.0.5"
+    "rn-material-ui-textfield": "^1.0.5",
+    "expo-screen-orientation": "~3.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0"
