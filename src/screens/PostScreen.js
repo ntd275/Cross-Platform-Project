@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Button, ScrollView, TextInput, FlatList } from 'react-native';
-import { Avatar, ListItem } from 'react-native-elements';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, Text, View, Button, ScrollView, TextInput, FlatList, TouchableOpacity, Pressable } from 'react-native';
+import { Avatar, ListItem, Icon } from 'react-native-elements';
 import HeaderBar from './components/HeaderBar.js'
 import Post from './components/Post.js';
+import IconSend from '../../assets/ic_send.svg'
+import IconPhoto from '../../assets/ic_photo_o.svg'
 
 const UserPost = (props) => {
     return( 
@@ -17,21 +18,21 @@ const PostAndComment = (props) => {
     return (
         <FlatList
             data={[
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
             ]}
             renderItem={({ item }) => (
                 <ListItem bottomDivider>
@@ -45,7 +46,16 @@ const PostAndComment = (props) => {
                         <ListItem.Subtitle style={styles.commentContent}>
                             {item.content}
                         </ListItem.Subtitle>
+                        <Text style={styles.commentDate}>
+                            {item.date + " trước"}
+                        </Text>
                     </ListItem.Content>
+                    <Icon
+                        name='heart-outline' // like: heart
+                        type='ionicon'
+                        color="#818181" // like: #f84c5d
+                        size={24}
+                    />
                 </ListItem>
             )}
             keyExtractor={(item, index) => index.toString()}
@@ -54,8 +64,37 @@ const PostAndComment = (props) => {
     );
 }
 
-export default function PostScreen({ navigation }) {
+const MyComment = () => {
     const [myComment, setMyComment] = useState("");
+    const disableSendButtonOpacity = 0.2;
+
+    return (
+        <View style={{flexDirection:'row'}}>
+            <View style={styles.sendButton}>
+                <TouchableOpacity>
+                    <IconPhoto />
+                </TouchableOpacity>
+            </View>
+            <View style={styles.enterCommentText}>
+                <TextInput style={styles.enterComment}
+                        placeholder="Nhập bình luận"
+                        returnKeyType="send"
+                        enablesReturnKeyAutomatically
+                        onChangeText={text => setMyComment(text)}
+                        defaultValue={myComment}>
+                </TextInput>
+            </View>
+            <View style={[styles.sendButton, 
+                          {opacity: myComment.match(/\S/)?1:disableSendButtonOpacity}]}>
+                <TouchableOpacity disabled={!myComment.match(/\S/)}>
+                    <IconSend />
+                </TouchableOpacity>
+            </View>
+        </View>
+    )
+}
+
+export default function PostScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
@@ -66,13 +105,7 @@ export default function PostScreen({ navigation }) {
                         () => {return <UserPost/>}
                     }/>
             </View>
-            <View>
-                <TextInput style={styles.enterComment}
-                           placeholder="Nhập bình luận"
-                           returnKeyType="send"
-                           enablesReturnKeyAutomatically>
-                </TextInput>
-            </View>
+            <MyComment/>
         </View>
     )
 }
@@ -141,5 +174,17 @@ const styles = StyleSheet.create({
     },
     commentContent: {
         fontSize: 14,
-    }
+        color: 'black',
+    },
+    commentDate: {
+        fontSize: 13,
+        color: 'gray',
+    },
+    enterCommentText: {
+        flex: 1,
+    },
+    sendButton: {
+        alignSelf: 'center',
+        margin: 10,
+    },
 });

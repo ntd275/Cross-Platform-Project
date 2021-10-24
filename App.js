@@ -34,7 +34,7 @@ export default function App() {
     return (
         <AuthContext.Provider value={authContext}>
         <NavigationContainer>
-            {loginState.accessToken == null? <TimelineStackScreen/>:
+            {loginState.accessToken == null? <LoginStackScreen/>:
             (<Tab.Navigator 
             screenOptions={{
             headerShown: false
@@ -61,7 +61,7 @@ export default function App() {
                 }
                 }}
             />
-            <Tab.Screen name="Nhật ký" component={TimelineStackScreen} options={{
+            <Tab.Screen name="Nhật ký'" component={TimelineStackScreen} options={{
                 tabBarIcon: ({focused}) => {
                 if(focused){
                     return <IconTabMeFocus/>
