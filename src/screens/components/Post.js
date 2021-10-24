@@ -153,131 +153,129 @@ export default function Post() {
 
 
     return (
-        <ScrollView>
-            <View style={styles.postContainer}>
-                {statusBar}
-                <View style={styles.postHeader}>
-                    <View style={styles.posterAvatar}>
-                        <Avatar
-                            size={42}
-                            rounded
-                            onPress={() => goToUserPage()}
-                            activeOpacity={0.8}
-                            source={{ uri: "https://scontent.fhan3-4.fna.fbcdn.net/v/t1.6435-9/82941062_2537534526492475_6431974749965910016_n.jpg?_nc_cat=104&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=fR3LcuaIaT8AX-g_OEo&_nc_ht=scontent.fhan3-4.fna&oh=c607895b42fed9c264a0e2321819ebad&oe=61980AEA" }}
-                        />
-                    </View>
-                    <View style={styles.posterInfo}>
-                        <View style={{ flex: 1 }}>
-                            <Pressable onPress={() => { goToUserPage() }}>
-                                <Text style={{ textAlign: "right", fontSize: 16, color: "#000", fontWeight: '600', lineHeight: 28 }}>
-                                    {userName}
-                                </Text>
-                            </Pressable>
-                        </View>
-                        <Text style={{ flex: 1, fontSize: 14, color: "#77797c", marginTop: 0 }}>{postTime}</Text>
-                    </View>
-                    <View style={styles.postMenu}>
-                        <Icon
-                            name='options'
-                            type='simple-line-icon'
-                            color="#898989"
-                            size={20}
-                            onPress={() => showMenu("")}
-                        />
-                    </View>
+        <View style={styles.postContainer}>
+            {statusBar}
+            <View style={styles.postHeader}>
+                <View style={styles.posterAvatar}>
+                    <Avatar
+                        size={42}
+                        rounded
+                        onPress={() => goToUserPage()}
+                        activeOpacity={0.8}
+                        source={{ uri: "https://scontent.fhan3-4.fna.fbcdn.net/v/t1.6435-9/82941062_2537534526492475_6431974749965910016_n.jpg?_nc_cat=104&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=fR3LcuaIaT8AX-g_OEo&_nc_ht=scontent.fhan3-4.fna&oh=c607895b42fed9c264a0e2321819ebad&oe=61980AEA" }}
+                    />
                 </View>
-                <View>
-                    <Text style={styles.postContent}>{postContent}</Text>
-                </View>
-
-                <View style={styles.postMedia}>
-                    {media}
-                </View>
-                <View style={styles.postFooter}>
-                    <View style={{ flexDirection: "row", marginRight: 36 }}>
-                        <Icon
-                            name='heart-outline' // like: heart
-                            type='ionicon'
-                            color="#818181" // like: #f84c5d
-                            size={32}
-                            onPress={() => clickLike("")}
-                        />
-                        <Text style={{ marginLeft: 6, fontSize: 18, lineHeight: 34 }}>{numLike}</Text>
+                <View style={styles.posterInfo}>
+                    <View style={{ flex: 1 }}>
+                        <Pressable onPress={() => { goToUserPage() }}>
+                            <Text style={{ textAlign: "right", fontSize: 16, color: "#000", fontWeight: '600', lineHeight: 28 }}>
+                                {userName}
+                            </Text>
+                        </Pressable>
                     </View>
-                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                        <Icon
-                            style={{ marginTop: 2 }}
-                            name='comment-processing-outline'
-                            type='material-community'
-                            color="#818181eb"
-                            size={30}
-                            onPress={() => clickComment("")}
-                        />
-                        <Text style={{ marginLeft: 6, fontSize: 18, lineHeight: 34 }}>{numComment}</Text>
-                    </View>
+                    <Text style={{ flex: 1, fontSize: 14, color: "#77797c", marginTop: 0 }}>{postTime}</Text>
                 </View>
-                <RBSheet
-                    ref={refRBSheet}
-                    closeOnDragDown={true}
-                    closeOnPressMask={true}
-                    animationType= "fade"
-                    height= {320}
-                    customStyles={{
-                        wrapper: {
-                            backgroundColor: 'rgba(0,0,0,0.28)',
-                        },
-                        container:{
-                            borderTopLeftRadius: 20,
-                            borderTopEndRadius: 20
-                        },
-                        draggableIcon: {
-                            opacity: 0
-                        }
-                    }}
-                >
-                    <View style={{justifyContent: "center", flexDirection: "column", height: 320, marginTop: -20}}>
-                        <Pressable style={[styles.menuOption, {height: 72}]} onPress={onPressDelete}>
-                            <IconMenuDelete flex={1} style={{marginTop: "auto", marginBottom: "auto"}} />
-                            <View flex={10} style={styles.inMenuOption}>
-                                <Text style={{fontSize: 16, fontWeight: '400', marginBottom: 4}}>Xoá bài đăng</Text>
-                                <Text style={{fontSize: 14, color: "#9ea1a6"}}>Bài đăng này sẽ ẩn khỏi nhật ký</Text>
-                            </View>
-                        </Pressable>
-
-                        <Pressable style={[styles.menuOption, {height: 90}]} onPress={onPressHide}>
-                            <IconMenuHide flex={1} style={{marginTop: "auto", marginBottom: "auto"}} />
-                            <View flex={10} style={styles.inMenuOption}>
-                                <Text style={{fontSize: 16, fontWeight: '400', marginBottom: 4}}>Ẩn nhật ký của {userName}</Text>
-                                <Text style={{fontSize: 14, color: "#9ea1a6"}}>Toàn bộ bài đăng và khoảnh khắc của người này sẽ bị ẩn đi</Text>
-                            </View>
-                        </Pressable>
-
-                        <Pressable style={[styles.menuOption, {height: 90}]} onPress={onPressBlock}>
-                            <IconMenuBan flex={1} style={{marginTop: "auto", marginBottom: "auto"}} />
-                            <View flex={10} style={styles.inMenuOption}>
-                                <Text style={{fontSize: 16, fontWeight: '400', marginBottom: 4}}>Chặn {userName} xem nhật ký của tôi</Text>
-                                <Text style={{fontSize: 14, color: "#9ea1a6"}}>Người này sẽ không thấy toàn bộ bài đăng và khoảnh khắc của bạn</Text>
-                            </View>
-                        </Pressable>
-
-                        <Pressable style={[styles.menuOption, {height: 68}]} onPress={onPressReport}>
-                            <IconMenuReport flex={1} style={{marginTop: "auto", marginBottom: "auto"}} />
-                            <View flex={10} style={styles.reportMenuOption}>
-                                <Text style={{fontSize: 16, fontWeight: '400'}}>Báo xấu</Text>
-                            </View>
-                        </Pressable>
-           
-                    </View>
-                </RBSheet>
+                <View style={styles.postMenu}>
+                    <Icon
+                        name='options'
+                        type='simple-line-icon'
+                        color="#898989"
+                        size={20}
+                        onPress={() => showMenu("")}
+                    />
+                </View>
             </View>
-        </ScrollView>
+            <View>
+                <Text style={styles.postContent}>{postContent}</Text>
+            </View>
+
+            <View style={styles.postMedia}>
+                {media}
+            </View>
+            <View style={styles.postFooter}>
+                <View style={{ flexDirection: "row", marginRight: 36 }}>
+                    <Icon
+                        name='heart-outline' // like: heart
+                        type='ionicon'
+                        color="#818181" // like: #f84c5d
+                        size={32}
+                        onPress={() => clickLike("")}
+                    />
+                    <Text style={{ marginLeft: 6, fontSize: 18, lineHeight: 34 }}>{numLike}</Text>
+                </View>
+                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <Icon
+                        style={{ marginTop: 2 }}
+                        name='comment-processing-outline'
+                        type='material-community'
+                        color="#818181eb"
+                        size={30}
+                        onPress={() => clickComment("")}
+                    />
+                    <Text style={{ marginLeft: 6, fontSize: 18, lineHeight: 34 }}>{numComment}</Text>
+                </View>
+            </View>
+            <RBSheet
+                ref={refRBSheet}
+                closeOnDragDown={true}
+                closeOnPressMask={true}
+                animationType="fade"
+                height={320}
+                customStyles={{
+                    wrapper: {
+                        backgroundColor: 'rgba(0,0,0,0.28)',
+                    },
+                    container: {
+                        borderTopLeftRadius: 20,
+                        borderTopEndRadius: 20
+                    },
+                    draggableIcon: {
+                        opacity: 0
+                    }
+                }}
+            >
+                <View style={{ justifyContent: "center", flexDirection: "column", height: 320, marginTop: -20 }}>
+                    <Pressable style={[styles.menuOption, { height: 72 }]} onPress={onPressDelete}>
+                        <IconMenuDelete flex={1} style={{ marginTop: "auto", marginBottom: "auto" }} />
+                        <View flex={10} style={styles.inMenuOption}>
+                            <Text style={{ fontSize: 16, fontWeight: '400', marginBottom: 4 }}>Xoá bài đăng</Text>
+                            <Text style={{ fontSize: 14, color: "#9ea1a6" }}>Bài đăng này sẽ ẩn khỏi nhật ký</Text>
+                        </View>
+                    </Pressable>
+
+                    <Pressable style={[styles.menuOption, { height: 90 }]} onPress={onPressHide}>
+                        <IconMenuHide flex={1} style={{ marginTop: "auto", marginBottom: "auto" }} />
+                        <View flex={10} style={styles.inMenuOption}>
+                            <Text style={{ fontSize: 16, fontWeight: '400', marginBottom: 4 }}>Ẩn nhật ký của {userName}</Text>
+                            <Text style={{ fontSize: 14, color: "#9ea1a6" }}>Toàn bộ bài đăng và khoảnh khắc của người này sẽ bị ẩn đi</Text>
+                        </View>
+                    </Pressable>
+
+                    <Pressable style={[styles.menuOption, { height: 90 }]} onPress={onPressBlock}>
+                        <IconMenuBan flex={1} style={{ marginTop: "auto", marginBottom: "auto" }} />
+                        <View flex={10} style={styles.inMenuOption}>
+                            <Text style={{ fontSize: 16, fontWeight: '400', marginBottom: 4 }}>Chặn {userName} xem nhật ký của tôi</Text>
+                            <Text style={{ fontSize: 14, color: "#9ea1a6" }}>Người này sẽ không thấy toàn bộ bài đăng và khoảnh khắc của bạn</Text>
+                        </View>
+                    </Pressable>
+
+                    <Pressable style={[styles.menuOption, { height: 68 }]} onPress={onPressReport}>
+                        <IconMenuReport flex={1} style={{ marginTop: "auto", marginBottom: "auto" }} />
+                        <View flex={10} style={styles.reportMenuOption}>
+                            <Text style={{ fontSize: 16, fontWeight: '400' }}>Báo xấu</Text>
+                        </View>
+                    </Pressable>
+
+                </View>
+            </RBSheet>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
     postContainer: {
         backgroundColor: "#fff",
-        marginTop: 100
+        marginTop: 0
     },
     posterAvatar: {
         marginLeft: 18,
@@ -331,21 +329,21 @@ const styles = StyleSheet.create({
         width: "100%",
         height: 400,
     },
-    menuOption:{
-        flexDirection: "row", 
+    menuOption: {
+        flexDirection: "row",
         paddingLeft: 14,
         paddingRight: 18,
     },
-    inMenuOption:{
-        flexDirection:"column",
-        justifyContent:"center",
+    inMenuOption: {
+        flexDirection: "column",
+        justifyContent: "center",
         marginLeft: 12,
         borderBottomWidth: 1,
         borderBottomColor: "#adb1b7",
     },
-    reportMenuOption:{
-        flexDirection:"column",
-        justifyContent:"center",
+    reportMenuOption: {
+        flexDirection: "column",
+        justifyContent: "center",
         marginLeft: 12,
     }
 });
