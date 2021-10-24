@@ -7,33 +7,28 @@ import IconSend from '../../assets/ic_send.svg'
 import IconPhoto from '../../assets/icn_csc_menu_sticker_n.svg'
 
 const UserPost = (props) => {
+    let numComment = props.numComment;
+    let describe = <Text style={styles.describeText}>Hãy là người đầu tiên bình luận</Text>
+    if (numComment > 0) {
+        describe = <Text style={styles.describeText}>
+            Có {numComment} bình luận. Bạn chỉ được xem bình luận của bạn bè trong danh bạ.
+        </Text>
+    }
     return (
-        <View style={styles.post}>
-            <Post mode="comment"></Post>
-        </View>
+        <>
+            <View style={styles.post}>
+                <Post mode="comment"></Post>
+
+            </View>
+            {describe}
+        </>
     )
 }
 
 const PostAndComment = (props) => {
     return (
         <FlatList
-            data={[
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-                { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-            ]}
+            data={props.listComment}
             renderItem={({ item }) => (
                 <ListItem bottomDivider>
                     <Avatar
@@ -99,14 +94,31 @@ const MyComment = () => {
 }
 
 export default function PostScreen({ navigation }) {
-
+    let listComment = [
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
+    ];
     return (
         <View style={styles.container}>
             <HeaderBar text="Bình luận" navigation={navigation} />
             <View style={styles.postAndComment}>
                 <PostAndComment
+                    listComment={listComment}
                     post={
-                        () => { return <UserPost /> }
+                        () => { return <UserPost numComment={listComment.length} /> }
                     } />
             </View>
             <MyComment />
@@ -194,4 +206,12 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         margin: 10,
     },
+    describeText: {
+        fontSize: 14,
+        paddingLeft: 16,
+        paddingRight: 16,
+        color: "#778993",
+        marginTop: 12,
+        marginBottom: 12
+    }
 });
