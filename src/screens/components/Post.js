@@ -203,7 +203,7 @@ export default function Post(props) {
                     />
                     <Text style={{ marginLeft: 6, fontSize: 18, lineHeight: 34 }}>{numLike}</Text>
                 </View>
-                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                <View style={{ flexDirection: "row", display: props.mode == "comment" ? "none" : ""}}>
                     <Icon
                         style={{ marginTop: 2 }}
                         name='comment-processing-outline'
