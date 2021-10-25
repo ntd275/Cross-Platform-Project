@@ -16,6 +16,7 @@ import IconTabContact from './assets/ic_tab_contact.svg'
 import IconTabContactFocus from './assets/ic_tab_contact_focus.svg'
 import IconTabSocial from './assets/ic_tab_social.svg'
 import IconTabSocialFocus from './assets/ic_tab_social_focus.svg'
+import CreatePost from './src/screens/CreatePost';
 
 const Tab = createBottomTabNavigator();
 
@@ -35,7 +36,8 @@ export default function App() {
     return (
         <AuthContext.Provider value={authContext}>
         <NavigationContainer>
-            {loginState.accessToken == null? <LoginStackScreen/>:
+            
+            {loginState.accessToken == null? <CreatePost/>:
             (<Tab.Navigator 
             screenOptions={{
             headerShown: false
