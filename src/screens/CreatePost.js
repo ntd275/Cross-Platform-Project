@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  Image,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
@@ -76,15 +75,13 @@ export default function CreatePost() {
 const styles = StyleSheet.create({
   container: {
       flex: 1,
-      backgroundColor: '#fff',
+      backgroundColor: '#ffffff',
   },
   header: {
-      width: '100%',
       backgroundColor: "#fafafa",
       height: 62,
       borderBottomWidth: 1,
       borderBottomColor: '#f0f0f0',
-      display: 'flex',
       flexDirection: 'row'
   },
   iconClose: {
@@ -96,7 +93,6 @@ const styles = StyleSheet.create({
     marginLeft: 25,
   },
   mode :{
-    display: 'flex',
     flexDirection: 'row',
   },
   textMode: {
