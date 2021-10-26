@@ -20,84 +20,122 @@ import IconPhoto from '../../assets/ic_photo_n.svg'
 import IconVideo from '../../assets/icn_video.svg'
 
 export default function CreatePost() {
-    const refInput = useRef()
-    return (
-        <View style={styles.container}>
-            <StatusBar
-              backgroundColor="#00000000"
-              barStyle="dark-content"
-              translucent={true}
-            />
-            <View style={styles.header}>
-              <TouchableOpacity style={styles.iconClose}>
-                <IconHeaderClose/>
-              </TouchableOpacity>
-              <View style={styles.modeContainer}>
-                <View style={styles.mode}>
-                  <IconFriend style={{marginTop:2}}/>
-                  <Text style={styles.textMode}>Tất cả bạn bè</Text>
-                </View>
-                <Text style={{color: '#909090'}}>Xem bởi bạn bè trên Zalo</Text>
-                
-              </View>
-              <TouchableOpacity style={styles.iconSendWrap}>
-                  <IconSendDiable/>
-              </TouchableOpacity>
-            </View>
-            <KeyboardAvoidingView style={styles.content} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-              <ScrollView style={styles.input} contentContainerStyle={{flex:1}}>
-                <TextInput
-                  style={styles.textInput}
-                  placeholder="Bạn đang nghĩ gì?"
-                  placeholderTextColor="#929292"
-                  multiline={true}
-                  ref={refInput}
-                >
-                </TextInput>
-                <Pressable style={{flex:1}} onPress={()=>{refInput.current.focus()}}></Pressable>
-              </ScrollView>
-              <View style={styles.bottomBar}>
-                <TouchableOpacity style={styles.iconSticker}>
-                  <IconSticker/>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconPhoto}>
-                  <IconPhoto/>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconVideo}>
-                  <IconVideo/>
-                </TouchableOpacity>
-              </View>
-            </KeyboardAvoidingView>
+  const refInput = useRef()
+
+  const [canSend, setCanSend] = useState(false);
+  const [postText, setPostText] = useState("");
+  const [isSent, setIsSent] = useState(false);
+
+  useEffect(() => {
+    setCanSend(checkCanSend());
+  }, [postText]);
+  var checkCanSend = () => {
+    return postText !== "";
+  }
+
+  var onChangeText = (text) => {
+    setPostText(text);
+  }
+
+  var requestSend = ()=>{
+    if(!isSent){
+      setIsSent(true);
+      console.log("sending....")
+    }
+  }
+  
+  var exitScreen= ()=>{
+    console.log("exiting ...")
+  }
+
+  let iconSend;
+  if (canSend) {
+    iconSend = <TouchableOpacity style={styles.iconSendWrap} onPress={requestSend}>
+    <IconSend />
+  </TouchableOpacity>
+  } else {
+    iconSend = <TouchableOpacity style={styles.iconSendWrap}>
+      <IconSendDiable />
+    </TouchableOpacity>
+  }
+
+  return (
+    <View style={styles.container}>
+      <StatusBar
+        backgroundColor="#00000000"
+        barStyle="dark-content"
+        translucent={true}
+      />
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.iconClose} onPress={exitScreen}>
+          <IconHeaderClose />
+        </TouchableOpacity>
+        <View style={styles.modeContainer}>
+          <View style={styles.mode}>
+            <IconFriend style={{ marginTop: 2 }} />
+            <Text style={styles.textMode}>Tất cả bạn bè</Text>
+          </View>
+          <Text style={{ color: '#909090' }}>Xem bởi bạn bè trên Zalo</Text>
+
         </View>
-      );
+        {iconSend}
+      </View>
+      <KeyboardAvoidingView style={styles.content} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <ScrollView style={styles.input} contentContainerStyle={{ flex: 1 }}>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Bạn đang nghĩ gì?"
+            placeholderTextColor="#929292"
+            multiline={true}
+            ref={refInput}
+            onChangeText={text => onChangeText(text)}
+            value={postText}
+          >
+          </TextInput>
+          <Pressable style={{ flex: 1 }} onPress={() => { refInput.current.focus() }}></Pressable>
+        </ScrollView>
+        <View style={styles.bottomBar}>
+          <TouchableOpacity style={styles.iconSticker}>
+            <IconSticker />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconPhoto}>
+            <IconPhoto />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconVideo}>
+            <IconVideo />
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
-      flex: 1,
-      backgroundColor: '#ffffff',
+    flex: 1,
+    backgroundColor: '#ffffff',
   },
   header: {
-      backgroundColor: "#fafafa",
-      height: 62,
-      borderBottomWidth: 1,
-      borderBottomColor: '#f0f0f0',
-      flexDirection: 'row'
+    backgroundColor: "#fafafa",
+    height: 62,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    flexDirection: 'row'
   },
   iconClose: {
-    marginTop: 30,
-      left: 10,
+    marginTop: 28,
+    left: 10,
   },
   modeContainer: {
     marginTop: 20,
     marginLeft: 25,
   },
-  mode :{
+  mode: {
     flexDirection: 'row',
   },
   textMode: {
     fontWeight: '500',
-    fontSize :16,
+    fontSize: 16,
     marginLeft: 5,
   },
   iconSendWrap: {
@@ -105,14 +143,14 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
     marginRight: 10
   },
-  content:{
+  content: {
     flex: 1,
   },
   input: {
     flex: 1,
     marginLeft: 10,
   },
-  textInput:{
+  textInput: {
     marginTop: 20,
     fontSize: 18,
   },
@@ -129,7 +167,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginLeft: 'auto',
   },
-  iconVideo:  {
+  iconVideo: {
     marginRight: 20,
     marginTop: 10,
     marginLeft: 30
