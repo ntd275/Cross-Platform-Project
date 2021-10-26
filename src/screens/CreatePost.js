@@ -18,6 +18,8 @@ import IconSend from '../../assets/icn_send.svg'
 import IconSticker from '../../assets/icn_csc_menu_sticker_n.svg'
 import IconPhoto from '../../assets/ic_photo_n.svg'
 import IconVideo from '../../assets/icn_video.svg'
+import ImageSelect from './components/ImageSelect';
+import useKeyboardHeight from 'react-native-use-keyboard-height';
 
 export default function CreatePost() {
   const refInput = useRef()
@@ -25,6 +27,7 @@ export default function CreatePost() {
   const [canSend, setCanSend] = useState(false);
   const [postText, setPostText] = useState("");
   const [isSent, setIsSent] = useState(false);
+
 
   useEffect(() => {
     setCanSend(checkCanSend());
@@ -57,6 +60,12 @@ export default function CreatePost() {
     iconSend = <TouchableOpacity style={styles.iconSendWrap}>
       <IconSendDiable />
     </TouchableOpacity>
+  }
+  const [openImageSelect, setOpenImageSelect] = useState(false)
+  const [selectedImage, setSelectedImage] = useState([]);
+  const touchPhoto=() => {
+    refInput.current.blur()
+    setOpenImageSelect(!openImageSelect)
   }
 
   return (
@@ -98,7 +107,7 @@ export default function CreatePost() {
           <TouchableOpacity style={styles.iconSticker}>
             <IconSticker />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconPhoto}>
+          <TouchableOpacity style={styles.iconPhoto} onPress={touchPhoto}>
             <IconPhoto />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconVideo}>
@@ -106,6 +115,13 @@ export default function CreatePost() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+      {openImageSelect &&
+        <ImageSelect
+        style= {{height:266}}
+        onChange={setSelectedImage}
+        selected={selectedImage}
+        />
+      }
     </View>
   );
 }
