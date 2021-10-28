@@ -21,12 +21,16 @@ import IconPhoto from "../../assets/ic_photo_n.svg";
 import IconVideo from "../../assets/icn_video.svg";
 import ImageSelect from "./components/ImageSelect";
 import AppContext from "../components/context/AppContext";
+import AuthContext from "../components/context/AuthContext";
 import useKeyboardHeight from "react-native-use-keyboard-height";
 import IconCloseCircle from "../../assets/ic_close_circle.svg"
 import VideoSelect from "./components/VideoSelect";
 import { Video } from "expo-av";
 import IconPhotoActive from "../../assets/ic_photo_active.svg";
 import IconVideoActive from "../../assets/icn_video_active.svg";
+import * as FileSystem from 'expo-file-system';
+import { Api } from "../api/Api";
+import * as MediaLibrary from 'expo-media-library'
 
 export default function CreatePost({ navigation }) {
   const refInput = useRef();
@@ -34,10 +38,6 @@ export default function CreatePost({ navigation }) {
   const [canSend, setCanSend] = useState(false);
   const [postText, setPostText] = useState("");
   const [isSent, setIsSent] = useState(false);
-
-  useEffect(() => {
-    setCanSend(checkCanSend());
-  }, [postText]);
 
   const checkCanSend = () => {
     return postText !== "" || selectedVideo != null || selectedImage.length > 0;
@@ -47,10 +47,35 @@ export default function CreatePost({ navigation }) {
     setPostText(text);
   };
 
-  const requestSend = () => {
+  const authContext = useContext(AuthContext)
+
+  const requestSend = async () => {
     if (!isSent) {
       setIsSent(true);
-      console.log("sending....");
+      let images = [];
+      for( let i = 0; i < selectedImage.length; i++){
+        let info = await MediaLibrary.getAssetInfoAsync(selectedImage[i])
+        let base64 = await FileSystem.readAsStringAsync(info.localUri,{
+          encoding:'base64'
+        })
+        images.push(base64)
+        console.log(base64.length/1024/1024)
+      }
+      let info = selectedVideo && await MediaLibrary.getAssetInfoAsync(selectedVideo)
+      let video = info && await FileSystem.readAsStringAsync(info.localUri,{
+        encoding: 'base64'
+      })
+      console.log(video.length/1024/1024)
+      try {
+        let res = await Api.createPost(authContext.loginState.accessToken,postText,images,video)
+        console.log(res.data)
+        console.log(res.status)
+        navigation.goBack();
+      } catch (e) {
+        console.log("a")
+        console.log(e.response.status)
+        setIsSent(false);
+      }
     }
   };
 
@@ -120,9 +145,9 @@ export default function CreatePost({ navigation }) {
         </View>
         <TouchableOpacity
           style={styles.iconSendWrap}
-          onPress={canSend?requestSend:null}
+          onPress={checkCanSend()?requestSend:null}
         >
-          {canSend ? <IconSend /> : <IconSendDiable />}
+          {checkCanSend() ? <IconSend /> : <IconSendDiable />}
         </TouchableOpacity>
       </View>
       <KeyboardAvoidingView
