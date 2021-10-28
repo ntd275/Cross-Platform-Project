@@ -6,17 +6,16 @@ import {
   View,
   Text
 } from 'react-native';
-import UnCheck from '../../../assets/pick_photo_uncheck.svg'
-import Check from '../../../assets/pick_photo_check.svg'
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library'
-import IconCamera from '../../../assets/icn_camera.svg'
+import IconCamera from '../../../assets/ic_video.svg'
 const {width} = Dimensions.get('window');
 
-class ImageTile extends React.PureComponent {
+class VideoTile extends React.PureComponent {
   openCamera = async ()=>{
     let photo = await ImagePicker.launchCameraAsync(
       {
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
         presentationStyle: 	6,
         quality: 1,
       }
@@ -24,17 +23,15 @@ class ImageTile extends React.PureComponent {
     if(!photo.cancelled){
       const asset = await MediaLibrary.createAssetAsync(photo.uri)
       this.props.selectImage(asset)
-      console.log(asset)
-      this.props.pushImage(asset)
     }
   }
 
   render() {
-    const { index, item, selected, selectImage, selectedItemNumber,numColumns,} = this.props;
+    const { index, item, preView,numColumns} = this.props;
     if (!item) return null;
     if (index == 0){
       return(
-        <TouchableHighlight
+    <TouchableHighlight
         style={{margin: 1.5}}
         underlayColor='#00000000'
         onPress={this.openCamera} >
@@ -42,36 +39,24 @@ class ImageTile extends React.PureComponent {
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <View style={{ width: width / numColumns - 3, height: width / numColumns - 3, alignItems:'center',justifyContent:'center'}}>
               <IconCamera/>
-              <Text style={{color:"#767676"}}>Chụp ảnh</Text>
+              <Text style={{color:"#767676"}}>Quay phim</Text>
             </View>
           </View>
         </View>
       </TouchableHighlight>
       )
     }
+
     return (
       <TouchableHighlight
         style={{margin: 1.5}}
         underlayColor='#00000000'
-        onPress={() => selectImage(item)} >
+        onPress={() => preView(item)} >
         <View style={{ position: 'relative' }}>
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <ImageBackground
               style={{ width: width / numColumns - 3, height: width / numColumns - 3}}
               source={{ uri: item.uri }} >
-              {selected &&
-                <View style={{flex:1, opacity:0.5, backgroundColor: '#000'}}></View>
-              }
-              <View style={{position:"absolute", top:10, right:10}}> 
-                {
-                  selected ? <Check /> : <UnCheck/>
-                }
-                {selected && (
-                  <View style={{position:"absolute", top:0, bottom: 0,left: 0,right :0,  justifyContent: 'center', alignItems: 'center'}}>
-                      <Text style={{color:"#fff"}}>{selectedItemNumber}</Text>
-                  </View>
-                )}       
-              </View>
             </ImageBackground>
           </View>
         </View>
@@ -80,4 +65,4 @@ class ImageTile extends React.PureComponent {
   }
 }
 
-export default ImageTile;
+export default VideoTile;

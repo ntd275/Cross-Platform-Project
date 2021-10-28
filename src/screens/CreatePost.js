@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -8,65 +8,97 @@ import {
   StyleSheet,
   StatusBar,
   KeyboardAvoidingView,
-  Pressable
-} from 'react-native';
+  Pressable,
+  Dimensions,
+} from "react-native";
+import { Image } from "react-native-elements";
+import IconHeaderClose from "../../assets/icn_header_close.svg";
+import IconFriend from "../../assets/ic_friend.svg";
+import IconSendDiable from "../../assets/icn_send_disable.svg";
+import IconSend from "../../assets/icn_send.svg";
+import IconSticker from "../../assets/icn_csc_menu_sticker_n.svg";
+import IconPhoto from "../../assets/ic_photo_n.svg";
+import IconVideo from "../../assets/icn_video.svg";
+import ImageSelect from "./components/ImageSelect";
+import AppContext from "../components/context/AppContext";
+import useKeyboardHeight from "react-native-use-keyboard-height";
+import IconCloseCircle from "../../assets/ic_close_circle.svg"
+import VideoSelect from "./components/VideoSelect";
+import { Video } from "expo-av";
+import IconPhotoActive from "../../assets/ic_photo_active.svg";
+import IconVideoActive from "../../assets/icn_video_active.svg";
 
-import IconHeaderClose from '../../assets/icn_header_close.svg'
-import IconFriend from '../../assets/ic_friend.svg'
-import IconSendDiable from '../../assets/icn_send_disable.svg'
-import IconSend from '../../assets/icn_send.svg'
-import IconSticker from '../../assets/icn_csc_menu_sticker_n.svg'
-import IconPhoto from '../../assets/ic_photo_n.svg'
-import IconVideo from '../../assets/icn_video.svg'
-import ImageSelect from './components/ImageSelect';
-import useKeyboardHeight from 'react-native-use-keyboard-height';
-
-export default function CreatePost() {
-  const refInput = useRef()
+export default function CreatePost({ navigation }) {
+  const refInput = useRef();
 
   const [canSend, setCanSend] = useState(false);
   const [postText, setPostText] = useState("");
   const [isSent, setIsSent] = useState(false);
 
-
   useEffect(() => {
     setCanSend(checkCanSend());
   }, [postText]);
-  var checkCanSend = () => {
-    return postText !== "";
-  }
 
-  var onChangeText = (text) => {
+  const checkCanSend = () => {
+    return postText !== "" || selectedVideo != null || selectedImage.length > 0;
+  };
+
+  const onChangeText = (text) => {
     setPostText(text);
-  }
+  };
 
-  var requestSend = ()=>{
-    if(!isSent){
+  const requestSend = () => {
+    if (!isSent) {
       setIsSent(true);
-      console.log("sending....")
+      console.log("sending....");
     }
-  }
-  
-  var exitScreen= ()=>{
-    console.log("exiting ...")
+  };
+
+  const exitScreen = () => {
+    navigation.goBack();
+  };
+
+  const [openSelect, setOpenSelect] = useState('image');
+  const [selectedImage, setSelectedImage] = useState([]);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+
+  const openPhoto = () => {
+    refInput.current.blur();
+    setOpenSelect('image');
+  };
+
+  const closePhoto = () => {
+    setOpenSelect(null);
   }
 
-  let iconSend;
-  if (canSend) {
-    iconSend = <TouchableOpacity style={styles.iconSendWrap} onPress={requestSend}>
-    <IconSend />
-  </TouchableOpacity>
-  } else {
-    iconSend = <TouchableOpacity style={styles.iconSendWrap}>
-      <IconSendDiable />
-    </TouchableOpacity>
+  const canOpenPhoto = () => {
+    if(selectedVideo != null) return false
+    return true
   }
-  const [openImageSelect, setOpenImageSelect] = useState(false)
-  const [selectedImage, setSelectedImage] = useState([]);
-  const touchPhoto=() => {
-    refInput.current.blur()
-    setOpenImageSelect(!openImageSelect)
+
+  const context = useContext(AppContext);
+  const keyBoardHeight = useKeyboardHeight();
+
+  const removeImage =(i)=> {
+    let images = Array.from(selectedImage)
+    images.splice(i,1)
+    setSelectedImage(images)
   }
+
+  const openVideo = () => {
+    refInput.current.blur();
+    setOpenSelect('video');
+  };
+
+  const closeVideo = () => {
+    setOpenSelect(null);
+  }
+
+  const canOpenVideo =() => {
+    if(selectedImage.length > 0) return false
+    return true
+  }
+
 
   return (
     <View style={styles.container}>
@@ -84,44 +116,131 @@ export default function CreatePost() {
             <IconFriend style={{ marginTop: 2 }} />
             <Text style={styles.textMode}>Tất cả bạn bè</Text>
           </View>
-          <Text style={{ color: '#909090' }}>Xem bởi bạn bè trên Zalo</Text>
-
+          <Text style={{ color: "#909090" }}>Xem bởi bạn bè trên Zalo</Text>
         </View>
-        {iconSend}
+        <TouchableOpacity
+          style={styles.iconSendWrap}
+          onPress={canSend?requestSend:null}
+        >
+          {canSend ? <IconSend /> : <IconSendDiable />}
+        </TouchableOpacity>
       </View>
-      <KeyboardAvoidingView style={styles.content} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <ScrollView style={styles.input} contentContainerStyle={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        style={styles.content}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView style={styles.input}>
           <TextInput
             style={styles.textInput}
             placeholder="Bạn đang nghĩ gì?"
             placeholderTextColor="#929292"
             multiline={true}
             ref={refInput}
-            onChangeText={text => onChangeText(text)}
+            onChangeText={(text) => onChangeText(text)}
             value={postText}
-          >
-          </TextInput>
-          <Pressable style={{ flex: 1 }} onPress={() => { refInput.current.focus() }}></Pressable>
+          ></TextInput>
+          {selectedImage.length > 0 && (
+            <View style={styles.imageContainer}>
+              <View
+                style={{
+                  flex: selectedImage.length > 2 ? 2 : 1,
+                  height: "100%",
+                  marginRight: 1,
+                  position: 'relative'
+                }}
+              >
+                <Image
+                  source={selectedImage[0]}
+                  style={{ height: "100%" }}
+                  onPress={() => {}}
+                />
+                <TouchableOpacity style={{position:'absolute', top:5, right:5}} onPress={()=>{removeImage(0)}}>
+                  <IconCloseCircle />
+                </TouchableOpacity>
+              </View>
+              { selectedImage.length > 1 &&
+              <View style={{ flex: 1, marginLeft: 1 }}>
+                {selectedImage.slice(1).map((e, i) => {
+                  return (
+                    <View key={i} style={{ flex: 1, marginTop: i!=0?2:0, position:'relative'}}>
+                      <Image
+                        source={selectedImage[i + 1]}
+                        style={{ height: "100%", resizeMode: "cover" }}
+                        onPress={() => {}}
+                      />
+                      <TouchableOpacity style={{position:'absolute', top:5, right:5}} onPress={()=>{removeImage(i)}}>
+                        <IconCloseCircle/>
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
+              </View>
+              }
+            </View>
+          )}
+          {selectedVideo && 
+            <View style={styles.videoContainer}> 
+              <View
+                style={{
+                  flex: 1,
+                  height: "100%",
+                  marginRight: 1,
+                  position: 'relative'
+                }}
+              >
+                <Video
+                  style={{ height: '100%', width: '100%'}}
+                  source={selectedVideo}
+                  resizeMode="cover"
+                  useNativeControls
+                />
+                <TouchableOpacity style={{position:'absolute', top:5, right:5}} onPress={()=>{setSelectedVideo(null)}}>
+                  <IconCloseCircle />
+                </TouchableOpacity>
+              </View>
+            </View>
+          }
+          {selectedImage.length == 0 && selectedVideo == null && (
+            <Pressable
+              style={{
+                height: Dimensions.get("screen").height - keyBoardHeight - 150,
+              }}
+              onPress={() => {
+                refInput.current.focus();
+              }}
+            ></Pressable>
+          )}
         </ScrollView>
         <View style={styles.bottomBar}>
           <TouchableOpacity style={styles.iconSticker}>
             <IconSticker />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconPhoto} onPress={touchPhoto}>
-            <IconPhoto />
+          <TouchableOpacity style={{...styles.iconPhoto,opacity: canOpenPhoto()?1:0.5 }} onPress={openSelect == 'image'?closePhoto:openPhoto} disabled={!canOpenPhoto()}>
+            {openSelect=='image'?<IconPhotoActive/>: <IconPhoto/>}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconVideo}>
-            <IconVideo />
+          <TouchableOpacity style={{...styles.iconVideo,opacity: canOpenVideo()?1:0.5}} onPress={openSelect == 'video'?closeVideo:openVideo} disabled={!canOpenVideo()}>
+            {openSelect=='video'?<IconVideoActive/>: <IconVideo />}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-      {openImageSelect &&
+      {openSelect == 'image' && (
         <ImageSelect
-        style= {{height:266}}
-        onChange={setSelectedImage}
-        selected={selectedImage}
+          style={{
+            height: context.keyBoardHeight != 0 ? context.keyBoardHeight : 266,
+          }}
+          onChange={setSelectedImage}
+          selected={selectedImage}
         />
-      }
+      )}
+      {openSelect == 'video' && (
+        <VideoSelect
+          style={{
+            height: context.keyBoardHeight != 0 ? context.keyBoardHeight : 266,
+          }}
+          onChange={(video) =>{ setSelectedVideo(video);setOpenSelect(null)}}
+          selected={selectedVideo}
+        />
+      )}
     </View>
   );
 }
@@ -129,14 +248,14 @@ export default function CreatePost() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   header: {
     backgroundColor: "#fafafa",
     height: 62,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    flexDirection: 'row'
+    borderBottomColor: "#f0f0f0",
+    flexDirection: "row",
   },
   iconClose: {
     marginTop: 28,
@@ -147,33 +266,44 @@ const styles = StyleSheet.create({
     marginLeft: 25,
   },
   mode: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   textMode: {
-    fontWeight: '500',
+    fontWeight: "500",
     fontSize: 16,
     marginLeft: 5,
   },
   iconSendWrap: {
     marginTop: 28,
-    marginLeft: 'auto',
-    marginRight: 10
+    marginLeft: "auto",
+    marginRight: 10,
   },
   content: {
     flex: 1,
   },
   input: {
     flex: 1,
-    marginLeft: 10,
+    paddingLeft: 10,
+    paddingRight: 10,
   },
   textInput: {
     marginTop: 20,
     fontSize: 18,
   },
+  imageContainer: {
+    display: "flex",
+    flexDirection: "row",
+    height: 400,
+    marginTop: 30,
+  },
+  videoContainer:{
+    height: 600,
+    marginTop: 30,
+  },
   bottomBar: {
     height: 45,
-    backgroundColor: '#fafafa',
-    flexDirection: 'row'
+    backgroundColor: "#fafafa",
+    flexDirection: "row",
   },
   iconSticker: {
     marginTop: 5,
@@ -181,11 +311,11 @@ const styles = StyleSheet.create({
   },
   iconPhoto: {
     marginTop: 10,
-    marginLeft: 'auto',
+    marginLeft: "auto",
   },
   iconVideo: {
     marginRight: 20,
     marginTop: 10,
-    marginLeft: 30
-  }
+    marginLeft: 30,
+  },
 });

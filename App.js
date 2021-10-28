@@ -17,6 +17,7 @@ import IconTabContactFocus from './assets/ic_tab_contact_focus.svg'
 import IconTabSocial from './assets/ic_tab_social.svg'
 import IconTabSocialFocus from './assets/ic_tab_social_focus.svg'
 import CreatePost from './src/screens/CreatePost';
+import AppContext from './src/components/context/AppContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -33,11 +34,19 @@ export default function App() {
     dispatch
   }
 
+  const [keyBoardHeight, setKeyBoardHeight] = React.useState(0)
+  const appContext = {
+    keyBoardHeight,
+    setKeyBoardHeight
+  }
+
     return (
+      <AppContext.Provider value={appContext}>
+
         <AuthContext.Provider value={authContext}>
         <NavigationContainer>
             
-            {loginState.accessToken == null? <CreatePost/>:
+            {loginState.accessToken == null? <LoginStackScreen/>:
             (<Tab.Navigator 
             screenOptions={{
             headerShown: false
@@ -83,5 +92,6 @@ export default function App() {
         </Tab.Navigator>)}
       </NavigationContainer>
     </AuthContext.Provider>
+    </AppContext.Provider>
   );
 }

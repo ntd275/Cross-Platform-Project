@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { SearchBar } from "react-native-elements";
 import { LinearGradient } from "expo-linear-gradient";
 import IconNotice from "../../assets/notifications-outline.svg";
@@ -21,6 +21,8 @@ import {
   TouchableOpacity,
   TouchableHighlight,
 } from "react-native";
+import useKeyboardHeight from 'react-native-use-keyboard-height';
+import AppContext from "../components/context/AppContext";
 
 export default function TimeLineScreen({ navigation }) {
   const [search, setSearch] = useState("");
@@ -40,6 +42,9 @@ export default function TimeLineScreen({ navigation }) {
     </TouchableHighlight>
     );
   }
+
+  const keyBoardHeight = useKeyboardHeight()
+  const appContext = useContext(AppContext)
 
   return (
     <View style={styles.container}>
@@ -123,7 +128,10 @@ export default function TimeLineScreen({ navigation }) {
               onEndEditing={getSearchText}
               placeholder="Hôm nay bạn thế nào?"
               placeholderTextColor="#dedede"
-            ></TextInput>
+              onFocus={(e)=>{e.target.blur();navigation.navigate("CreatePost")}}
+              onBlur={()=>{appContext.setKeyBoardHeight(keyBoardHeight)}}
+            >
+            </TextInput>
           </View>
         </View>
         <View style={styles.mediaArea}>
