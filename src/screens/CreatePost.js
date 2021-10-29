@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useContext } from "react";
+import React, { useRef, useState, useContext } from "react";
 import {
   View,
   Text,
@@ -58,22 +58,29 @@ export default function CreatePost({ navigation }) {
         let base64 = await FileSystem.readAsStringAsync(info.localUri,{
           encoding:'base64'
         })
-        images.push(base64)
+        images.push('data:image;base64,'+base64)
         console.log(base64.length/1024/1024)
       }
-      let info = selectedVideo && await MediaLibrary.getAssetInfoAsync(selectedVideo)
-      let video = info && await FileSystem.readAsStringAsync(info.localUri,{
-        encoding: 'base64'
-      })
-      console.log(video.length/1024/1024)
+
+      let videos = [];
+
+      if(selectedVideo != null){
+        let info =  await MediaLibrary.getAssetInfoAsync(selectedVideo)
+        let video = await FileSystem.readAsStringAsync(info.localUri,{
+          encoding: 'base64'
+        })
+        videos.push('data:video;base64,' + video)
+        console.log(videos[0].length)
+      }
+      
       try {
-        let res = await Api.createPost(authContext.loginState.accessToken,postText,images,video)
+        let res = await Api.createPost(authContext.loginState.accessToken,postText,images,videos)
         console.log(res.data)
         console.log(res.status)
         navigation.goBack();
       } catch (e) {
-        console.log("a")
         console.log(e.response.status)
+        console.log(e.response)
         setIsSent(false);
       }
     }

@@ -24,7 +24,7 @@ export default function Post(props) {
             uri: "https://scontent.fhan3-3.fna.fbcdn.net/v/t1.6435-9/52368397_121091762294390_5329755510382002176_n.jpg?_nc_cat=108&ccb=1-5&_nc_sid=8bfeb9&_nc_ohc=GZwoO6NYPUcAX-lVfCH&tn=S-LhVHmVXF0IXquK&_nc_ht=scontent.fhan3-3.fna&oh=b43cd856bb3960dc0cfe598aa23ed947&oe=619839A5",
         },
         {
-            uri: "https://scontent.fhan4-3.fna.fbcdn.net/v/t1.6435-9/35147076_653606388304254_5729101200196894720_n.jpg?_nc_cat=100&ccb=1-5&_nc_sid=8bfeb9&_nc_ohc=dtzP9CcJUBoAX_cNvYg&_nc_ht=scontent.fhan4-3.fna&oh=10967cb3d1ab2d240d88838af25fed68&oe=6197D2B4",
+            uri: "http://13.76.46.159:8000/files/8601d239-573a-43b2-bea6-88651d44b553.null",
         },
     ];
 
