@@ -94,6 +94,12 @@ export default class ImageSelect extends React.Component {
     return {length, offset: length * index, index};
   }
 
+  pushImage = (image) =>{
+    this.state.photos.unshift(image)
+    this.setState({photos: this.state.photos})
+
+  }
+
   renderImageTile = ({item, index}) => {
     const selected = this.props.selected.findIndex(e => e.id === item.id) !== -1;
     const selectedItemNumber = this.props.selected.findIndex(e => e.id === item.id) + 1;
@@ -105,7 +111,7 @@ export default class ImageSelect extends React.Component {
         item={item}
         selected={selected}
         selectImage={this.selectImage}
-        refresh = {this.refresh}
+        pushImage = {this.pushImage}
       />
     );
   }
