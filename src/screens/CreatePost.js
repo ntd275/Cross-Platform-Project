@@ -150,6 +150,8 @@ export default function CreatePost({ navigation }) {
         { text: "Không" },
         {text:'Có',onPress: ()=>{navigation.goBack()}}
       ])
+    }else{
+      navigation.goBack()
     }
   };
 
