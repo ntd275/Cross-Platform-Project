@@ -39,7 +39,6 @@ export const Api = {
             onUploadProgress: onSend
         })
     },
-<<<<<<< HEAD
     editPost: (token,id, described, images, videos,onSend) => {
         return axios({
            method: 'post',
@@ -55,7 +54,6 @@ export const Api = {
            onUploadProgress: onSend
        })
    },
-=======
     getComment: (token, postId) => {
         return axios({
             method: 'get',
@@ -65,6 +63,5 @@ export const Api = {
             maxBodyLength: 1000000000
         })
     },
->>>>>>> c67cc7af8eb9546bb86f2a7c60b92fc79a5192d9
 }
 
