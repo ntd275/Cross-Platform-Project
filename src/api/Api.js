@@ -39,6 +39,21 @@ export const Api = {
             onUploadProgress: onSend
         })
     },
+    editPost: (token,id, described, images, videos,onSend) => {
+        return axios({
+           method: 'post',
+           url: `${BaseURL}/posts/edit/${id}`,
+           data: {
+               described, 
+               images, 
+               videos
+           },
+           headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', authorization: "a "+token },
+           maxContentLength: 100000000,
+           maxBodyLength: 1000000000,
+           onUploadProgress: onSend
+       })
+   },
     getComment: (token, postId) => {
         return axios({
             method: 'get',
