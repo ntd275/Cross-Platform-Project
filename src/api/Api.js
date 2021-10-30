@@ -48,5 +48,19 @@ export const Api = {
             maxBodyLength: 1000000000
         })
     },
+    createComment: (token, postId, content) => {
+        let commentAnswered = null;
+        return axios({
+            method: 'post',
+            url: `${BaseURL}/postComment/create/${postId}`,
+            data: {
+                content,
+                commentAnswered
+            },
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', authorization: "a "+token },
+            maxContentLength: 100000000,
+            maxBodyLength: 1000000000
+        })
+    }
 }
 

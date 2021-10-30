@@ -11,15 +11,17 @@ import { Api } from '../api/Api.js';
 
 function getDateStr(timestamp) {
     let now = new Date();
-    let hours = Math.ceil((now-timestamp)/(1000*3600));
-    if (hours > 24*365){
-        return Math.ceil(hours/24/365) + " năm";
-    } else if (hours > 24*30) {
-        return Math.ceil(hours/24/30) + " tháng";
-    } else if (hours > 24){
-        return Math.ceil(hours/24) + " ngày";
+    let mins = Math.ceil((now-timestamp)/(60000)); // 1000*60
+    if (mins > 525600){ // 24*365*60
+        return Math.ceil(mins/525600) + " năm";
+    } else if (mins > 43200) { // 24*30*60
+        return Math.ceil(mins/43200) + " tháng";
+    } else if (mins > 1440){ // 24*60
+        return Math.ceil(mins/1440) + " ngày";
+    } else if (mins > 60){
+        return Math.ceil(mins/60) + " giờ";
     } else {
-        return hours + " giờ";
+        return mins + " phút";
     }
 }
 
@@ -75,7 +77,7 @@ const PostAndComment = (props) => {
     );
 }
 
-const MyComment = () => {
+const MyComment = (props) => {
     const [myComment, setMyComment] = useState("");
 
     return (
@@ -98,7 +100,12 @@ const MyComment = () => {
 
                 </View>
                 <View style={styles.sendButton}>
-                    <TouchableOpacity disabled={!myComment.match(/\S/)}>
+                    <TouchableOpacity 
+                        disabled={!myComment.match(/\S/)}
+                        onPress={() => {
+                            props.createCommentFunc(myComment);
+                            setMyComment("");
+                        }}>
                         {myComment.match(/\S/)?<IconSend />:<IconSendDiable/>}
                     </TouchableOpacity>
                 </View>
@@ -111,6 +118,17 @@ export default function PostScreen({ navigation, route }) {
     const context = React.useContext(AuthContext)
     const [listComment, setListComment] = useState("");
     const [countComment, setCountComment] = useState(0);
+    const createComment = async (content) => {
+        try {
+            let accessToken = context.loginState.accessToken;
+            const res = await Api.createComment(accessToken, route.params.postId, content);
+            // console.log(res);
+            getListComment();
+        } catch (err) {
+            console.log(err)
+            navigation.navigate("NoConnectionScreen",{message: "Tài khoản sẽ tự động đăng nhập khi có kết nối internet"})
+        }
+    }
     const getListComment = async () => {
         try {
             let accessToken = context.loginState.accessToken;
@@ -148,7 +166,7 @@ export default function PostScreen({ navigation, route }) {
                         () => { return <UserPost numComment={countComment} /> }
                     } />
             </View>
-            <MyComment />
+            <MyComment createCommentFunc={createComment}/>
         </View>
     )
 }
