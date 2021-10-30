@@ -145,7 +145,12 @@ export default function CreatePost({ navigation }) {
   };
 
   const exitScreen = () => {
-    navigation.goBack();
+    if(checkCanSend()) {
+      Alert.alert("Xác nhận", "Nội dung chưa được lưu bạn có chắc muốn hủy?", [
+        { text: "Không" },
+        {text:'Có',onPress: ()=>{navigation.goBack()}}
+      ])
+    }
   };
 
   const [openSelect, setOpenSelect] = useState("image");
