@@ -24,8 +24,8 @@ export const Api = {
             username
         })
     },
-    createPost: (token, described, images, videos) => {
-        return axios({
+    createPost: (token, described, images, videos,onSend) => {
+         return axios({
             method: 'post',
             url: `${BaseURL}/posts/create`,
             data: {
@@ -35,7 +35,8 @@ export const Api = {
             },
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', authorization: "a "+token },
             maxContentLength: 100000000,
-            maxBodyLength: 1000000000
+            maxBodyLength: 1000000000,
+            onUploadProgress: onSend
         })
     },
     getComment: (token, postId) => {
