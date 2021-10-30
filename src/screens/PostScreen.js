@@ -110,6 +110,7 @@ const MyComment = () => {
 export default function PostScreen({ navigation, route }) {
     const context = React.useContext(AuthContext)
     const [listComment, setListComment] = useState("");
+    const [countComment, setCountComment] = useState(0);
     const getListComment = async () => {
         try {
             let accessToken = context.loginState.accessToken;
@@ -126,6 +127,7 @@ export default function PostScreen({ navigation, route }) {
                     date: getDateStr(new Date(comment.createdAt)),
                 })
             ));
+            setCountComment(res.data.countComments);
         } catch (err) {
             console.log(err)
             navigation.navigate("NoConnectionScreen",{message: "Tài khoản sẽ tự động đăng nhập khi có kết nối internet"})
@@ -143,7 +145,7 @@ export default function PostScreen({ navigation, route }) {
                 <PostAndComment
                     listComment={listComment}
                     post={
-                        () => { return <UserPost numComment={listComment.length} /> }
+                        () => { return <UserPost numComment={countComment} /> }
                     } />
             </View>
             <MyComment />
