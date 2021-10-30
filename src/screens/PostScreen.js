@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View, Button, ScrollView, TextInput, FlatList, TouchableOpacity, Pressable, KeyboardAvoidingView } from 'react-native';
 import { Avatar, ListItem, Icon } from 'react-native-elements';
 import HeaderBar from './components/HeaderBar.js'
@@ -6,6 +6,22 @@ import Post from './components/Post.js';
 import IconSend from '../../assets/icn_send.svg'
 import IconSendDiable from '../../assets/icn_send_disable.svg'
 import IconPhoto from '../../assets/icn_csc_menu_sticker_n.svg'
+import AuthContext from '../components/context/AuthContext';
+import { Api } from '../api/Api.js';
+
+function getDateStr(timestamp) {
+    let now = new Date();
+    let hours = Math.ceil((now-timestamp)/(1000*3600));
+    if (hours > 24*365){
+        return Math.ceil(hours/24/365) + " năm";
+    } else if (hours > 24*30) {
+        return Math.ceil(hours/24/30) + " tháng";
+    } else if (hours > 24){
+        return Math.ceil(hours/24) + " ngày";
+    } else {
+        return hours + " giờ";
+    }
+}
 
 const UserPost = (props) => {
     let numComment = props.numComment;
@@ -19,7 +35,6 @@ const UserPost = (props) => {
         <>
             <View style={styles.post}>
                 <Post mode="comment"></Post>
-
             </View>
             {describe}
         </>
@@ -92,24 +107,35 @@ const MyComment = () => {
     )
 }
 
-export default function PostScreen({ navigation }) {
-    let listComment = [
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-        { user: 'Devin', content: 'Hello, this is a comment', img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png', date: '2 ngày' },
-    ];
+export default function PostScreen({ navigation, route }) {
+    const context = React.useContext(AuthContext)
+    const [listComment, setListComment] = useState("");
+    const getListComment = async () => {
+        try {
+            let accessToken = context.loginState.accessToken;
+            const res = await Api.getComment(accessToken, route.params.postId);
+            let comments = res.data.data;
+            // console.log(comments);
+            setListComment(comments.map(
+                comment => ({
+                    user: comment.user.username,
+                    content: comment.content,
+                    img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png',
+                    dateCreated: new Date(comment.createdAt),
+                    dateUpdated: new Date(comment.updatedAt),
+                    date: getDateStr(new Date(comment.createdAt)),
+                })
+            ));
+        } catch (err) {
+            console.log(err)
+            navigation.navigate("NoConnectionScreen",{message: "Tài khoản sẽ tự động đăng nhập khi có kết nối internet"})
+        }
+    }
+
+    useLayoutEffect(() => {
+        getListComment();
+    }, []);
+
     return (
         <View style={styles.container}>
             <HeaderBar text="Bình luận" navigation={navigation} />

@@ -36,7 +36,7 @@ export default function TimeLineScreen({ navigation }) {
   let postList = [];
   for (let i = 0; i<10; i++){
     postList.push(<TouchableHighlight key = {i} style={{marginTop: 12}}
-      onPress={() => { navigation.navigate("PostScreen") }}
+      onPress={() => { navigation.navigate("PostScreen", { postId: "60c45081ae8c0f00220f461a" }) }}
     >
       <Post mode={"timeline"}/>
     </TouchableHighlight>

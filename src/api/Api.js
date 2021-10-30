@@ -25,7 +25,7 @@ export const Api = {
         })
     },
     createPost: (token, described, images, videos) => {
-         return axios({
+        return axios({
             method: 'post',
             url: `${BaseURL}/posts/create`,
             data: {
@@ -37,6 +37,15 @@ export const Api = {
             maxContentLength: 100000000,
             maxBodyLength: 1000000000
         })
-    }
+    },
+    getComment: (token, postId) => {
+        return axios({
+            method: 'get',
+            url: `${BaseURL}/postComment/list/${postId}`,
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', authorization: "a "+token },
+            maxContentLength: 100000000,
+            maxBodyLength: 1000000000
+        })
+    },
 }
 

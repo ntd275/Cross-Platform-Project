@@ -4,7 +4,7 @@ import Logo from '../../assets/logo_zalo_small.svg'
 import NoConnection from '../../assets/no-connection.svg'
 
 export default function NoConnectionScreen({route, navigation }){
-    const message = route.params
+    const message = route.params.message;
     return(
       <View style={styles.container}>
         <Logo style={styles.logo}/>
