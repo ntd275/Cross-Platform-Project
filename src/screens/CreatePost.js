@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Pressable,
   Dimensions,
+  Alert,
 } from "react-native";
 import { Image } from "react-native-elements";
 import IconHeaderClose from "../../assets/icn_header_close.svg";
@@ -32,10 +33,13 @@ import * as FileSystem from 'expo-file-system';
 import { Api } from "../api/Api";
 import * as MediaLibrary from 'expo-media-library'
 
+const MAX_IMAGE_SIZE = 4*1024*1024
+const MAX_VIDEO_SIZE = 10*1024*1024
+const MAX_VIDEO_DURATION = 10
+const MIN_VIDEO_DURATION = 1 
 export default function CreatePost({ navigation }) {
   const refInput = useRef();
 
-  const [canSend, setCanSend] = useState(false);
   const [postText, setPostText] = useState("");
   const [isSent, setIsSent] = useState(false);
 
@@ -52,9 +56,30 @@ export default function CreatePost({ navigation }) {
   const requestSend = async () => {
     if (!isSent) {
       setIsSent(true);
+      if(postText.length > 500) {
+        Alert.alert(
+          "Bài viết quá dài",
+          "Chỉ cho phép bài viết tối đa 500 ký tự",
+          [
+            { text: "OK" }
+          ]
+        );
+        return
+      }
       let images = [];
       for( let i = 0; i < selectedImage.length; i++){
         let info = await MediaLibrary.getAssetInfoAsync(selectedImage[i])
+        let fileInfo = await FileSystem.getInfoAsync(info.localUri)
+        if(fileInfo.size > MAX_IMAGE_SIZE){
+          Alert.alert(
+            "Ảnh quá lớn",
+            "Chỉ cho phép ảnh kích thước tối đa 4MB",
+            [
+              { text: "OK" }
+            ]
+          );
+          return
+        }
         let base64 = await FileSystem.readAsStringAsync(info.localUri,{
           encoding:'base64'
         })
@@ -66,6 +91,38 @@ export default function CreatePost({ navigation }) {
 
       if(selectedVideo != null){
         let info =  await MediaLibrary.getAssetInfoAsync(selectedVideo)
+        let fileInfo = await FileSystem.getInfoAsync(info.localUri)
+        if(fileInfo.size > MAX_VIDEO_SIZE){
+          Alert.alert(
+            "Video quá lớn",
+            "Chỉ cho phép video kích thước tối đa 10MB",
+            [
+              { text: "OK" }
+            ]
+          );
+          return
+        }
+        if(info.duration > MAX_VIDEO_DURATION){
+          Alert.alert(
+            "Video quá dài",
+            "Chỉ cho phép video có độ dài tối đa 10s",
+            [
+              { text: "OK" }
+            ]
+          );
+          return
+        }
+        if(info.duration < MIN_VIDEO_DURATION){
+          Alert.alert(
+            "Video quá nagnws",
+            "Video cần tối thiểu 1s",
+            [
+              { text: "OK" }
+            ]
+          );
+          return
+        }
+        
         let video = await FileSystem.readAsStringAsync(info.localUri,{
           encoding: 'base64'
         })
@@ -93,6 +150,7 @@ export default function CreatePost({ navigation }) {
   const [openSelect, setOpenSelect] = useState('image');
   const [selectedImage, setSelectedImage] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [inputIsFocus, setInputIsFocus] = useState(false)
 
   const openPhoto = () => {
     refInput.current.blur();
@@ -170,6 +228,8 @@ export default function CreatePost({ navigation }) {
             ref={refInput}
             onChangeText={(text) => onChangeText(text)}
             value={postText}
+            onBlur ={()=>setInputIsFocus(false)}
+            onFocus={()=>setInputIsFocus(true)}
           ></TextInput>
           {selectedImage.length > 0 && (
             <View style={styles.imageContainer}>
@@ -235,7 +295,7 @@ export default function CreatePost({ navigation }) {
           {selectedImage.length == 0 && selectedVideo == null && (
             <Pressable
               style={{
-                height: Dimensions.get("screen").height - keyBoardHeight - 150,
+                height: openSelect? Dimensions.get("screen").height - 150 - context.keyBoardHeight : Dimensions.get("screen").height - 150 - keyBoardHeight,
               }}
               onPress={() => {
                 refInput.current.focus();
@@ -247,11 +307,11 @@ export default function CreatePost({ navigation }) {
           <TouchableOpacity style={styles.iconSticker}>
             <IconSticker />
           </TouchableOpacity>
-          <TouchableOpacity style={{...styles.iconPhoto,opacity: canOpenPhoto()?1:0.5 }} onPress={openSelect == 'image'?closePhoto:openPhoto} disabled={!canOpenPhoto()}>
-            {openSelect=='image'?<IconPhotoActive/>: <IconPhoto/>}
+          <TouchableOpacity style={{...styles.iconPhoto,opacity: canOpenPhoto()?1:0.5 }} onPress={openSelect == 'image' && !inputIsFocus?closePhoto:openPhoto} disabled={!canOpenPhoto()}>
+            {openSelect=='image' && !inputIsFocus?<IconPhotoActive/>: <IconPhoto/>}
           </TouchableOpacity>
-          <TouchableOpacity style={{...styles.iconVideo,opacity: canOpenVideo()?1:0.5}} onPress={openSelect == 'video'?closeVideo:openVideo} disabled={!canOpenVideo()}>
-            {openSelect=='video'?<IconVideoActive/>: <IconVideo />}
+          <TouchableOpacity style={{...styles.iconVideo,opacity: canOpenVideo()?1:0.5}} onPress={openSelect == 'video' && !inputIsFocus?closeVideo:openVideo} disabled={!canOpenVideo()}>
+            {openSelect=='video'&& !inputIsFocus?<IconVideoActive/>: <IconVideo />}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
