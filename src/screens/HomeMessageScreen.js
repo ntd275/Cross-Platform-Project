@@ -10,7 +10,7 @@ import {
 import AuthContext from "../components/context/AuthContext";
 import { LinearGradient } from "expo-linear-gradient";
 import IconSearch from "../../assets/search-outline.svg";
-import IconQR from "../../assets/qr-code-outline.svg";
+import IconQR from "../../assets/ic_scan_qr_footer.svg";
 import IconAdd from "../../assets/add-outline.svg";
 import Message from "./components/Message";
 export default function HomeMessageScreen() {
@@ -136,6 +136,6 @@ const styles = StyleSheet.create({
     color: "white",
     marginLeft: "auto",
     marginRight: 12,
-    marginTop: 2,
+    marginTop: 0,
   },
 });
