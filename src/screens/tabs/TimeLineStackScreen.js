@@ -5,6 +5,7 @@ import PostScreen from "../PostScreen";
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import CreatePost from "../CreatePost";
 import EditPost from "../EditPost";
+import NoConnectionScreen from "../NoConnectionScreen";
 
 const TimeLineStack = createNativeStackNavigator();
 
@@ -28,6 +29,7 @@ export default function TimeLineStackScreen({route, navigation}) {
       <TimeLineStack.Screen name="PostScreen" component={PostScreen} />
       <TimeLineStack.Screen name="CreatePost" component={CreatePost} />
       <TimeLineStack.Screen name="EditPost" component={EditPost} />
+      <TimeLineStack.Screen name="NoConnectionScreen" component={NoConnectionScreen}/>
     </TimeLineStack.Navigator>
   );
 }
