@@ -1,6 +1,6 @@
 import { useLinkProps } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, Pressable, Text, StatusBar, View, Button } from 'react-native';
+import { ScrollView, StyleSheet, Pressable, Text, TextInput, StatusBar, View, Button, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
 import { Avatar, Icon, Image } from "react-native-elements";
 import ImageView from "react-native-image-viewing";
 import { Video, AVPlaybackStatus } from 'expo-av';
@@ -12,6 +12,9 @@ import IconMenuHide from '../../../assets/ic_hide_social.svg'
 import IconComment from '../../../assets/ico_comment.svg'
 import IconUnLike from '../../../assets/ic_unlike.svg'
 import IconLike from '../../../assets/ic_like.svg'
+import IconSend from '../../../assets/icn_send_black.svg'
+import * as myConst from '../../utils/Constants'
+
 export default function Post(props) {
     const images = [
         {
@@ -36,8 +39,10 @@ export default function Post(props) {
 
     const video = React.useRef(null);
     const refRBSheet = React.useRef(null);
+    const refRBSheetReport = React.useRef(null);
+    const refRBSheetReportDetails = React.useRef(null);
     const [status, setStatus] = React.useState({});
-
+    const [reportReason, setReportReason] = React.useState(myConst.REPORT_KHAC);
     const [visible, setIsVisible] = useState(false);
     const [imageIndex, setImageIndex] = useState(1);
 
@@ -153,9 +158,16 @@ export default function Post(props) {
     }
 
     var onPressReport = () => {
+        refRBSheet.current.close();
+        refRBSheetReport.current.open();
         console.log("pressed Report");
     }
 
+    var onPressReportReason = (reason) => {
+        refRBSheetReport.current.close();
+        setReportReason(reason);
+        refRBSheetReportDetails.current.open();
+    }
 
     return (
         <View style={styles.postContainer}>
@@ -221,6 +233,7 @@ export default function Post(props) {
                 ref={refRBSheet}
                 closeOnDragDown={true}
                 closeOnPressMask={true}
+                closeOnPressBack={true}
                 animationType="fade"
                 height={320}
                 customStyles={{
@@ -261,15 +274,113 @@ export default function Post(props) {
                         </View>
                     </Pressable>
 
-                    <Pressable style={[styles.menuOption, { height: 68 }]} onPress={onPressReport}>
+                    <Pressable 
+                        style={[styles.menuOption, { height: 68 }]} 
+                        onPress={onPressReport}    
+                        >
                         <IconMenuReport flex={1} style={{ marginTop: "auto", marginBottom: "auto" }} />
                         <View flex={10} style={styles.reportMenuOption}>
                             <Text style={{ fontSize: 16, fontWeight: '400' }}>Báo xấu</Text>
                         </View>
                     </Pressable>
-
                 </View>
             </RBSheet>
+            <RBSheet
+                ref={refRBSheetReport}
+                closeOnDragDown={true}
+                closeOnPressMask={true}
+                closeOnPressBack={true}
+                animationType="fade"
+                height={320}
+                customStyles={{
+                    wrapper: {
+                        backgroundColor: 'rgba(0,0,0,0.28)',
+                    },
+                    container: {
+                        borderTopLeftRadius: 20,
+                        borderTopEndRadius: 20
+                    },
+                    draggableIcon: {
+                        opacity: 0
+                    }
+                }}
+            >
+                <View style={{ justifyContent: "center", flexDirection: "column", height: 320, marginTop: -20 }}>
+                    <Pressable style={[styles.menuOption, { height: 72 }]} onPress={() => {;
+                            onPressReportReason(myConst.REPORT_NHAYCAM);
+                        }}>
+                        <View flex={10} style={styles.inMenuOption}>
+                            <Text style={{ fontSize: 16, fontWeight: '400', marginBottom: 4 }}>Nội dung nhạy cảm</Text>
+                        </View>
+                    </Pressable>
+
+                    <Pressable style={[styles.menuOption, { height: 72 }]} onPress={() => {;
+                            onPressReportReason(myConst.REPORT_LAMPHIEN);
+                        }}>
+                        <View flex={10} style={styles.inMenuOption}>
+                            <Text style={{ fontSize: 16, fontWeight: '400', marginBottom: 4 }}>Làm phiền</Text>
+                        </View>
+                    </Pressable>
+
+                    <Pressable style={[styles.menuOption, { height: 72 }]} onPress={() => {;
+                            onPressReportReason(myConst.REPORT_LUADAO);
+                        }}>
+                        <View flex={10} style={styles.inMenuOption}>
+                            <Text style={{ fontSize: 16, fontWeight: '400', marginBottom: 4 }}>Lừa đảo</Text>
+                        </View>
+                    </Pressable>
+
+                    <Pressable style={[styles.menuOption, { height: 72 }]} onPress={() => {;
+                            onPressReportReason(myConst.REPORT_KHAC);
+                        }}>
+                        <View flex={10} style={styles.inMenuOption}>
+                            <Text style={{ fontSize: 16, fontWeight: '400', marginBottom: 4 }}>Nhập lý do khác</Text>
+                        </View>
+                    </Pressable>
+                </View>
+            </RBSheet>
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <RBSheet
+                ref={refRBSheetReportDetails}
+                closeOnDragDown={true}
+                closeOnPressMask={true}
+                closeOnPressBack={true}
+                animationType="fade"
+                height={320}
+                customStyles={{
+                    wrapper: {
+                        backgroundColor: 'rgba(0,0,0,0.28)',
+                    },
+                    container: {
+                        borderTopLeftRadius: 20,
+                        borderTopEndRadius: 20
+                    },
+                    draggableIcon: {
+                        opacity: 0
+                    }
+                }}
+            >
+                <View style={{ justifyContent: "center", flexDirection: "column", height: 320, marginTop: -20 }}>
+                    <Text style={styles.enterReportTitle}>
+                        Lý do chi tiết báo xấu (tùy chọn):
+                    </Text>
+                    <TextInput style={styles.enterReport}
+                        placeholder="Nhập lý do báo xấu"
+                        returnKeyType="send"
+                        enablesReturnKeyAutomatically
+                        defaultValue=""
+                        multiline={true}>
+                    </TextInput>
+                    <View style={styles.sendReportButton}>
+                        <TouchableOpacity 
+                            onPress={() => {
+                            }}>
+                            <IconSend />
+                        </TouchableOpacity>
+                </View>
+                </View>
+            </RBSheet>
+            </KeyboardAvoidingView>
         </View>
     )
 }
@@ -347,5 +458,25 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         justifyContent: "center",
         marginLeft: 12,
-    }
+    },
+    enterReportTitle: {
+        fontSize: 24,
+        margin: 10,
+        fontWeight: "bold"
+    },
+    enterReport: {
+        padding: 10,
+        height: 50,
+        backgroundColor: "#fff",
+        fontSize: 18,
+        margin: 10,
+        borderColor: "gray",
+        borderRadius: 2,
+        borderWidth: 2,
+        flex: 1,
+    },
+    sendReportButton: {
+        alignSelf: 'center',
+        margin: 10,
+    },
 });
