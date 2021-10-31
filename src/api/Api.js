@@ -89,6 +89,13 @@ export const Api = {
             maxContentLength: 100000000,
             maxBodyLength: 1000000000
         })
+    },
+    getPosts: (token) =>{
+        return axios.get(`${BaseURL}/posts/list`,{
+            "headers": {
+                "authorization":token
+            }
+        })
     }
 }
 

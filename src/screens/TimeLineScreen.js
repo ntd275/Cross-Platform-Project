@@ -11,6 +11,8 @@ import IconAlbum from "../../assets/albums-outline.svg";
 import { Avatar } from "react-native-elements";
 import Post from "./components/Post"
 import { StatusBar } from 'react-native';
+import { Api } from '../api/Api'
+import AuthContext from '../components/context/AuthContext';
 import {
   StyleSheet,
   Text,
@@ -32,7 +34,28 @@ export default function TimeLineScreen({ navigation }) {
   const getSearchText = () => {
     console.log(search);
   };
-
+  const context = React.useContext(AuthContext);
+  const getPosts = async () => {
+    try {
+      accessToken = context.loginState.accessToken;
+      accessToken = "lol " + accessToken
+      // console.log(accessToken)
+      const res = await Api.getPosts(accessToken);
+      let  postList = res.data;
+      console.log(postList)
+    } catch (err) {
+      if (err.response && err.response.status == 401) {
+        console.log(err.response.data.message);
+        // setNotification("Không thể nhận diện");
+        // console.log(notification)
+        return;
+      }
+      console.log(err);
+      navigation.navigate("NoConnectionScreen", {
+        message: "Tài khoản sẽ tự động đăng nhập khi có kết nối internet",
+      });
+    }
+  };
   let postList = [];
   for (let i = 0; i<10; i++){
       let postId = "60c45081ae8c0f00220f461a";
@@ -57,7 +80,7 @@ export default function TimeLineScreen({ navigation }) {
             style={styles.header}
           >
             <View style={{ flexDirection: "row", marginTop: 28}}>
-              <TouchableOpacity onPress={getSearchText}>
+              <TouchableOpacity onPress={getPosts}>
                 <View style={{ flex: 1 }}>
                   <IconSearch style={styles.iconSearch} />
                 </View>
