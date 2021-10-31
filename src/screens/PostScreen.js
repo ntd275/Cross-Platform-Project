@@ -8,22 +8,7 @@ import IconSendDiable from '../../assets/icn_send_disable.svg'
 import IconPhoto from '../../assets/icn_csc_menu_sticker_n.svg'
 import AuthContext from '../components/context/AuthContext';
 import { Api } from '../api/Api.js';
-
-function getDateStr(timestamp) {
-    let now = new Date();
-    let mins = Math.ceil((now-timestamp)/(60000)); // 1000*60
-    if (mins > 525600){ // 24*365*60
-        return Math.ceil(mins/525600) + " năm";
-    } else if (mins > 43200) { // 24*30*60
-        return Math.ceil(mins/43200) + " tháng";
-    } else if (mins > 1440){ // 24*60
-        return Math.ceil(mins/1440) + " ngày";
-    } else if (mins > 60){
-        return Math.ceil(mins/60) + " giờ";
-    } else {
-        return mins + " phút";
-    }
-}
+import { TimeUtility } from '../utils/TimeUtility.js';
 
 const UserPost = (props) => {
     let numComment = props.numComment;
@@ -36,7 +21,7 @@ const UserPost = (props) => {
     return (
         <>
             <View style={styles.post}>
-                <Post mode="comment"></Post>
+                <Post mode="comment" postId={props.postId} navigation={props.navigation}></Post>
             </View>
             {describe}
         </>
@@ -46,6 +31,7 @@ const UserPost = (props) => {
 const PostAndComment = (props) => {
     return (
         <FlatList
+            keyboardShouldPersistTaps={'always'}
             data={props.listComment}
             renderItem={({ item }) => (
                 <ListItem bottomDivider>
@@ -115,7 +101,7 @@ const MyComment = (props) => {
 }
 
 export default function PostScreen({ navigation, route }) {
-    const context = React.useContext(AuthContext)
+    const context = React.useContext(AuthContext);
     const [listComment, setListComment] = useState("");
     const [countComment, setCountComment] = useState(0);
     const createComment = async (content) => {
@@ -142,7 +128,7 @@ export default function PostScreen({ navigation, route }) {
                     img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png',
                     dateCreated: new Date(comment.createdAt),
                     dateUpdated: new Date(comment.updatedAt),
-                    date: getDateStr(new Date(comment.createdAt)),
+                    date: TimeUtility.getTimeStr(new Date(comment.createdAt)),
                 })
             ));
             setCountComment(res.data.countComments);
@@ -163,7 +149,9 @@ export default function PostScreen({ navigation, route }) {
                 <PostAndComment
                     listComment={listComment}
                     post={
-                        () => { return <UserPost numComment={countComment} /> }
+                        () => { return <UserPost numComment={countComment} 
+                                                 postId={route.params.postId}
+                                                 navigation={route.params.navigation} /> }
                     } />
             </View>
             <MyComment createCommentFunc={createComment}/>

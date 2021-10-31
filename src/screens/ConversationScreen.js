@@ -13,7 +13,7 @@ import IconOption from '../../assets/ic_list1_line_24.svg'
 import IconContact from '../../assets/icn_csc_parsephone_contact.svg'
 import IconAddFriend from '../../assets/ic_adduser_line_24.svg'
 import { color } from 'react-native-elements/dist/helpers';
-import { TimeUility } from '../utils/TimeUility'
+import { TimeUtility } from '../utils/TimeUtility'
 import { TextUtility } from '../utils/TextUtility'
 
 
@@ -245,7 +245,7 @@ export default function ConversationScreen({ navigation, friendInfo }) {
             let curMessage = messages[i];
             curSender = curMessage.senderId;
             curDate = curMessage.date;
-            if (!prevDate || TimeUility.getHourDiff(prevDate, curDate) > 4) {
+            if (!prevDate || TimeUtility.getHourDiff(prevDate, curDate) > 4) {
                 list.push(DateTag(new Date(curDate), "date" + i));
             }
             if (i == messages.length - 1 || curSender != messages[i + 1].senderId) {

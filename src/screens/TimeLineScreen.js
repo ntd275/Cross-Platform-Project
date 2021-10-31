@@ -35,10 +35,11 @@ export default function TimeLineScreen({ navigation }) {
 
   let postList = [];
   for (let i = 0; i<10; i++){
+      let postId = "60c45081ae8c0f00220f461a";
     postList.push(<TouchableHighlight key = {i} style={{marginTop: 12}}
-      onPress={() => { navigation.navigate("PostScreen", { postId: "60c45081ae8c0f00220f461a" }) }}
+      onPress={() => { navigation.navigate("PostScreen", { postId: postId, navigation: navigation }) }}
     >
-      <Post mode={"timeline"}/>
+      <Post mode={"timeline"} postId={postId} navigation={navigation}/>
     </TouchableHighlight>
     );
   }
@@ -90,7 +91,7 @@ export default function TimeLineScreen({ navigation }) {
             />
           </LinearGradient>
         </View>
-      <ScrollView >
+      <ScrollView keyboardShouldPersistTaps={'always'}>
         <View style={styles.story}>
           <Text
             style={{
@@ -154,7 +155,7 @@ export default function TimeLineScreen({ navigation }) {
             </Text>
           </View>
         </View>
-        <ScrollView style={{ marginTop: 0 }}>
+        <ScrollView style={{ marginTop: 0 }} keyboardShouldPersistTaps={'always'}>
           {postList}
         </ScrollView>
       </ScrollView>
