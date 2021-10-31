@@ -10,6 +10,8 @@ import AuthContext from '../components/context/AuthContext';
 import IconMenuDelete from '../../assets/ic_bottom_sheet_menu_delete.svg'
 import IconMenuUser from '../../assets/ic_user_line_24.svg'
 import IconMenuBan from '../../assets/ic_ban_line_24.svg'
+import { showMessage, hideMessage } from "react-native-flash-message";
+import FlashMessage from "react-native-flash-message";
 
 const minPasswordLength = 6;
 const maxPasswordLength = 10;
@@ -21,6 +23,10 @@ export default function ConversationOptionScreen({ route, navigation }) {
     const [menuBlockVisible, setMenuBlockVisible] = useState(false);
 
     var goToUserPage = () => {
+        showMessage({
+            message: "Simple message",
+            type: "success",
+        });
         console.log("Go to user's page!");
     }
 
@@ -52,6 +58,7 @@ export default function ConversationOptionScreen({ route, navigation }) {
     return (
         <View style={styles.container}>
             <View>
+                <FlashMessage position="center" icon="success" />
                 <StatusBar
                     backgroundColor="#00000000"
                     barStyle="light-content"
@@ -252,17 +259,17 @@ const styles = StyleSheet.create({
         height: 50,
         width: '50%'
     },
-    textCancel:{
+    textCancel: {
         fontSize: 17,
-        textAlign:'center',
-        paddingTop:12,
+        textAlign: 'center',
+        paddingTop: 12,
         fontWeight: '400',
         color: "#1476f8",
     },
-    textAccept:{
+    textAccept: {
         fontSize: 17,
-        textAlign:'center',
-        paddingTop:12,
+        textAlign: 'center',
+        paddingTop: 12,
         fontWeight: '400',
         color: "#ed4732",
     },

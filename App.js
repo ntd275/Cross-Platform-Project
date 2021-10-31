@@ -46,7 +46,7 @@ export default function App() {
         <AuthContext.Provider value={authContext}>
         <NavigationContainer>
             
-            {loginState.accessToken == null? <LoginStackScreen/>:
+            {loginState.accessToken == null? <MessageStackScreen/>:
             (<Tab.Navigator 
             screenOptions={{
             headerShown: false

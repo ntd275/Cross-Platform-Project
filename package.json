@@ -28,6 +28,7 @@
     "react-dom": "16.13.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-42.0.0.tar.gz",
     "react-native-elements": "^3.4.2",
+    "react-native-flash-message": "^0.2.0",
     "react-native-image-viewing": "^0.2.1",
     "react-native-linear-gradient": "^2.5.6",
     "react-native-material-textfield": "git+https://github.com/n4kz/react-native-material-textfield.git",
