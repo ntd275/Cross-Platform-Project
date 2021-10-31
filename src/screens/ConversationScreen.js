@@ -11,7 +11,7 @@ import IconSendDiable from '../../assets/icn_send_disable.svg'
 import IconPhoto from '../../assets/icn_csc_menu_sticker_n.svg'
 import IconOption from '../../assets/ic_list1_line_24.svg'
 import IconContact from '../../assets/icn_csc_parsephone_contact.svg'
-import IconAddFriend from '../../assets/ic_adduser_solid_24.svg'
+import IconAddFriend from '../../assets/ic_adduser_line_24.svg'
 import { color } from 'react-native-elements/dist/helpers';
 import { TimeUtility } from '../utils/TimeUtility'
 import { TextUtility } from '../utils/TextUtility'
@@ -113,7 +113,8 @@ export default function ConversationScreen({ navigation, friendInfo }) {
     };
 
     var goToOption = () => {
-        console.log("navigating ...");
+        // console.log("navigating ...");
+        navigation.navigate("ConversationOption", {friendInfo: friend})
     }
     
     var requestFriend = ()=>{
