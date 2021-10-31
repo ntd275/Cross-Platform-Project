@@ -31,7 +31,7 @@ const ReportDetails = (props) => {
                 props.subject,
                 details
             );
-            console.log(res);
+            // console.log(res);
         } catch (err) {
             console.log(err)
             props.navigation.navigate("NoConnectionScreen", {message: "Tài khoản sẽ tự động đăng nhập khi có kết nối internet"})
