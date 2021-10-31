@@ -18,6 +18,11 @@ import IconTabSocial from './assets/ic_tab_social.svg'
 import IconTabSocialFocus from './assets/ic_tab_social_focus.svg'
 import CreatePost from './src/screens/CreatePost';
 import AppContext from './src/components/context/AppContext';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreLogs([
+    'Non-serializable values were found in the navigation state',
+]);
 
 const Tab = createBottomTabNavigator();
 
