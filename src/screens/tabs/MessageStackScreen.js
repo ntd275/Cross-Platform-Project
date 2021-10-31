@@ -14,8 +14,8 @@ export default function MessageStackScreen() {
         headerShown: false
       }}
     >
-      <MessageStack.Screen name="HomeMessageScreen" component={HomeMessageScreen} />
       <MessageStack.Screen name="ConversationScreen" component={ConversationScreen} />
+      <MessageStack.Screen name="HomeMessageScreen" component={HomeMessageScreen} />
       <MessageStack.Screen name="ConversationOption" component={ConversationOptionScreen} />
     </MessageStack.Navigator>
   )
