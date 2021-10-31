@@ -1,6 +1,6 @@
 import { useLinkProps } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, Pressable, Text, TextInput, StatusBar, View, Button, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, Pressable, Text, TextInput, StatusBar, View, Button, KeyboardAvoidingView, TouchableOpacity, TouchableNativeFeedback } from 'react-native';
 import { Avatar, Icon, Image } from "react-native-elements";
 import ImageView from "react-native-image-viewing";
 import { Video, AVPlaybackStatus } from 'expo-av';
@@ -14,6 +14,57 @@ import IconUnLike from '../../../assets/ic_unlike.svg'
 import IconLike from '../../../assets/ic_like.svg'
 import IconSend from '../../../assets/icn_send_black.svg'
 import * as myConst from '../../utils/Constants'
+import { Api } from '../../api/Api';
+import AuthContext from '../../components/context/AuthContext';
+
+const ReportDetails = (props) => {
+    const [details, setDetails] = React.useState("");
+    const [sent, setSent] = React.useState(false);
+    const context = React.useContext(AuthContext);
+
+    var onSendReport = async () => {
+        try {
+            let accessToken = context.loginState.accessToken;
+            const res = await Api.createReport(
+                accessToken, 
+                props.postId, 
+                props.subject,
+                details
+            );
+            console.log(res);
+        } catch (err) {
+            console.log(err)
+            props.navigation.navigate("NoConnectionScreen", {message: "Tài khoản sẽ tự động đăng nhập khi có kết nối internet"})
+        }
+        setSent(true);
+    }
+
+    return (
+        <View style={{ justifyContent: "center", flexDirection: "column", height: 320, marginTop: -20 }}>
+            <Text style={styles.enterReportTitle}>
+                Lý do chi tiết báo xấu (tùy chọn):
+            </Text>
+            <TextInput style={styles.enterReport}
+                placeholder="Nhập lý do báo xấu"
+                returnKeyType="send"
+                enablesReturnKeyAutomatically
+                defaultValue={details}
+                onChangeText={text => setDetails(text)}
+                multiline={true}>
+            </TextInput>
+            <View style={styles.sendReportButton}>
+                {(sent)?(
+                    <Text style={styles.sentAlert}>Đã gửi báo cáo thành công</Text>
+                ):(
+                    <TouchableNativeFeedback 
+                        onPress={onSendReport}>
+                        <IconSend />
+                    </TouchableNativeFeedback>
+                )}
+            </View>
+        </View>
+    )
+}
 
 export default function Post(props) {
     const images = [
@@ -360,25 +411,11 @@ export default function Post(props) {
                     }
                 }}
             >
-                <View style={{ justifyContent: "center", flexDirection: "column", height: 320, marginTop: -20 }}>
-                    <Text style={styles.enterReportTitle}>
-                        Lý do chi tiết báo xấu (tùy chọn):
-                    </Text>
-                    <TextInput style={styles.enterReport}
-                        placeholder="Nhập lý do báo xấu"
-                        returnKeyType="send"
-                        enablesReturnKeyAutomatically
-                        defaultValue=""
-                        multiline={true}>
-                    </TextInput>
-                    <View style={styles.sendReportButton}>
-                        <TouchableOpacity 
-                            onPress={() => {
-                            }}>
-                            <IconSend />
-                        </TouchableOpacity>
-                </View>
-                </View>
+                <ReportDetails 
+                    postId={props.postId} 
+                    subject={reportReason} 
+                    navigation={props.navigation}
+                />
             </RBSheet>
             </KeyboardAvoidingView>
         </View>
@@ -479,4 +516,8 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         margin: 10,
     },
+    sentAlert: {
+        marginBottom: 10,
+        color: "green"
+    }
 });

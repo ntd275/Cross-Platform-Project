@@ -76,6 +76,19 @@ export const Api = {
             maxContentLength: 100000000,
             maxBodyLength: 1000000000
         })
+    },
+    createReport: (token, postId, subject, details) => {
+        return axios({
+            method: 'post',
+            url: `${BaseURL}/postReport/create/${postId}`,
+            data: {
+                subject,
+                details
+            },
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', authorization: "a "+token },
+            maxContentLength: 100000000,
+            maxBodyLength: 1000000000
+        })
     }
 }
 

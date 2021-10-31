@@ -21,7 +21,7 @@ const UserPost = (props) => {
     return (
         <>
             <View style={styles.post}>
-                <Post mode="comment"></Post>
+                <Post mode="comment" postId={props.postId} navigation={props.navigation}></Post>
             </View>
             {describe}
         </>
@@ -31,6 +31,7 @@ const UserPost = (props) => {
 const PostAndComment = (props) => {
     return (
         <FlatList
+            keyboardShouldPersistTaps={'always'}
             data={props.listComment}
             renderItem={({ item }) => (
                 <ListItem bottomDivider>
@@ -100,7 +101,7 @@ const MyComment = (props) => {
 }
 
 export default function PostScreen({ navigation, route }) {
-    const context = React.useContext(AuthContext)
+    const context = React.useContext(AuthContext);
     const [listComment, setListComment] = useState("");
     const [countComment, setCountComment] = useState(0);
     const createComment = async (content) => {
@@ -148,7 +149,9 @@ export default function PostScreen({ navigation, route }) {
                 <PostAndComment
                     listComment={listComment}
                     post={
-                        () => { return <UserPost numComment={countComment} /> }
+                        () => { return <UserPost numComment={countComment} 
+                                                 postId={route.params.postId}
+                                                 navigation={route.params.navigation} /> }
                     } />
             </View>
             <MyComment createCommentFunc={createComment}/>
