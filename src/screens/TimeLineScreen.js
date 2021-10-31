@@ -5,9 +5,9 @@ import IconNotice from "../../assets/notifications-outline.svg";
 import IconBack from "../../assets/arrow-back-outline.svg";
 import IconSearch from "../../assets/search-outline.svg";
 import IconNewPost from "../../assets/ic_post_line_24.svg";
-import IconImage from "../../assets/image-outline.svg";
-import IconVideo from "../../assets/videocam-outline.svg";
-import IconAlbum from "../../assets/albums-outline.svg";
+import IconImage from "../../assets/ic_photo_grd.svg";
+import IconVideo from "../../assets/ic_video_solid_24.svg";
+import IconAlbum from "../../assets/ic_album.svg";
 import { Avatar } from "react-native-elements";
 import Post from "./components/Post"
 import { StatusBar } from 'react-native';
@@ -161,19 +161,19 @@ export default function TimeLineScreen({ navigation }) {
         <View style={styles.mediaArea}>
           <View style={styles.mediaPost}>
             <IconImage style={styles.iconImage} />
-            <Text style={{ marginLeft: 5, marginRight: "auto" }}>
+            <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight:'600',fontSize:13 }}>
               Đăng ảnh
             </Text>
           </View>
           <View style={styles.mediaPost}>
             <IconVideo style={styles.iconVideo} />
-            <Text style={{ marginLeft: 5, marginRight: "auto" }}>
+            <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight:'600',fontSize:13 }}>
               Đăng video
             </Text>
           </View>
           <View style={styles.mediaPost}>
             <IconAlbum style={styles.iconAlbum} />
-            <Text style={{ marginLeft: 5, marginRight: "auto" }}>
+            <Text style={{ marginLeft: 5, marginRight: "auto",fontWeight:'600',fontSize:13 }}>
               Tạo album
             </Text>
           </View>
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   },
   mediaArea: {
     flexDirection: "row",
-    marginTop: 2,
+    marginTop: 0,
     backgroundColor: "white",
     height: 43,
   },
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     borderColor: "#dedede",
-    borderWidth: 1,
+    borderWidth: 0.5,
     alignItems: "center",
   },
   iconNotice: {
