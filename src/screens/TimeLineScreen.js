@@ -10,7 +10,7 @@ import IconVideo from "../../assets/ic_video_solid_24.svg";
 import IconAlbum from "../../assets/ic_album.svg";
 import { Avatar } from "react-native-elements";
 import Post from "./components/Post"
-import { StatusBar } from 'react-native';
+import { Pressable, StatusBar } from 'react-native';
 import { Api } from '../api/Api'
 import AuthContext from '../components/context/AuthContext';
 import {
@@ -22,6 +22,7 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableHighlight,
+  FlatList
 } from "react-native";
 import useKeyboardHeight from 'react-native-use-keyboard-height';
 import AppContext from "../components/context/AppContext";
@@ -29,6 +30,7 @@ import AppContext from "../components/context/AppContext";
 export default function TimeLineScreen({ navigation }) {
   const [search, setSearch] = useState("");
   const [needReload, setNeedReload] = useState(true);
+  const [firstLoad, setFirstLoad] = useState(true);
   const [posts, setPosts] = useState([]);
 
   const updateSearch = (search) => {
@@ -47,7 +49,13 @@ export default function TimeLineScreen({ navigation }) {
       let postList = res.data.data;
 
       setPosts(postList);
-      setNeedReload(false);
+      if (needReload) {
+        setNeedReload(false);
+      }
+
+      if (firstLoad) {
+        setFirstLoad(false);
+      }
       // console.log(postList)
     } catch (err) {
       if (err.response && err.response.status == 401) {
@@ -68,15 +76,13 @@ export default function TimeLineScreen({ navigation }) {
   }
 
   var handleScrollDrag = function (event) {
-    if(event.nativeEvent.contentOffset.y < -80){
-      setTimeout(function(){
-        setNeedReload(true)
-      }, 300);
+    if (event.nativeEvent.contentOffset.y < -80 && !needReload) {
+      setNeedReload(true)
     }
   }
 
-  var ScreenBody = () => {
-    if (needReload) {
+  var NotiHeader = () => {
+    if (needReload && firstLoad) {
       return (
         <View style={{ marginTop: 10 }}>
           <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
@@ -87,7 +93,6 @@ export default function TimeLineScreen({ navigation }) {
         </View>
       );
     }
-
     if (posts.length == 0) {
       return (
         <View style={{ marginTop: 10 }}>
@@ -96,7 +101,12 @@ export default function TimeLineScreen({ navigation }) {
       );
     }
 
+    return (
+      <></>
+    );
+  }
 
+  var ScreenBody = () => {
     let postList = [];
     for (let i = 0; i < posts.length; i++) {
       postList.push(
@@ -113,8 +123,94 @@ export default function TimeLineScreen({ navigation }) {
     );
   }
 
+  var LoadingHeader = () => {
+    if (!firstLoad && needReload) {
+      return (
+        <View style={{ marginTop: 10 }}>
+          <Image
+            source={require("../../assets/loading.gif")}
+            style={{ alignSelf: "center" }}
+          />
+          <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
+        </View>
+      );
+    } else {
+      return <></>
+    }
+
+  }
+
   const keyBoardHeight = useKeyboardHeight()
   const appContext = useContext(AppContext)
+
+  var ListHeader = () => {
+    return (
+      <>
+        {LoadingHeader()}
+        <View style={styles.story}>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "bold",
+              marginLeft: 10,
+              marginTop: 20,
+            }}
+          >
+            Khoảnh khắc
+          </Text>
+          <View>
+            <Image
+              style={styles.storyImage}
+              source={require("../../assets/sticker_07.gif")}
+            ></Image>
+          </View>
+        </View>
+        <View style={styles.createPostArea}>
+          <View style={styles.avatar}>
+            <Avatar
+              rounded
+              size="medium"
+              source={{
+                uri: "https://scontent.fhan2-4.fna.fbcdn.net/v/t1.6435-9/133090782_1371551809851101_5019511807721447445_n.jpg?_nc_cat=100&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=bCAO7C_sS4EAX_qyJiC&tn=3oiMvUeJSpvhduTu&_nc_ht=scontent.fhan2-4.fna&oh=48243902ce00139fbac561642e71d76a&oe=61994089",
+              }}
+            />
+          </View>
+          <View style={{ marginTop: 25, marginLeft: 10, width: '100%' }}>
+            <Pressable style={{ width: '100%' }} onPress={() => { navigation.navigate("CreatePost") }} >
+              <Text style={{ color: "#dedede", fontSize: 18 }}>
+                Hôm nay bạn thế nào?
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+        <View style={styles.mediaArea}>
+          <TouchableOpacity flex={1} style={{ width: "33.3%" }} onPress={() => { navigation.navigate("CreatePost") }}>
+            <View style={styles.mediaPost}>
+              <IconImage style={styles.iconImage} />
+              <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
+                Đăng ảnh
+              </Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity flex={1} style={{ width: "33.3%" }} onPress={() => { navigation.navigate("CreatePost") }}>
+            <View style={styles.mediaPost}>
+              <IconVideo style={styles.iconVideo} />
+              <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
+                Đăng video
+              </Text>
+            </View>
+          </TouchableOpacity>
+          <View style={styles.mediaPost}>
+            <IconAlbum style={styles.iconAlbum} />
+            <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
+              Tạo album
+            </Text>
+          </View>
+        </View>
+        <NotiHeader />
+      </>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -160,74 +256,20 @@ export default function TimeLineScreen({ navigation }) {
           />
         </LinearGradient>
       </View>
-      <ScrollView keyboardShouldPersistTaps={'always'} onScrollEndDrag={handleScrollDrag} >
-        <View style={styles.story}>
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "bold",
-              marginLeft: 10,
-              marginTop: 20,
-            }}
-          >
-            Khoảnh khắc
-          </Text>
-          <View>
-            <Image
-              style={styles.storyImage}
-              source={require("../../assets/sticker_07.gif")}
-            ></Image>
+      <FlatList
+        keyboardShouldPersistTaps={'always'}
+        onScrollEndDrag={handleScrollDrag}
+        data={posts}
+        keyExtractor={(item, index) => index.toString()}
+        ListHeaderComponent={<ListHeader />}
+        renderItem={({ item }) => (
+          <View style={{ marginTop: 12 }}>
+            <Post mode={"timeline"} updateFunc={getPosts} post={item} navigation={navigation} />
           </View>
-        </View>
-        <View style={styles.createPostArea}>
-          <View style={styles.avatar}>
-            <Avatar
-              rounded
-              size="medium"
-              source={{
-                uri: "https://scontent.fhan2-4.fna.fbcdn.net/v/t1.6435-9/133090782_1371551809851101_5019511807721447445_n.jpg?_nc_cat=100&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=bCAO7C_sS4EAX_qyJiC&tn=3oiMvUeJSpvhduTu&_nc_ht=scontent.fhan2-4.fna&oh=48243902ce00139fbac561642e71d76a&oe=61994089",
-              }}
-            />
-          </View>
-          <View style={{ marginTop: 25, marginLeft: 10 }}>
-            <TextInput
-              style={{ color: "black", fontSize: 18 }}
-              onChangeText={updateSearch}
-              value={search}
-              // onTouchStart={()=>  alert("Hello...")}
-              onEndEditing={getSearchText}
-              placeholder="Hôm nay bạn thế nào?"
-              placeholderTextColor="#dedede"
-              onFocus={(e) => { e.target.blur(); navigation.navigate("CreatePost") }}
-              onBlur={() => { appContext.setKeyBoardHeight(keyBoardHeight) }}
-            >
-            </TextInput>
-          </View>
-        </View>
-        <View style={styles.mediaArea}>
-          <View style={styles.mediaPost}>
-            <IconImage style={styles.iconImage} />
-            <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
-              Đăng ảnh
-            </Text>
-          </View>
-          <View style={styles.mediaPost}>
-            <IconVideo style={styles.iconVideo} />
-            <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
-              Đăng video
-            </Text>
-          </View>
-          <View style={styles.mediaPost}>
-            <IconAlbum style={styles.iconAlbum} />
-            <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
-              Tạo album
-            </Text>
-          </View>
-        </View>
+        )}
+        style={{marginBottom: 74}}
+      />
 
-        {ScreenBody()}
-        <View style={{ height: 74 }}></View>
-      </ScrollView>
     </View>
   );
 }
@@ -239,7 +281,7 @@ const styles = StyleSheet.create({
   },
   input: {
     color: "white",
-    fontSize: 18,
+    fontSize: 16,
     marginLeft: 16,
     width: "100%",
     marginTop: 4

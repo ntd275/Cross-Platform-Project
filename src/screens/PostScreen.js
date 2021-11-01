@@ -118,7 +118,7 @@ export default function PostScreen({ navigation, route }) {
                     <Pressable onPress={() => { Keyboard.dismiss() }}>
                         <ListItem bottomDivider>
                             <Avatar
-                                size="small" rounded
+                                size={42} rounded
                                 source={{ uri: item.img }} />
                             <ListItem.Content>
                                 <ListItem.Title style={styles.commentUser}>
