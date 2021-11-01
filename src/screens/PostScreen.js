@@ -14,6 +14,32 @@ import FlashMessage from "react-native-flash-message";
 import { showMessage, hideMessage } from "react-native-flash-message";
 
 const BaseURL = 'http://13.76.46.159:8000/files/';
+const renderItem = ({ item }) => (
+    <Pressable onPress={() => { Keyboard.dismiss() }}>
+        <ListItem bottomDivider>
+            <Avatar
+                size={42} rounded
+                source={{ uri: item.img }} />
+            <ListItem.Content>
+                <ListItem.Title style={styles.commentUser}>
+                    {item.user}
+                </ListItem.Title>
+                <ListItem.Subtitle style={styles.commentContent}>
+                    {item.content}
+                </ListItem.Subtitle>
+                <Text style={styles.commentDate}>
+                    {item.date}
+                </Text>
+            </ListItem.Content>
+            <Icon
+                name='heart-outline' // like: heart
+                type='ionicon'
+                color="#818181" // like: #f84c5d
+                size={24}
+            />
+        </ListItem>
+    </Pressable>
+);
 
 export default function PostScreen({ navigation, route }) {
     const mounted = useRef(false);
@@ -114,32 +140,8 @@ export default function PostScreen({ navigation, route }) {
                 keyboardShouldPersistTaps={'always'}
                 onContentSizeChange={() => { if (DidComment) flatList.current.scrollToEnd({ animated: true }) }}
                 data={listComment}
-                renderItem={({ item }) => (
-                    <Pressable onPress={() => { Keyboard.dismiss() }}>
-                        <ListItem bottomDivider>
-                            <Avatar
-                                size={42} rounded
-                                source={{ uri: item.img }} />
-                            <ListItem.Content>
-                                <ListItem.Title style={styles.commentUser}>
-                                    {item.user}
-                                </ListItem.Title>
-                                <ListItem.Subtitle style={styles.commentContent}>
-                                    {item.content}
-                                </ListItem.Subtitle>
-                                <Text style={styles.commentDate}>
-                                    {item.date}
-                                </Text>
-                            </ListItem.Content>
-                            <Icon
-                                name='heart-outline' // like: heart
-                                type='ionicon'
-                                color="#818181" // like: #f84c5d
-                                size={24}
-                            />
-                        </ListItem>
-                    </Pressable>
-                )}
+                initialNumToRender={15}
+                renderItem={renderItem}
                 keyExtractor={(item, index) => index.toString()}
                 ListHeaderComponent={UserPost()}
             />
@@ -184,8 +186,8 @@ export default function PostScreen({ navigation, route }) {
         )
     }
 
-    var goBackFunc = ()=>{
-        if(needUpdateParent){
+    var goBackFunc = () => {
+        if (needUpdateParent) {
             route.params.updateFunc();
         }
         navigation.goBack();
@@ -195,7 +197,7 @@ export default function PostScreen({ navigation, route }) {
         <>
             <FlashMessage position="top" titleStyle={{ fontSize: 16, marginLeft: 12, marginTop: 1 }} icon="success" />
             <View style={styles.container} >
-            <HeaderBar text="Bình luận" goBackFunc={goBackFunc} navigation={navigation} />
+                <HeaderBar text="Bình luận" goBackFunc={goBackFunc} navigation={navigation} />
                 <View style={styles.postAndComment}>
                     {PostAndComment()}
                 </View>

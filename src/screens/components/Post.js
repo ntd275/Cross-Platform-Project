@@ -460,8 +460,8 @@ const styles = StyleSheet.create({
         maxHeight: 500
     },
     postFooter: {
-        paddingTop: 12,
-        height: 60,
+        paddingTop: 8,
+        height: 50,
         textAlignVertical: 'center',
         flexDirection: "row",
         marginLeft: 20,
