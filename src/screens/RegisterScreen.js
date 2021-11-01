@@ -191,7 +191,7 @@ export default function RegisterScreen({ navigation }) {
     const register = async () => {
         try {
             const res = await Api.register(phonenumber,password,fullname)
-            authContext.dispatch({type: 'LOGIN',accessToken: res.data.token, username: res.data.data.username})
+            authContext.dispatch({type: 'LOGIN',accessToken: res.data.token, username: res.data.data.username, userId: res.data.data.id})
         } catch(err){
             if (err.response && err.response.status == 400) {
                 console.log(err.response.data.message)
