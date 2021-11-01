@@ -10,10 +10,10 @@ import IconVideo from "../../assets/ic_video_solid_24.svg";
 import IconAlbum from "../../assets/ic_album.svg";
 import { Avatar } from "react-native-elements";
 import Post from "./components/Post"
-import { StatusBar } from 'react-native';
 import { Api } from '../api/Api'
 import AuthContext from '../components/context/AuthContext';
 import {
+  StatusBar,
   StyleSheet,
   Text,
   View,
@@ -23,6 +23,7 @@ import {
   TouchableOpacity,
   TouchableHighlight,
   Pressable,
+  FlatList
 } from "react-native";
 import { useKeyboard } from "./components/useKeyboard";
 import AppContext from "../components/context/AppContext";
@@ -32,6 +33,7 @@ const BaseURL = "http://13.76.46.159:8000/files/"
 export default function TimeLineScreen({ navigation }) {
   const [search, setSearch] = useState("");
   const [needReload, setNeedReload] = useState(true);
+  const [firstLoad, setFirstLoad] = useState(true);
   const [posts, setPosts] = useState([]);
 
   const updateSearch = (search) => {
@@ -46,8 +48,8 @@ export default function TimeLineScreen({ navigation }) {
     try {
       accessToken ="lol "+context.loginState.accessToken
       let user = await Api.getMe(accessToken)
-      // console.log(user.data)
-      appContext.setAvatar(user.data.avatar.fileName)
+      console.log(user.data)
+      appContext.setAvatar(user.data.data.avatar.fileName)
     } catch (e){
       console.log(e)
     }
@@ -61,7 +63,13 @@ export default function TimeLineScreen({ navigation }) {
       let postList = res.data.data;
 
       setPosts(postList);
-      setNeedReload(false);
+      if (needReload) {
+        setNeedReload(false);
+      }
+
+      if (firstLoad) {
+        setFirstLoad(false);
+      }
       // console.log(postList)
     } catch (err) {
       if (err.response && err.response.status == 401) {
@@ -83,15 +91,13 @@ export default function TimeLineScreen({ navigation }) {
   }
 
   var handleScrollDrag = function (event) {
-    if(event.nativeEvent.contentOffset.y < -80){
-      setTimeout(function(){
-        setNeedReload(true)
-      }, 300);
+    if (event.nativeEvent.contentOffset.y < -80 && !needReload) {
+      setNeedReload(true)
     }
   }
 
-  var ScreenBody = () => {
-    if (needReload) {
+  var NotiHeader = () => {
+    if (needReload && firstLoad) {
       return (
         <View style={{ marginTop: 10 }}>
           <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
@@ -102,7 +108,6 @@ export default function TimeLineScreen({ navigation }) {
         </View>
       );
     }
-
     if (posts.length == 0) {
       return (
         <View style={{ marginTop: 10 }}>
@@ -111,7 +116,12 @@ export default function TimeLineScreen({ navigation }) {
       );
     }
 
+    return (
+      <></>
+    );
+  }
 
+  var ScreenBody = () => {
     let postList = [];
     for (let i = 0; i < posts.length; i++) {
       postList.push(
@@ -131,52 +141,27 @@ export default function TimeLineScreen({ navigation }) {
   const keyBoardHeight = useKeyboard()
   const inputRef = useRef()
   const mode = useRef('image')
-
-  return (
-    <View style={styles.container}>
-      <View>
-        <LinearGradient
-          colors={["#0085ff", "#05adff"]}
-          start={[0, 1]}
-          end={[1, 0]}
-          style={styles.header}
-        >
-          <View style={{ flexDirection: "row", marginTop: 28 }}>
-            <TouchableOpacity onPress={getPosts}>
-              <View style={{ flex: 1 }}>
-                <IconSearch style={styles.iconSearch} />
-              </View>
-            </TouchableOpacity>
-
-            <View style={{ flex: 6 }}>
-              <TextInput
-                style={styles.input}
-                onChangeText={updateSearch}
-                value={search}
-                // onTouchStart={()=>  alert("Hello...")}
-                onEndEditing={getSearchText}
-                placeholder="Tìm bạn bè, tin nhắn, ..."
-                placeholderTextColor="#fff"
-              ></TextInput>
-            </View>
-            {/* <View>
-              <IconBack style={styles.iconBack} />
-            </View> */}
-            <View style={{ flex: 1 }}>
-              <IconNewPost style={styles.iconNewPost} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <IconNotice style={styles.iconNotice} />
-            </View>
-          </View>
-          <StatusBar
-            backgroundColor="#00000000"
-            barStyle="light-content"
-            translucent={true}
+  var LoadingHeader = () => {
+    if (!firstLoad && needReload) {
+      return (
+        <View style={{ marginTop: 10 }}>
+          <Image
+            source={require("../../assets/loading.gif")}
+            style={{ alignSelf: "center" }}
           />
-        </LinearGradient>
-      </View>
-      <ScrollView keyboardShouldPersistTaps={'always'} onScrollEndDrag={handleScrollDrag} >
+          <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
+        </View>
+      );
+    } else {
+      return <></>
+    }
+
+  }
+
+  var ListHeader = () => {
+    return (
+      <>
+        {LoadingHeader()}
         <View style={styles.story}>
           <Text
             style={{
@@ -238,10 +223,70 @@ export default function TimeLineScreen({ navigation }) {
             </Text>
           </View>
         </View>
+        <NotiHeader />
+      </>
+    );
+  }
 
-        {ScreenBody()}
-        <View style={{ height: 74 }}></View>
-      </ScrollView>
+  return (
+    <View style={styles.container}>
+      <View>
+        <LinearGradient
+          colors={["#0085ff", "#05adff"]}
+          start={[0, 1]}
+          end={[1, 0]}
+          style={styles.header}
+        >
+          <View style={{ flexDirection: "row", marginTop: 28 }}>
+            <TouchableOpacity onPress={getPosts}>
+              <View style={{ flex: 1 }}>
+                <IconSearch style={styles.iconSearch} />
+              </View>
+            </TouchableOpacity>
+
+            <View style={{ flex: 6 }}>
+              <TextInput
+                style={styles.input}
+                onChangeText={updateSearch}
+                value={search}
+                // onTouchStart={()=>  alert("Hello...")}
+                onEndEditing={getSearchText}
+                placeholder="Tìm bạn bè, tin nhắn, ..."
+                placeholderTextColor="#fff"
+              ></TextInput>
+            </View>
+            {/* <View>
+              <IconBack style={styles.iconBack} />
+            </View> */}
+            <View style={{ flex: 1 }}>
+              <IconNewPost style={styles.iconNewPost} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <IconNotice style={styles.iconNotice} />
+            </View>
+          </View>
+          <StatusBar
+            backgroundColor="#00000000"
+            barStyle="light-content"
+            translucent={true}
+          />
+        </LinearGradient>
+      </View>
+
+      <FlatList
+        keyboardShouldPersistTaps={'always'}
+        onScrollEndDrag={handleScrollDrag}
+        data={posts}
+        keyExtractor={(item, index) => index.toString()}
+        ListHeaderComponent={<ListHeader />}
+        renderItem={({ item }) => (
+          <View style={{ marginTop: 12 }}>
+            <Post mode={"timeline"} updateFunc={getPosts} post={item} navigation={navigation} />
+          </View>
+        )}
+        style={{marginBottom: 74}}
+      />
+
     </View>
   );
 }
@@ -253,7 +298,7 @@ const styles = StyleSheet.create({
   },
   input: {
     color: "white",
-    fontSize: 18,
+    fontSize: 16,
     marginLeft: 16,
     width: "100%",
     marginTop: 4

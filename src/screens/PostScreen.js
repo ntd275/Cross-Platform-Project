@@ -66,7 +66,7 @@ export default function PostScreen({ navigation, route }) {
                 comment => ({
                     user: comment.user.username,
                     content: comment.content,
-                    img: BaseURL + comment.user.fileName,
+                    img: BaseURL + comment.user.avatar.fileName,
                     dateCreated: new Date(comment.createdAt),
                     dateUpdated: new Date(comment.updatedAt),
                     date: TimeUtility.getTimeStr(new Date(comment.createdAt)),
@@ -118,7 +118,7 @@ export default function PostScreen({ navigation, route }) {
                     <Pressable onPress={() => { Keyboard.dismiss() }}>
                         <ListItem bottomDivider>
                             <Avatar
-                                size="small" rounded
+                                size={42} rounded
                                 source={{ uri: item.img }} />
                             <ListItem.Content>
                                 <ListItem.Title style={styles.commentUser}>
@@ -193,7 +193,7 @@ export default function PostScreen({ navigation, route }) {
 
     return (
         <>
-            <FlashMessage position="top" titleStyle={{ fontSize: 18, marginLeft: 12, marginTop: 1 }} icon="success" />
+            <FlashMessage position="top" titleStyle={{ fontSize: 16, marginLeft: 12, marginTop: 1 }} icon="success" />
             <View style={styles.container} >
             <HeaderBar text="Bình luận" goBackFunc={goBackFunc} navigation={navigation} />
                 <View style={styles.postAndComment}>
