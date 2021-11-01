@@ -7,17 +7,18 @@ export const TimeUtility = {
     },
     getTimeStr: (timestamp) => {
         let now = new Date();
-        let mins = Math.ceil((now-timestamp)/(60000)); // 1000*60
-        if (mins > 525600){ // 24*365*60
-            return Math.ceil(mins/525600) + " năm";
-        } else if (mins > 43200) { // 24*30*60
-            return Math.ceil(mins/43200) + " tháng";
+        let mins = Math.floor((now-timestamp)/(60000)); // 1000*60
+
+        if (mins > 10080) { // 1440 * 7
+            return new Date(timestamp).toLocaleDateString();
         } else if (mins > 1440){ // 24*60
-            return Math.ceil(mins/1440) + " ngày";
+            return Math.floor(mins/1440) + " ngày trước";
         } else if (mins > 60){
-            return Math.ceil(mins/60) + " giờ";
-        } else {
-            return mins + " phút";
+            return Math.floor(mins/60) + " giờ trước";
+        } else if(mins >= 1) {
+            return mins + " phút trước";
+        }else{
+            return "Vừa xong"
         }
     }
 };

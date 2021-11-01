@@ -1,6 +1,6 @@
 import { useLinkProps } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, Pressable, Text, TextInput, StatusBar, View, Button, KeyboardAvoidingView, TouchableOpacity, TouchableNativeFeedback } from 'react-native';
+import { ScrollView, StyleSheet, Pressable, Text, TextInput, StatusBar, View, Button, KeyboardAvoidingView, Keyboard, TouchableOpacity, TouchableNativeFeedback } from 'react-native';
 import { Avatar, Icon, Image } from "react-native-elements";
 import ImageView from "react-native-image-viewing";
 import { Video, AVPlaybackStatus } from 'expo-av';
@@ -16,6 +16,10 @@ import IconSend from '../../../assets/icn_send_black.svg'
 import * as myConst from '../../utils/Constants'
 import { Api } from '../../api/Api';
 import AuthContext from '../../components/context/AuthContext';
+import { TextUtility } from '../../utils/TextUtility'
+import { TimeUtility } from '../../utils/TimeUtility';
+
+const BaseURL = 'http://13.76.46.159:8000/files/';
 
 const ReportDetails = (props) => {
     const [details, setDetails] = React.useState("");
@@ -26,15 +30,15 @@ const ReportDetails = (props) => {
         try {
             let accessToken = context.loginState.accessToken;
             const res = await Api.createReport(
-                accessToken, 
-                props.postId, 
+                accessToken,
+                props.postId,
                 props.subject,
                 details
             );
             // console.log(res);
         } catch (err) {
             console.log(err)
-            props.navigation.navigate("NoConnectionScreen", {message: "Tài khoản sẽ tự động đăng nhập khi có kết nối internet"})
+            props.navigation.navigate("NoConnectionScreen", { message: "" })
         }
         setSent(true);
     }
@@ -53,10 +57,10 @@ const ReportDetails = (props) => {
                 multiline={true}>
             </TextInput>
             <View style={styles.sendReportButton}>
-                {(sent)?(
+                {(sent) ? (
                     <Text style={styles.sentAlert}>Đã gửi báo cáo thành công</Text>
-                ):(
-                    <TouchableNativeFeedback 
+                ) : (
+                    <TouchableNativeFeedback
                         onPress={onSendReport}>
                         <IconSend />
                     </TouchableNativeFeedback>
@@ -67,27 +71,6 @@ const ReportDetails = (props) => {
 }
 
 export default function Post(props) {
-    const images = [
-        {
-            uri: "https://scontent.fhan3-1.fna.fbcdn.net/v/t1.6435-9/83664896_183120826091483_966697121426178048_n.jpg?_nc_cat=102&ccb=1-5&_nc_sid=8bfeb9&_nc_ohc=6FkkOSn1HxsAX_5s72G&_nc_ht=scontent.fhan3-1.fna&oh=352f134b1cfd21372d65288dc232620e&oe=6197F36C",
-        },
-        {
-            uri: "https://scontent.fhan3-1.fna.fbcdn.net/v/t1.6435-9/52578938_121091798961053_2441959323211923456_n.jpg?_nc_cat=111&ccb=1-5&_nc_sid=8bfeb9&_nc_ohc=8brvAXNHzrsAX9rIqmo&_nc_ht=scontent.fhan3-1.fna&oh=1b8845aa2bcb4e40104067dc60f7bd9d&oe=619857E2",
-        },
-        {
-            uri: "https://scontent.fhan3-3.fna.fbcdn.net/v/t1.6435-9/52368397_121091762294390_5329755510382002176_n.jpg?_nc_cat=108&ccb=1-5&_nc_sid=8bfeb9&_nc_ohc=GZwoO6NYPUcAX-lVfCH&tn=S-LhVHmVXF0IXquK&_nc_ht=scontent.fhan3-3.fna&oh=b43cd856bb3960dc0cfe598aa23ed947&oe=619839A5",
-        },
-        {
-            uri: "http://13.76.46.159:8000/files/8601d239-573a-43b2-bea6-88651d44b553.null",
-        },
-    ];
-
-    let isLiked = props.isLiked ? props.isLiked : false;
-    let iconLikeStatus = isLiked ? IconLike : IconUnLike
-
-    const videoURL = "";  //http://13.76.46.159:8000/files/test.mp4  
-    //http://13.76.46.159:8000/files/big_buck_bunny.mp4
-
     const video = React.useRef(null);
     const refRBSheet = React.useRef(null);
     const refRBSheetReport = React.useRef(null);
@@ -96,14 +79,16 @@ export default function Post(props) {
     const [reportReason, setReportReason] = React.useState(myConst.REPORT_KHAC);
     const [visible, setIsVisible] = useState(false);
     const [imageIndex, setImageIndex] = useState(1);
-
-    let userName = "Nguyễn Thế Đức";
-    let postContent = "Hôm nay tôi rất vui :))";
-    let postTime = "30 phút trước";
-    let numLike = 4;
-    let numComment = 2;
+    const [images, setImages] = useState(props.post.images);
+    const [videos, setVideos] = useState(props.post.videos);
+    const [numLike, setNumLike] = useState(props.post.like.length);
+    const [isLike, setIsLike] = useState(props.post.isLike);
+    const [postTime, setPostTime] = useState(new Date(props.post.createdAt));
+    let userName = props.post.author.username;
+    let numComment = props.post.countComments;
 
     var goToUserPage = () => {
+        setIsLike(false);
         console.log("Go to user's page!");
     }
 
@@ -120,6 +105,8 @@ export default function Post(props) {
         console.log("touched comment ...");
     }
 
+    let iconLikeStatus = isLike ? IconLike : IconUnLike
+
     let statusBar = <></>
     if (visible) {
         statusBar = <StatusBar
@@ -127,18 +114,25 @@ export default function Post(props) {
         />
     }
 
+    let renderImages = [];
+    for (let i = 0; i < images.length; i++) {
+        renderImages.push({ uri: BaseURL + images[i].fileName })
+    }
+    console.log()
+
     let media = <></>
     let addition = <></>
-    if (!videoURL) {
-        if (images.length > 0) {
-            if (images.length > 1) {
+
+    if (videos.length == 0) {
+        if (renderImages.length > 0) {
+            if (renderImages.length > 1) {
                 let additionImages = [];
-                let imageHeight = (images.length <= 2) ? (400) : ((400 - 3 * (images.length - 2)) / (images.length - 1));
-                for (let i = 1; i < images.length; i++) {
+                let imageHeight = (renderImages.length <= 2) ? (400) : ((400 - 3 * (renderImages.length - 2)) / (renderImages.length - 1));
+                for (let i = 1; i < renderImages.length; i++) {
                     additionImages.push(
                         <View key={i}>
                             <Image
-                                source={[images[i]]}
+                                source={[renderImages[i]]}
                                 style={{ height: imageHeight, resizeMode: 'cover' }}
                                 onPress={() => { setImageIndex(i); setIsVisible(true) }}
                             />
@@ -152,18 +146,18 @@ export default function Post(props) {
             }
             media = <>
                 <ImageView
-                    images={images}
+                    images={renderImages}
                     imageIndex={imageIndex}
                     visible={visible}
                     onRequestClose={() => setIsVisible(false)}
                     swipeToCloseEnabled={true}
                     FooterComponent={(props) => {
-                        return <View><Text style={styles.imageViewFooter}>{props.imageIndex + 1} / {images.length}</Text></View>
+                        return <View><Text style={styles.imageViewFooter}>{props.imageIndex + 1} / {renderImages.length}</Text></View>
                     }}
                 />
                 <View style={{ flex: 1, paddingTop: 20 }}>
                     <Image
-                        source={[images[0]]}
+                        source={[renderImages[0]]}
                         style={{ height: 400, resizeMode: 'cover' }}
                         onPress={() => { setImageIndex(0); setIsVisible(true) }}
                     />
@@ -177,7 +171,7 @@ export default function Post(props) {
                 ref={video}
                 style={styles.video}
                 source={{
-                    uri: videoURL,
+                    uri: BaseURL + videos[0].fileName,
                 }}
                 useNativeControls={true}
                 resizeMode="contain"
@@ -187,13 +181,12 @@ export default function Post(props) {
         </View>
     }
 
-
-    var onBuffer = () => {
-        console.log("buffering video");
-    }
-
-    var videoError = () => {
-        console.log("video error");
+    var navigateToCommentScreen = () => {
+        Keyboard.dismiss()
+        if(props.mode !== "comment"){
+            if(videos.length > 0) video.current.pauseAsync();
+            props.navigation.navigate("PostScreen", { postId: props.post._id, post: props.post, navigation: props.navigation, updateFunc: props.updateFunc})
+        }
     }
 
     var onPressDelete = () => {
@@ -220,66 +213,77 @@ export default function Post(props) {
         refRBSheetReportDetails.current.open();
     }
 
+    var renderPostContent = ()=>{
+        let [phone, TextUI] = TextUtility.detectThenFormatPhoneAndURL(props.post.described);
+        return TextUI;
+    }
+
     return (
         <View style={styles.postContainer}>
             {statusBar}
-            <View style={styles.postHeader}>
-                <View style={styles.posterAvatar}>
-                    <Avatar
-                        size={42}
-                        rounded
-                        onPress={() => goToUserPage()}
-                        activeOpacity={0.8}
-                        source={{ uri: "https://scontent.fhan3-4.fna.fbcdn.net/v/t1.6435-9/82941062_2537534526492475_6431974749965910016_n.jpg?_nc_cat=104&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=fR3LcuaIaT8AX-g_OEo&_nc_ht=scontent.fhan3-4.fna&oh=c607895b42fed9c264a0e2321819ebad&oe=61980AEA" }}
-                    />
-                </View>
-                <View style={styles.posterInfo}>
-                    <View style={{ flex: 1 }}>
-                        <Pressable onPress={() => { goToUserPage() }}>
-                            <Text style={{ textAlign: "right", fontSize: 16, color: "#000", fontWeight: '600', lineHeight: 28 }}>
-                                {userName}
-                            </Text>
-                        </Pressable>
+            <Pressable onPress={navigateToCommentScreen}>
+                <View>
+                    <View style={styles.postHeader}>
+                        <View style={styles.posterAvatar}>
+                            <Avatar
+                                size={42}
+                                rounded
+                                onPress={() => goToUserPage()}
+                                activeOpacity={0.8}
+                                source={{ uri: BaseURL + props.post.author.avatar.fileName }}
+                            />
+                        </View>
+                        <View style={styles.posterInfo}>
+                            <View style={{ flex: 1 }}>
+                                <Pressable onPress={() => { goToUserPage() }}>
+                                    <Text style={{ textAlign: "right", fontSize: 16, color: "#000", fontWeight: '600', lineHeight: 28 }}>
+                                        {userName}
+                                    </Text>
+                                </Pressable>
+                            </View>
+                            <Text style={{ flex: 1, fontSize: 14, color: "#77797c", marginTop: 0 }}>{TimeUtility.getTimeStr(postTime)}</Text>
+                        </View>
+                        <View style={styles.postMenu}>
+                            <Icon
+                                name='options'
+                                type='simple-line-icon'
+                                color="#898989"
+                                size={20}
+                                onPress={() => showMenu("")}
+                            />
+                        </View>
                     </View>
-                    <Text style={{ flex: 1, fontSize: 14, color: "#77797c", marginTop: 0 }}>{postTime}</Text>
+                    <View style={styles.postContent}>
+                        {renderPostContent()}
+                    </View>
                 </View>
-                <View style={styles.postMenu}>
-                    <Icon
-                        name='options'
-                        type='simple-line-icon'
-                        color="#898989"
-                        size={20}
-                        onPress={() => showMenu("")}
-                    />
-                </View>
-            </View>
-            <View>
-                <Text style={styles.postContent}>{postContent}</Text>
-            </View>
+            </Pressable>
 
             <View style={styles.postMedia}>
                 {media}
             </View>
-            <View style={styles.postFooter}>
-                <View style={{ flexDirection: "row", marginRight: 36 }}>
-                    <Pressable
-                        style={{ marginTop: 4 }}
-                        onPress={() => clickComment("")}
-                    >
-                        {iconLikeStatus}
-                    </Pressable>
-                    <Text style={{ marginLeft: 9, fontSize: 18, lineHeight: 34 }}>{numLike}</Text>
+            <Pressable onPress={navigateToCommentScreen}>
+                <View style={styles.postFooter}>
+                    <View style={{ flexDirection: "row", marginRight: 36 }}>
+                        <Pressable
+                            style={{ marginTop: 4 }}
+                            onPress={() => clickComment("")}
+                        >
+                            {iconLikeStatus}
+                        </Pressable>
+                        <Text style={{ marginLeft: 9, fontSize: 18, lineHeight: 34 }}>{numLike}</Text>
+                    </View>
+                    <View style={{ flexDirection: "row", display: props.mode == "comment" ? "none" : null }}>
+                        <Pressable
+                            style={{ marginTop: 4 }}
+                            onPress={navigateToCommentScreen}
+                        >
+                            {IconComment}
+                        </Pressable>
+                        <Text style={{ marginLeft: 10, fontSize: 18, lineHeight: 34 }}>{numComment}</Text>
+                    </View>
                 </View>
-                <View style={{ flexDirection: "row", display: props.mode == "comment" ? "none" : null }}>
-                    <Pressable
-                        style={{ marginTop: 4 }}
-                        onPress={() => clickComment("")}
-                    >
-                        {IconComment}
-                    </Pressable>
-                    <Text style={{ marginLeft: 10, fontSize: 18, lineHeight: 34 }}>{numComment}</Text>
-                </View>
-            </View>
+            </Pressable>
             <RBSheet
                 ref={refRBSheet}
                 closeOnDragDown={true}
@@ -325,10 +329,10 @@ export default function Post(props) {
                         </View>
                     </Pressable>
 
-                    <Pressable 
-                        style={[styles.menuOption, { height: 68 }]} 
-                        onPress={onPressReport}    
-                        >
+                    <Pressable
+                        style={[styles.menuOption, { height: 68 }]}
+                        onPress={onPressReport}
+                    >
                         <IconMenuReport flex={1} style={{ marginTop: "auto", marginBottom: "auto" }} />
                         <View flex={10} style={styles.reportMenuOption}>
                             <Text style={{ fontSize: 16, fontWeight: '400' }}>Báo xấu</Text>
@@ -357,67 +361,71 @@ export default function Post(props) {
                 }}
             >
                 <View style={{ justifyContent: "center", flexDirection: "column", height: 320, marginTop: -20 }}>
-                    <Pressable style={[styles.menuOption, { height: 72 }]} onPress={() => {;
-                            onPressReportReason(myConst.REPORT_NHAYCAM);
-                        }}>
+                    <Pressable style={[styles.menuOption, { height: 72 }]} onPress={() => {
+                        ;
+                        onPressReportReason(myConst.REPORT_NHAYCAM);
+                    }}>
                         <View flex={10} style={styles.inMenuOption}>
                             <Text style={{ fontSize: 16, fontWeight: '400', marginBottom: 4 }}>Nội dung nhạy cảm</Text>
                         </View>
                     </Pressable>
 
-                    <Pressable style={[styles.menuOption, { height: 72 }]} onPress={() => {;
-                            onPressReportReason(myConst.REPORT_LAMPHIEN);
-                        }}>
+                    <Pressable style={[styles.menuOption, { height: 72 }]} onPress={() => {
+                        ;
+                        onPressReportReason(myConst.REPORT_LAMPHIEN);
+                    }}>
                         <View flex={10} style={styles.inMenuOption}>
                             <Text style={{ fontSize: 16, fontWeight: '400', marginBottom: 4 }}>Làm phiền</Text>
                         </View>
                     </Pressable>
 
-                    <Pressable style={[styles.menuOption, { height: 72 }]} onPress={() => {;
-                            onPressReportReason(myConst.REPORT_LUADAO);
-                        }}>
+                    <Pressable style={[styles.menuOption, { height: 72 }]} onPress={() => {
+                        ;
+                        onPressReportReason(myConst.REPORT_LUADAO);
+                    }}>
                         <View flex={10} style={styles.inMenuOption}>
                             <Text style={{ fontSize: 16, fontWeight: '400', marginBottom: 4 }}>Lừa đảo</Text>
                         </View>
                     </Pressable>
 
-                    <Pressable style={[styles.menuOption, { height: 72 }]} onPress={() => {;
-                            onPressReportReason(myConst.REPORT_KHAC);
-                        }}>
+                    <Pressable style={[styles.menuOption, { height: 72 }]} onPress={() => {
+                        ;
+                        onPressReportReason(myConst.REPORT_KHAC);
+                    }}>
                         <View flex={10} style={styles.inMenuOption}>
                             <Text style={{ fontSize: 16, fontWeight: '400', marginBottom: 4 }}>Nhập lý do khác</Text>
                         </View>
                     </Pressable>
                 </View>
             </RBSheet>
-            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-            <RBSheet
-                ref={refRBSheetReportDetails}
-                closeOnDragDown={true}
-                closeOnPressMask={true}
-                closeOnPressBack={true}
-                animationType="fade"
-                height={320}
-                customStyles={{
-                    wrapper: {
-                        backgroundColor: 'rgba(0,0,0,0.28)',
-                    },
-                    container: {
-                        borderTopLeftRadius: 20,
-                        borderTopEndRadius: 20
-                    },
-                    draggableIcon: {
-                        opacity: 0
-                    }
-                }}
-            >
-                <ReportDetails 
-                    postId={props.postId} 
-                    subject={reportReason} 
-                    navigation={props.navigation}
-                />
-            </RBSheet>
-            </KeyboardAvoidingView>
+            {/* <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+                <RBSheet
+                    ref={refRBSheetReportDetails}
+                    closeOnDragDown={true}
+                    closeOnPressMask={true}
+                    closeOnPressBack={true}
+                    animationType="fade"
+                    height={320}
+                    customStyles={{
+                        wrapper: {
+                            backgroundColor: 'rgba(0,0,0,0.28)',
+                        },
+                        container: {
+                            borderTopLeftRadius: 20,
+                            borderTopEndRadius: 20
+                        },
+                        draggableIcon: {
+                            opacity: 0
+                        }
+                    }}
+                >
+                    <ReportDetails
+                        postId={props.post._id}
+                        subject={reportReason}
+                        navigation={props.navigation}
+                    />
+                </RBSheet>
+            </KeyboardAvoidingView> */}
         </View>
     )
 }
@@ -441,9 +449,11 @@ const styles = StyleSheet.create({
         marginBottom: 20
     },
     postContent: {
-        paddingLeft: 18,
-        paddingRight: 18,
+        paddingLeft: 8,
+        paddingRight: 6,
         fontSize: 18,
+        marginTop: -10,
+        marginBottom: -11
     },
     postMedia: {
         flexDirection: "row",

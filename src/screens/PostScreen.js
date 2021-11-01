@@ -1,124 +1,63 @@
-import React, { useState, useLayoutEffect } from 'react';
-import { StyleSheet, Text, View, Button, ScrollView, TextInput, FlatList, TouchableOpacity, Pressable, KeyboardAvoidingView } from 'react-native';
+import React, { useState, useLayoutEffect, useRef, useEffect } from 'react';
+import { StyleSheet, StatusBar, LinearGradient, Text, View, Button, ScrollView, TextInput, FlatList, TouchableOpacity, Pressable, KeyboardAvoidingView, Keyboard } from 'react-native';
 import { Avatar, ListItem, Icon } from 'react-native-elements';
-import HeaderBar from './components/HeaderBar.js'
+import HeaderBar from '../screens/components/HeaderBar'
 import Post from './components/Post.js';
 import IconSend from '../../assets/icn_send.svg'
 import IconSendDiable from '../../assets/icn_send_disable.svg'
+import IconBack from "../../assets/arrow-back-outline.svg";
 import IconPhoto from '../../assets/icn_csc_menu_sticker_n.svg'
 import AuthContext from '../components/context/AuthContext';
 import { Api } from '../api/Api.js';
 import { TimeUtility } from '../utils/TimeUtility.js';
-
-const UserPost = (props) => {
-    let numComment = props.numComment;
-    let describe = <Text style={styles.describeText}>Hãy là người đầu tiên bình luận</Text>
-    if (numComment > 0) {
-        describe = <Text style={styles.describeText}>
-            Có {numComment} bình luận. Bạn chỉ được xem bình luận của bạn bè trong danh bạ.
-        </Text>
-    }
-    return (
-        <>
-            <View style={styles.post}>
-                <Post mode="comment" postId={props.postId} navigation={props.navigation}></Post>
-            </View>
-            {describe}
-        </>
-    )
-}
-
-const PostAndComment = (props) => {
-    return (
-        <FlatList
-            keyboardShouldPersistTaps={'always'}
-            data={props.listComment}
-            renderItem={({ item }) => (
-                <ListItem bottomDivider>
-                    <Avatar
-                        size="small" rounded
-                        source={{ uri: item.img }} />
-                    <ListItem.Content>
-                        <ListItem.Title style={styles.commentUser}>
-                            {item.user}
-                        </ListItem.Title>
-                        <ListItem.Subtitle style={styles.commentContent}>
-                            {item.content}
-                        </ListItem.Subtitle>
-                        <Text style={styles.commentDate}>
-                            {item.date + " trước"}
-                        </Text>
-                    </ListItem.Content>
-                    <Icon
-                        name='heart-outline' // like: heart
-                        type='ionicon'
-                        color="#818181" // like: #f84c5d
-                        size={24}
-                    />
-                </ListItem>
-            )}
-            keyExtractor={(item, index) => index.toString()}
-            ListHeaderComponent={props.post}
-        />
-    );
-}
-
-const MyComment = (props) => {
-    const [myComment, setMyComment] = useState("");
-
-    return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-            <View style={{ flexDirection: 'row' }}>
-                <View style={styles.sendButton}>
-                    <TouchableOpacity>
-                        <IconPhoto />
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.enterCommentText}>
-
-                    <TextInput style={styles.enterComment}
-                        placeholder="Nhập bình luận"
-                        returnKeyType="send"
-                        enablesReturnKeyAutomatically
-                        onChangeText={text => setMyComment(text)}
-                        defaultValue={myComment}>
-                    </TextInput>
-
-                </View>
-                <View style={styles.sendButton}>
-                    <TouchableOpacity 
-                        disabled={!myComment.match(/\S/)}
-                        onPress={() => {
-                            props.createCommentFunc(myComment);
-                            setMyComment("");
-                        }}>
-                        {myComment.match(/\S/)?<IconSend />:<IconSendDiable/>}
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </KeyboardAvoidingView>
-    )
-}
+import FlashMessage from "react-native-flash-message";
+import { showMessage, hideMessage } from "react-native-flash-message";
 
 export default function PostScreen({ navigation, route }) {
+    const mounted = useRef(false);
+    const flatList = useRef(null);
+
+    useEffect(() => {
+        mounted.current = true;
+
+        return () => { mounted.current = false; };
+    }, []);
     const context = React.useContext(AuthContext);
     const [listComment, setListComment] = useState("");
     const [countComment, setCountComment] = useState(0);
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [DidComment, setDidComment] = useState(false);
+    const [needUpdateParent, setNeedUpdateParent] = useState(false);
     const createComment = async (content) => {
         try {
             let accessToken = context.loginState.accessToken;
             const res = await Api.createComment(accessToken, route.params.postId, content);
-            // console.log(res);
+            if (mounted.current === false) {
+                return;
+            }
+            setNeedUpdateParent(true);
+            setDidComment(true);
+            Keyboard.dismiss();
+            showMessage({
+                message: "Đã gửi bình luận",
+                type: "info",
+                style: { marginLeft: "auto" },
+                // backgroundColor: "#0092fa",
+            });
             getListComment();
         } catch (err) {
             console.log(err)
-            navigation.navigate("NoConnectionScreen",{message: "Tài khoản sẽ tự động đăng nhập khi có kết nối internet"})
+            navigation.navigate("NoConnectionScreen", { message: "" })
         }
     }
     const getListComment = async () => {
         try {
             let accessToken = context.loginState.accessToken;
             const res = await Api.getComment(accessToken, route.params.postId);
+            if (mounted.current === false) {
+                return;
+            }
+            setIsLoaded(true);
             let comments = res.data.data;
             // console.log(comments);
             setListComment(comments.map(
@@ -134,7 +73,7 @@ export default function PostScreen({ navigation, route }) {
             setCountComment(res.data.countComments);
         } catch (err) {
             console.log(err)
-            navigation.navigate("NoConnectionScreen",{message: "Tài khoản sẽ tự động đăng nhập khi có kết nối internet"})
+            navigation.navigate("NoConnectionScreen", { message: "Tài khoản sẽ tự động đăng nhập khi có kết nối internet" })
         }
     }
 
@@ -142,20 +81,125 @@ export default function PostScreen({ navigation, route }) {
         getListComment();
     }, []);
 
+    var UserPost = () => {
+        let describe = <Text style={styles.describeText}>Đang tải bình luận, vui lòng chờ ...</Text>
+        if (isLoaded) {
+            if (countComment > 0) {
+                describe = <Text style={styles.describeText}>
+                    Có {countComment} bình luận. Bạn chỉ được xem bình luận của bạn bè trong danh bạ.
+                </Text>
+            } else {
+                describe = <Text style={styles.describeText}>Hãy là người đầu tiên bình luận</Text>
+            }
+        }
+
+        return (
+            <>
+                <View style={styles.post}>
+                    <Post mode="comment" post={route.params.post} navigation={route.params.navigation}></Post>
+                </View>
+                {describe}
+            </>
+        )
+    }
+
+    const PostAndComment = () => {
+        return (
+
+            <FlatList
+                ref={flatList}
+                keyboardShouldPersistTaps={'always'}
+                onContentSizeChange={() => { if (DidComment) flatList.current.scrollToEnd({ animated: true }) }}
+                data={listComment}
+                renderItem={({ item }) => (
+                    <Pressable onPress={() => { Keyboard.dismiss() }}>
+                        <ListItem bottomDivider>
+                            <Avatar
+                                size="small" rounded
+                                source={{ uri: item.img }} />
+                            <ListItem.Content>
+                                <ListItem.Title style={styles.commentUser}>
+                                    {item.user}
+                                </ListItem.Title>
+                                <ListItem.Subtitle style={styles.commentContent}>
+                                    {item.content}
+                                </ListItem.Subtitle>
+                                <Text style={styles.commentDate}>
+                                    {item.date}
+                                </Text>
+                            </ListItem.Content>
+                            <Icon
+                                name='heart-outline' // like: heart
+                                type='ionicon'
+                                color="#818181" // like: #f84c5d
+                                size={24}
+                            />
+                        </ListItem>
+                    </Pressable>
+                )}
+                keyExtractor={(item, index) => index.toString()}
+                ListHeaderComponent={UserPost()}
+            />
+
+        );
+    }
+
+    var MyComment = (props) => {
+        const [myComment, setMyComment] = useState("");
+
+        return (
+            <KeyboardAvoidingView style={styles.myComment} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+                <View style={{ flexDirection: 'row' }}>
+                    <View style={styles.sendButton}>
+                        <TouchableOpacity>
+                            <IconPhoto />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.enterCommentText}>
+
+                        <TextInput style={styles.enterComment}
+                            placeholder="Nhập bình luận"
+                            returnKeyType="none"
+                            enablesReturnKeyAutomatically={false}
+                            onChangeText={text => setMyComment(text)}
+                            defaultValue={myComment}>
+                        </TextInput>
+
+                    </View>
+                    <View style={styles.sendButton}>
+                        <TouchableOpacity
+                            disabled={!myComment.match(/\S/)}
+                            onPress={() => {
+                                createComment(myComment);
+                                setMyComment("");
+                            }}>
+                            {myComment.match(/\S/) ? <IconSend /> : <IconSendDiable />}
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </KeyboardAvoidingView>
+        )
+    }
+
+    var goBackFunc = ()=>{
+        if(needUpdateParent){
+            route.params.updateFunc();
+        }
+        navigation.goBack();
+    }
+
     return (
-        <View style={styles.container}>
-            <HeaderBar text="Bình luận" navigation={navigation} />
-            <View style={styles.postAndComment}>
-                <PostAndComment
-                    listComment={listComment}
-                    post={
-                        () => { return <UserPost numComment={countComment} 
-                                                 postId={route.params.postId}
-                                                 navigation={route.params.navigation} /> }
-                    } />
+        <>
+            <FlashMessage position="top" titleStyle={{ fontSize: 18, marginLeft: 12, marginTop: 1 }} icon="success" />
+            <View style={styles.container} >
+            <HeaderBar text="Bình luận" goBackFunc={goBackFunc} navigation={navigation} />
+                <View style={styles.postAndComment}>
+                    {PostAndComment()}
+                </View>
+
             </View>
-            <MyComment createCommentFunc={createComment}/>
-        </View>
+            {MyComment()}
+        </>
     )
 }
 
@@ -196,13 +240,11 @@ const styles = StyleSheet.create({
         paddingTop: 3
     },
     postAndComment: {
-        flex: 1,
+        flex: 1
     },
     post: {
-        flex: 1,
-        padding: 0,
         borderBottomColor: "#ebebeb",
-        borderBottomWidth: 1
+        borderBottomWidth: 1,
     },
     comment: {
         flex: 1,
@@ -221,14 +263,16 @@ const styles = StyleSheet.create({
         flex: 2,
     },
     commentUser: {
-        fontSize: 13,
+        fontSize: 14,
         fontWeight: 'bold',
     },
     commentContent: {
+        paddingTop: 4,
         fontSize: 14,
         color: 'black',
     },
     commentDate: {
+        paddingTop: 4,
         fontSize: 13,
         color: 'gray',
     },
@@ -246,5 +290,10 @@ const styles = StyleSheet.create({
         color: "#778993",
         marginTop: 12,
         marginBottom: 12
+    },
+    myComment: {
+        backgroundColor: "#fff",
+        borderTopWidth: 1,
+        borderTopColor: "#e6e6e6"
     }
 });

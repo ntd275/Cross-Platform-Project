@@ -28,6 +28,9 @@ import AppContext from "../components/context/AppContext";
 
 export default function TimeLineScreen({ navigation }) {
   const [search, setSearch] = useState("");
+  const [needReload, setNeedReload] = useState(true);
+  const [posts, setPosts] = useState([]);
+
   const updateSearch = (search) => {
     setSearch(search);
   };
@@ -41,8 +44,11 @@ export default function TimeLineScreen({ navigation }) {
       accessToken = "lol " + accessToken
       // console.log(accessToken)
       const res = await Api.getPosts(accessToken);
-      let  postList = res.data;
-      console.log(postList)
+      let postList = res.data.data;
+
+      setPosts(postList);
+      setNeedReload(false);
+      // console.log(postList)
     } catch (err) {
       if (err.response && err.response.status == 401) {
         console.log(err.response.data.message);
@@ -52,18 +58,58 @@ export default function TimeLineScreen({ navigation }) {
       }
       console.log(err);
       navigation.navigate("NoConnectionScreen", {
-        message: "Tài khoản sẽ tự động đăng nhập khi có kết nối internet",
+        message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
       });
     }
   };
-  let postList = [];
-  for (let i = 0; i<10; i++){
-      let postId = "60c45081ae8c0f00220f461a";
-    postList.push(<TouchableHighlight key = {i} style={{marginTop: 12}}
-      onPress={() => { navigation.navigate("PostScreen", { postId: postId, navigation: navigation }) }}
-    >
-      <Post mode={"timeline"} postId={postId} navigation={navigation}/>
-    </TouchableHighlight>
+
+  if (needReload) {
+    getPosts();
+  }
+
+  var handleScrollDrag = function (event) {
+    if(event.nativeEvent.contentOffset.y < -80){
+      setTimeout(function(){
+        setNeedReload(true)
+      }, 300);
+    }
+  }
+
+  var ScreenBody = () => {
+    if (needReload) {
+      return (
+        <View style={{ marginTop: 10 }}>
+          <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
+          <Image
+            source={require("../../assets/loading.gif")}
+            style={{ alignSelf: "center" }}
+          />
+        </View>
+      );
+    }
+
+    if (posts.length == 0) {
+      return (
+        <View style={{ marginTop: 10 }}>
+          <Text style={styles.describeText}>Chưa có bài đăng nào</Text>
+        </View>
+      );
+    }
+
+
+    let postList = [];
+    for (let i = 0; i < posts.length; i++) {
+      postList.push(
+        <View key={i} style={{ marginTop: 12 }}>
+          <Post mode={"timeline"} updateFunc={getPosts} post={posts[i]} navigation={navigation} />
+        </View>
+      );
+    }
+
+    return (
+      <>
+        {postList}
+      </>
     );
   }
 
@@ -73,48 +119,48 @@ export default function TimeLineScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View>
-          <LinearGradient
-            colors={["#0085ff", "#05adff"]}
-            start={[0, 1]}
-            end={[1, 0]}
-            style={styles.header}
-          >
-            <View style={{ flexDirection: "row", marginTop: 28}}>
-              <TouchableOpacity onPress={getPosts}>
-                <View style={{ flex: 1 }}>
-                  <IconSearch style={styles.iconSearch} />
-                </View>
-              </TouchableOpacity>
-
-              <View style={{ flex: 6 }}>
-                <TextInput
-                  style={styles.input}
-                  onChangeText={updateSearch}
-                  value={search}
-                  // onTouchStart={()=>  alert("Hello...")}
-                  onEndEditing={getSearchText}
-                  placeholder="Tìm bạn bè, tin nhắn, ..."
-                  placeholderTextColor="#fff"
-                ></TextInput>
+        <LinearGradient
+          colors={["#0085ff", "#05adff"]}
+          start={[0, 1]}
+          end={[1, 0]}
+          style={styles.header}
+        >
+          <View style={{ flexDirection: "row", marginTop: 28 }}>
+            <TouchableOpacity onPress={getPosts}>
+              <View style={{ flex: 1 }}>
+                <IconSearch style={styles.iconSearch} />
               </View>
-              {/* <View>
+            </TouchableOpacity>
+
+            <View style={{ flex: 6 }}>
+              <TextInput
+                style={styles.input}
+                onChangeText={updateSearch}
+                value={search}
+                // onTouchStart={()=>  alert("Hello...")}
+                onEndEditing={getSearchText}
+                placeholder="Tìm bạn bè, tin nhắn, ..."
+                placeholderTextColor="#fff"
+              ></TextInput>
+            </View>
+            {/* <View>
               <IconBack style={styles.iconBack} />
             </View> */}
-              <View style={{ flex: 1 }}>
-                <IconNewPost style={styles.iconNewPost} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <IconNotice style={styles.iconNotice} />
-              </View>
+            <View style={{ flex: 1 }}>
+              <IconNewPost style={styles.iconNewPost} />
             </View>
-            <StatusBar
-              backgroundColor="#00000000"
-              barStyle="light-content"
-              translucent={true}
-            />
-          </LinearGradient>
-        </View>
-      <ScrollView keyboardShouldPersistTaps={'always'}>
+            <View style={{ flex: 1 }}>
+              <IconNotice style={styles.iconNotice} />
+            </View>
+          </View>
+          <StatusBar
+            backgroundColor="#00000000"
+            barStyle="light-content"
+            translucent={true}
+          />
+        </LinearGradient>
+      </View>
+      <ScrollView keyboardShouldPersistTaps={'always'} onScrollEndDrag={handleScrollDrag} >
         <View style={styles.story}>
           <Text
             style={{
@@ -152,8 +198,8 @@ export default function TimeLineScreen({ navigation }) {
               onEndEditing={getSearchText}
               placeholder="Hôm nay bạn thế nào?"
               placeholderTextColor="#dedede"
-              onFocus={(e)=>{e.target.blur();navigation.navigate("CreatePost")}}
-              onBlur={()=>{appContext.setKeyBoardHeight(keyBoardHeight)}}
+              onFocus={(e) => { e.target.blur(); navigation.navigate("CreatePost") }}
+              onBlur={() => { appContext.setKeyBoardHeight(keyBoardHeight) }}
             >
             </TextInput>
           </View>
@@ -161,26 +207,26 @@ export default function TimeLineScreen({ navigation }) {
         <View style={styles.mediaArea}>
           <View style={styles.mediaPost}>
             <IconImage style={styles.iconImage} />
-            <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight:'600',fontSize:13 }}>
+            <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
               Đăng ảnh
             </Text>
           </View>
           <View style={styles.mediaPost}>
             <IconVideo style={styles.iconVideo} />
-            <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight:'600',fontSize:13 }}>
+            <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
               Đăng video
             </Text>
           </View>
           <View style={styles.mediaPost}>
             <IconAlbum style={styles.iconAlbum} />
-            <Text style={{ marginLeft: 5, marginRight: "auto",fontWeight:'600',fontSize:13 }}>
+            <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
               Tạo album
             </Text>
           </View>
         </View>
-        <ScrollView style={{ marginTop: 0 }} keyboardShouldPersistTaps={'always'}>
-          {postList}
-        </ScrollView>
+
+        {ScreenBody()}
+        <View style={{ height: 74 }}></View>
       </ScrollView>
     </View>
   );
@@ -188,7 +234,8 @@ export default function TimeLineScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#f6f6f6",
-    flexDirection:"column"
+    minHeight: "100%",
+    flexDirection: "column"
   },
   input: {
     color: "white",
@@ -287,4 +334,13 @@ const styles = StyleSheet.create({
     color: "blue",
     marginLeft: "auto",
   },
+  describeText: {
+    fontSize: 14,
+    paddingLeft: 16,
+    paddingRight: 16,
+    color: "#778993",
+    marginTop: 12,
+    marginBottom: 12,
+    textAlign: "center"
+  }
 });

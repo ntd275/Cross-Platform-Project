@@ -4,6 +4,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import IconBack from '../../../assets/ic_nav_header_back.svg'
 
 const HeaderBar = (props) => {
+    let goBackFunc = () => { props.navigation.goBack() };
+    if(props.goBackFunc){
+        goBackFunc = props.goBackFunc;
+    }
     return(
         <>
             <StatusBar
@@ -21,7 +25,7 @@ const HeaderBar = (props) => {
                 <View style={{ flex: 1, flexDirection: "row" }}>
                     <TouchableOpacity
                         style={styles.iconBackWrap}
-                        onPress={() => { props.navigation.goBack() }}
+                        onPress={goBackFunc}
                     >
                         <IconBack style={styles.iconBack} />
                     </TouchableOpacity>
