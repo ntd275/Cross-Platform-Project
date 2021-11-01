@@ -13,6 +13,8 @@ import { TimeUtility } from '../utils/TimeUtility.js';
 import FlashMessage from "react-native-flash-message";
 import { showMessage, hideMessage } from "react-native-flash-message";
 
+const BaseURL = 'http://13.76.46.159:8000/files/';
+
 export default function PostScreen({ navigation, route }) {
     const mounted = useRef(false);
     const flatList = useRef(null);
@@ -64,10 +66,11 @@ export default function PostScreen({ navigation, route }) {
                 comment => ({
                     user: comment.user.username,
                     content: comment.content,
-                    img: 'https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png',
+                    img: BaseURL + comment.user.fileName,
                     dateCreated: new Date(comment.createdAt),
                     dateUpdated: new Date(comment.updatedAt),
                     date: TimeUtility.getTimeStr(new Date(comment.createdAt)),
+                    userId: comment.user._id,
                 })
             ));
             setCountComment(res.data.countComments);
