@@ -96,6 +96,13 @@ export const Api = {
                 "authorization":token
             }
         })
+    },
+    getMe: (token)=> {
+        return axios.get(`${BaseURL}/users/show`,{
+            "headers": {
+                "authorization":token
+            }
+        })
     }
 }
 

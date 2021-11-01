@@ -39,10 +39,26 @@ export default function App() {
     dispatch
   }
 
+  
+  const _setKeyBoardHeight = (h) => {
+    if(h > 0){
+      setKeyBoardHeight(h)
+    }
+  }
+
+  const _setAvatar = (v) => {
+    if(v != avatar) {
+      setAvatar(v)
+    }
+  }
+
   const [keyBoardHeight, setKeyBoardHeight] = React.useState(0)
+  const [avatar, setAvatar] = React.useState("avatar_2.png")
   const appContext = {
     keyBoardHeight,
-    setKeyBoardHeight
+    setKeyBoardHeight: _setKeyBoardHeight,
+    avatar,
+    setAvatar: _setAvatar,
   }
 
     return (

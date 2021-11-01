@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { SearchBar } from "react-native-elements";
 import { LinearGradient } from "expo-linear-gradient";
 import IconNotice from "../../assets/notifications-outline.svg";
@@ -22,9 +22,12 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableHighlight,
+  Pressable,
 } from "react-native";
-import useKeyboardHeight from 'react-native-use-keyboard-height';
+import { useKeyboard } from "./components/useKeyboard";
 import AppContext from "../components/context/AppContext";
+
+const BaseURL = "http://13.76.46.159:8000/files/"
 
 export default function TimeLineScreen({ navigation }) {
   const [search, setSearch] = useState("");
@@ -38,6 +41,17 @@ export default function TimeLineScreen({ navigation }) {
     console.log(search);
   };
   const context = React.useContext(AuthContext);
+  const appContext = useContext(AppContext)
+  const getAvatar = async () => {
+    try {
+      accessToken ="lol "+context.loginState.accessToken
+      let user = await Api.getMe(accessToken)
+      // console.log(user.data)
+      appContext.setAvatar(user.data.avatar.fileName)
+    } catch (e){
+      console.log(e)
+    }
+  }
   const getPosts = async () => {
     try {
       accessToken = context.loginState.accessToken;
@@ -64,6 +78,7 @@ export default function TimeLineScreen({ navigation }) {
   };
 
   if (needReload) {
+    getAvatar();
     getPosts();
   }
 
@@ -113,8 +128,9 @@ export default function TimeLineScreen({ navigation }) {
     );
   }
 
-  const keyBoardHeight = useKeyboardHeight()
-  const appContext = useContext(AppContext)
+  const keyBoardHeight = useKeyboard()
+  const inputRef = useRef()
+  const mode = useRef('image')
 
   return (
     <View style={styles.container}>
@@ -185,38 +201,36 @@ export default function TimeLineScreen({ navigation }) {
               rounded
               size="medium"
               source={{
-                uri: "https://scontent.fhan2-4.fna.fbcdn.net/v/t1.6435-9/133090782_1371551809851101_5019511807721447445_n.jpg?_nc_cat=100&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=bCAO7C_sS4EAX_qyJiC&tn=3oiMvUeJSpvhduTu&_nc_ht=scontent.fhan2-4.fna&oh=48243902ce00139fbac561642e71d76a&oe=61994089",
+                uri: BaseURL+appContext.avatar,
               }}
             />
           </View>
           <View style={{ marginTop: 25, marginLeft: 10 }}>
             <TextInput
               style={{ color: "black", fontSize: 18 }}
-              onChangeText={updateSearch}
-              value={search}
               // onTouchStart={()=>  alert("Hello...")}
-              onEndEditing={getSearchText}
               placeholder="Hôm nay bạn thế nào?"
               placeholderTextColor="#dedede"
-              onFocus={(e) => { e.target.blur(); navigation.navigate("CreatePost") }}
-              onBlur={() => { appContext.setKeyBoardHeight(keyBoardHeight) }}
+              onFocus={() => {inputRef.current.blur();navigation.navigate("CreatePost",{mode: mode.current});}}
+              onBlur={() => {appContext.setKeyBoardHeight(keyBoardHeight)}}
+              ref = {inputRef}
             >
             </TextInput>
           </View>
         </View>
         <View style={styles.mediaArea}>
-          <View style={styles.mediaPost}>
+          <Pressable style={styles.mediaPost} onPress={()=>{mode.current = 'image', inputRef.current.focus()}}>
             <IconImage style={styles.iconImage} />
             <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
               Đăng ảnh
             </Text>
-          </View>
-          <View style={styles.mediaPost}>
+          </Pressable>
+          <Pressable style={styles.mediaPost} onPress={()=>{mode.current = 'video', inputRef.current.focus()}}>
             <IconVideo style={styles.iconVideo} />
             <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
               Đăng video
             </Text>
-          </View>
+          </Pressable>
           <View style={styles.mediaPost}>
             <IconAlbum style={styles.iconAlbum} />
             <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>

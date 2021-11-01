@@ -37,7 +37,7 @@ const MAX_IMAGE_SIZE = 4 * 1024 * 1024;
 const MAX_VIDEO_SIZE = 10 * 1024 * 1024;
 const MAX_VIDEO_DURATION = 10;
 const MIN_VIDEO_DURATION = 1;
-export default function CreatePost({ navigation }) {
+export default function CreatePost({ navigation,route }) {
   const refInput = useRef();
 
   const [postText, setPostText] = useState("");
@@ -155,7 +155,7 @@ export default function CreatePost({ navigation }) {
     }
   };
 
-  const [openSelect, setOpenSelect] = useState("image");
+  const [openSelect, setOpenSelect] = useState(route.params?route.params.mode:"image");
   const [selectedImage, setSelectedImage] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [inputIsFocus, setInputIsFocus] = useState(false);
@@ -196,6 +196,8 @@ export default function CreatePost({ navigation }) {
     if (selectedImage.length > 0) return false;
     return true;
   };
+
+  //console.log(context.keyBoardHeight)
 
   return (
     <View style={styles.container}>
