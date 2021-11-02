@@ -101,11 +101,11 @@ export default function TimeLineScreen({ navigation }) {
   let opacity = useRef(new Animated.Value(0))
 
   let openLoading =()=>{
-    opacity.current.setValue(90)
+    opacity.current.setValue(100)
   }
 
   let closeLoading =()=>{
-    opacity.current.setValue(90)
+    opacity.current.setValue(100)
     Animated.timing(opacity.current, {
       toValue: 0,
       duration: 500,
@@ -173,10 +173,10 @@ export default function TimeLineScreen({ navigation }) {
   const mode = useRef('image')
   var LoadingHeader = () => {
       return (
-        <Animated.View style={{ paddingTop:10 , height: opacity.current }} >
+        <Animated.View style={{height: opacity.current }} >
           <Image
             source={require("../../assets/loading.gif")}
-            style={{ alignSelf: "center" }}
+            style={{ alignSelf: "center", marginTop: 10 }}
           />
           <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
         </Animated.View>

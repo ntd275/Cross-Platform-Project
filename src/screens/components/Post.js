@@ -541,7 +541,7 @@ export default function Post(props) {
         >
           <View
             style={{
-              backgroundColor: "rgba(220,220,220,0.95)",
+              backgroundColor: "rgba(220,220,220,1)",
               borderTopLeftRadius: 15,
               borderTopEndRadius: 15,
               borderBottomRightRadius: 15,
@@ -551,8 +551,8 @@ export default function Post(props) {
           >
             <Text
               style={{
-                fontSize: 12,
-                fontWeight: "500",
+                fontSize: 16,
+                fontWeight: "600",
                 color: "#767676",
                 textAlign: "center",
                 marginTop: 15,
@@ -562,14 +562,14 @@ export default function Post(props) {
             </Text>
             <Text
               style={{
-                fontSize: 12,
+                fontSize: 14,
                 color: "#767676",
                 textAlign: "center",
                 marginTop: 15,
                 marginBottom: 20,
               }}
             >
-              Bạn muốn báo xấu hoạt động này
+              Bạn muốn báo xấu hoạt động này?
             </Text>
             <Divider orientation="horizontal" />
             <TouchableHighlight
@@ -807,7 +807,7 @@ const styles = StyleSheet.create({
   },
   reportOptionText: {
     color: "#0085ff",
-    fontSize: 19,
+    fontSize: 20,
     fontWeight: "400",
   },
 });
