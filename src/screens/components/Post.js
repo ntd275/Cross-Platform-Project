@@ -622,7 +622,7 @@ export default function Post(props) {
                     <Text
                         style={{
                             textAlign: "center",
-                            fontSize: 16,
+                            fontSize: 17,
                             fontWeight: "400",
                             lineHeight: 20,
                             marginBottom: 10,
@@ -638,7 +638,7 @@ export default function Post(props) {
                         returnKeyType="none"
                         value={reportKhac.content}
                         onChangeText={(text) => setReportKhac({ show: reportKhac.show, content: text })}
-                        enablesReturnKeyAutomatically
+                        enablesReturnKeyAutomatically={false}
                         multiline={true}
                         autoFocus
                     />

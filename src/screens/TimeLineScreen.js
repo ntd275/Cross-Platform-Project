@@ -342,9 +342,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   avatar: {
-    marginLeft: 10,
+    marginLeft: 18,
     marginTop: 10,
     marginBottom: 10,
+    marginRight:9
   },
 
   storyImage: {
