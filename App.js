@@ -22,10 +22,6 @@ import { LogBox } from 'react-native';
 import FlashMessage from "react-native-flash-message";
 import { showMessage, hideMessage } from "react-native-flash-message";
 
-LogBox.ignoreLogs([
-  'Non-serializable values were found in the navigation state',
-]);
-
 const Tab = createBottomTabNavigator();
 
 export default function App() {
