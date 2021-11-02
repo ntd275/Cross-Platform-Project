@@ -23,7 +23,9 @@ import {
   TouchableOpacity,
   TouchableHighlight,
   Pressable,
-  FlatList
+  FlatList,
+  Animated,
+  Easing
 } from "react-native";
 import { useKeyboard } from "./components/useKeyboard";
 import AppContext from "../components/context/AppContext";
@@ -34,6 +36,7 @@ export default function TimeLineScreen({ navigation }) {
   const [search, setSearch] = useState("");
   const [needReload, setNeedReload] = useState(true);
   const [firstLoad, setFirstLoad] = useState(true);
+  const [isLoading, setIsLoading] = useState(false)
   const [posts, setPosts] = useState([]);
 
   const updateSearch = (search) => {
@@ -55,6 +58,10 @@ export default function TimeLineScreen({ navigation }) {
     }
   }
   const getPosts = async () => {
+    if(isLoading){
+      return
+    }
+    setIsLoading(true)
     try {
       accessToken = context.loginState.accessToken;
       accessToken = "lol " + accessToken
@@ -63,19 +70,24 @@ export default function TimeLineScreen({ navigation }) {
       let postList = res.data.data;
 
       setPosts(postList);
-      if (needReload) {
-        setNeedReload(false);
+      if(!firstLoad){
+        closeLoading()
       }
-
       if (firstLoad) {
         setFirstLoad(false);
       }
+      if (needReload) {
+        setNeedReload(false);
+      }
+      setIsLoading(false)
       // console.log(postList)
+
     } catch (err) {
       if (err.response && err.response.status == 401) {
         console.log(err.response.data.message);
         // setNotification("Không thể nhận diện");
         // console.log(notification)
+        setIsLoading(false)
         return;
       }
       console.log(err);
@@ -85,13 +97,30 @@ export default function TimeLineScreen({ navigation }) {
     }
   };
 
-  if (needReload) {
+  let opacity = useRef(new Animated.Value(0))
+
+  let openLoading =()=>{
+    opacity.current.setValue(90)
+  }
+
+  let closeLoading =()=>{
+    opacity.current.setValue(90)
+    Animated.timing(opacity.current, {
+      toValue: 0,
+      duration: 500,
+      easing: Easing.ease,
+      useNativeDriver: false
+    }).start();
+  }
+
+  if (needReload && !isLoading) {
     getAvatar();
     getPosts();
   }
 
   var handleScrollDrag = function (event) {
     if (event.nativeEvent.contentOffset.y < -80 && !needReload) {
+      openLoading()
       setNeedReload(true)
     }
   }
@@ -142,20 +171,15 @@ export default function TimeLineScreen({ navigation }) {
   const inputRef = useRef()
   const mode = useRef('image')
   var LoadingHeader = () => {
-    if (!firstLoad && needReload) {
       return (
-        <View style={{ marginTop: 10 }}>
+        <Animated.View style={{ marginTop: 10 , height: opacity.current }} >
           <Image
             source={require("../../assets/loading.gif")}
             style={{ alignSelf: "center" }}
           />
           <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
-        </View>
+        </Animated.View>
       );
-    } else {
-      return <></>
-    }
-
   }
 
   var ListHeader = () => {
