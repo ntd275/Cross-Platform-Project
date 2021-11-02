@@ -70,9 +70,7 @@ export default function TimeLineScreen({ navigation }) {
       let postList = res.data.data;
 
       setPosts(postList);
-      if(!firstLoad){
-        closeLoading()
-      }
+      
       if (firstLoad) {
         setFirstLoad(false);
       }
@@ -80,6 +78,9 @@ export default function TimeLineScreen({ navigation }) {
         setNeedReload(false);
       }
       setIsLoading(false)
+      if(!firstLoad){
+        closeLoading()
+      }
       // console.log(postList)
 
     } catch (err) {
