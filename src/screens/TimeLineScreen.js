@@ -51,7 +51,7 @@ export default function TimeLineScreen({ navigation }) {
     try {
       accessToken ="lol "+context.loginState.accessToken
       let user = await Api.getMe(accessToken)
-      console.log(user.data)
+      //console.log(user.data)
       appContext.setAvatar(user.data.data.avatar.fileName)
     } catch (e){
       console.log(e)
