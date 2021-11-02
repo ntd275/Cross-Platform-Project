@@ -172,7 +172,7 @@ export default function TimeLineScreen({ navigation }) {
   const mode = useRef('image')
   var LoadingHeader = () => {
       return (
-        <Animated.View style={{ marginTop: 10 , height: opacity.current }} >
+        <Animated.View style={{ paddingTop:10 , height: opacity.current }} >
           <Image
             source={require("../../assets/loading.gif")}
             style={{ alignSelf: "center" }}
