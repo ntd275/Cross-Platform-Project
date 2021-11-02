@@ -7,7 +7,7 @@ import TimeLineStackScreen from './src/screens/tabs/TimeLineStackScreen';
 import ProfileStackScreen from './src/screens/tabs/ProfileStackScreen';
 import LoginStackScreen from './src/screens/LoginStackScreen';
 import AuthContext from './src/components/context/AuthContext';
-import { loginReducer} from './src/components/reducer/loginReducer';
+import { loginReducer } from './src/components/reducer/loginReducer';
 import IconTabMeFocus from './assets/ic_tab_me_focus.svg'
 import IconTabMe from './assets/ic_tab_me.svg'
 import IconTabMessage from './assets/ic_tab_message.svg'
@@ -19,35 +19,42 @@ import IconTabSocialFocus from './assets/ic_tab_social_focus.svg'
 import CreatePost from './src/screens/CreatePost';
 import AppContext from './src/components/context/AppContext';
 import { LogBox } from 'react-native';
+import FlashMessage from "react-native-flash-message";
+import { showMessage, hideMessage } from "react-native-flash-message";
 
 LogBox.ignoreLogs([
-    'Non-serializable values were found in the navigation state',
+  'Non-serializable values were found in the navigation state',
 ]);
 
 const Tab = createBottomTabNavigator();
 
 export default function App() {
+  var displayMessage = (messageObject) => {
+    showMessage(messageObject);
+  }
+
+  const flashMessage = React.useRef("timelineFlash");
   const initLoginState = {
-    userName : null,
+    userName: null,
     accessToken: null,
     isLoading: false,
   }
 
-  const [loginState, dispatch] = React.useReducer(loginReducer,initLoginState)
+  const [loginState, dispatch] = React.useReducer(loginReducer, initLoginState)
   const authContext = {
     loginState,
     dispatch
   }
 
-  
+
   const _setKeyBoardHeight = (h) => {
-    if(h > 0){
+    if (h > 0) {
       setKeyBoardHeight(h)
     }
   }
 
   const _setAvatar = (v) => {
-    if(v != avatar) {
+    if (v != avatar) {
       setAvatar(v)
     }
   }
@@ -59,60 +66,64 @@ export default function App() {
     setKeyBoardHeight: _setKeyBoardHeight,
     avatar,
     setAvatar: _setAvatar,
+    displayMessage: displayMessage,
   }
 
-    return (
+  return (
+    <>
+      <FlashMessage ref={flashMessage} position="top" titleStyle={{ fontSize: 16, marginLeft: 12, marginTop: 1 }} />
       <AppContext.Provider value={appContext}>
 
         <AuthContext.Provider value={authContext}>
-        <NavigationContainer>
-            
-            {loginState.accessToken == null? <LoginStackScreen/>:
-            (<Tab.Navigator 
-            screenOptions={{
-            headerShown: false
-            }}
-            >
+          <NavigationContainer>
 
-            <Tab.Screen name="Tin nhắn" component={MessageStackScreen} 
-                options={{
-                tabBarIcon: ({focused}) => {
-                    if(focused){
-                    return <IconTabMessageFocus/>
-                    }
-                    return <IconTabMessage/>
-                }
+            {loginState.accessToken == null ? <LoginStackScreen /> :
+              (<Tab.Navigator
+                screenOptions={{
+                  headerShown: false
                 }}
-            />
-            <Tab.Screen name="Danh bạ" component={ContactStackScreen} 
-                options={{
-                tabBarIcon: ({focused}) => {
-                    if(focused){
-                    return <IconTabContactFocus/>
+              >
+
+                <Tab.Screen name="Tin nhắn" component={MessageStackScreen}
+                  options={{
+                    tabBarIcon: ({ focused }) => {
+                      if (focused) {
+                        return <IconTabMessageFocus />
+                      }
+                      return <IconTabMessage />
                     }
-                    return <IconTabContact/>
-                }
-                }}
-            />
-            <Tab.Screen name="Nhật ký" component={TimeLineStackScreen} options={{
-                tabBarIcon: ({focused}) => {
-                if(focused){
-                    return <IconTabSocialFocus/>
-                }
-                return <IconTabSocial/>
-                }
-            }}/>
-            <Tab.Screen name="Cá nhân" component={ProfileStackScreen} options={{
-                tabBarIcon: ({focused}) => {
-                if(focused){
-                    return <IconTabMeFocus/>
-                }
-                return <IconTabMe/>
-                }
-            }}/>
-        </Tab.Navigator>)}
-      </NavigationContainer>
-    </AuthContext.Provider>
-    </AppContext.Provider>
+                  }}
+                />
+                <Tab.Screen name="Danh bạ" component={ContactStackScreen}
+                  options={{
+                    tabBarIcon: ({ focused }) => {
+                      if (focused) {
+                        return <IconTabContactFocus />
+                      }
+                      return <IconTabContact />
+                    }
+                  }}
+                />
+                <Tab.Screen name="Nhật ký" component={TimeLineStackScreen} options={{
+                  tabBarIcon: ({ focused }) => {
+                    if (focused) {
+                      return <IconTabSocialFocus />
+                    }
+                    return <IconTabSocial />
+                  }
+                }} />
+                <Tab.Screen name="Cá nhân" component={ProfileStackScreen} options={{
+                  tabBarIcon: ({ focused }) => {
+                    if (focused) {
+                      return <IconTabMeFocus />
+                    }
+                    return <IconTabMe />
+                  }
+                }} />
+              </Tab.Navigator>)}
+          </NavigationContainer>
+        </AuthContext.Provider>
+      </AppContext.Provider>
+    </>
   );
 }

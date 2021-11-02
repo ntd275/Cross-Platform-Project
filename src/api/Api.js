@@ -82,8 +82,8 @@ export const Api = {
             method: 'post',
             url: `${BaseURL}/postReport/create/${postId}`,
             data: {
-                subject,
-                details
+                subject: subject,
+                details: details
             },
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', authorization: "a "+token },
             maxContentLength: 100000000,

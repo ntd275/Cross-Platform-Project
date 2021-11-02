@@ -49,16 +49,16 @@ export default function TimeLineScreen({ navigation }) {
   const appContext = useContext(AppContext)
   const getAvatar = async () => {
     try {
-      accessToken ="lol "+context.loginState.accessToken
+      accessToken = "lol " + context.loginState.accessToken
       let user = await Api.getMe(accessToken)
       //console.log(user.data)
       appContext.setAvatar(user.data.data.avatar.fileName)
-    } catch (e){
+    } catch (e) {
       console.log(e)
     }
   }
   const getPosts = async () => {
-    if(isLoading){
+    if (isLoading) {
       return
     }
     setIsLoading(true)
@@ -69,8 +69,8 @@ export default function TimeLineScreen({ navigation }) {
       const res = await Api.getPosts(accessToken);
       let postList = res.data.data;
 
-      setPosts(postList);
-      
+      setPosts(postList.reverse());
+
       if (firstLoad) {
         setFirstLoad(false);
       }
@@ -78,7 +78,7 @@ export default function TimeLineScreen({ navigation }) {
         setNeedReload(false);
       }
       setIsLoading(false)
-      if(!firstLoad){
+      if (!firstLoad) {
         closeLoading()
       }
       // console.log(postList)
@@ -100,11 +100,11 @@ export default function TimeLineScreen({ navigation }) {
 
   let opacity = useRef(new Animated.Value(0))
 
-  let openLoading =()=>{
+  let openLoading = () => {
     opacity.current.setValue(100)
   }
 
-  let closeLoading =()=>{
+  let closeLoading = () => {
     opacity.current.setValue(100)
     Animated.timing(opacity.current, {
       toValue: 0,
@@ -172,15 +172,15 @@ export default function TimeLineScreen({ navigation }) {
   const inputRef = useRef()
   const mode = useRef('image')
   var LoadingHeader = () => {
-      return (
-        <Animated.View style={{height: opacity.current }} >
-          <Image
-            source={require("../../assets/loading.gif")}
-            style={{ alignSelf: "center", marginTop: 10 }}
-          />
-          <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
-        </Animated.View>
-      );
+    return (
+      <Animated.View style={{ height: opacity.current }} >
+        <Image
+          source={require("../../assets/loading.gif")}
+          style={{ alignSelf: "center", marginTop: 10 }}
+        />
+        <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
+      </Animated.View>
+    );
   }
 
   var ListHeader = () => {
@@ -211,7 +211,7 @@ export default function TimeLineScreen({ navigation }) {
               rounded
               size="medium"
               source={{
-                uri: BaseURL+appContext.avatar,
+                uri: BaseURL + appContext.avatar,
               }}
             />
           </View>
@@ -221,21 +221,21 @@ export default function TimeLineScreen({ navigation }) {
               // onTouchStart={()=>  alert("Hello...")}
               placeholder="Hôm nay bạn thế nào?"
               placeholderTextColor="#dedede"
-              onFocus={() => {inputRef.current.blur();navigation.navigate("CreatePost",{mode: mode.current});}}
-              onBlur={() => {appContext.setKeyBoardHeight(keyBoardHeight)}}
-              ref = {inputRef}
+              onFocus={() => { inputRef.current.blur(); navigation.navigate("CreatePost", { mode: mode.current }); }}
+              onBlur={() => { appContext.setKeyBoardHeight(keyBoardHeight) }}
+              ref={inputRef}
             >
             </TextInput>
           </View>
         </View>
         <View style={styles.mediaArea}>
-          <Pressable style={styles.mediaPost} onPress={()=>{mode.current = 'image', inputRef.current.focus()}}>
+          <Pressable style={styles.mediaPost} onPress={() => { mode.current = 'image', inputRef.current.focus() }}>
             <IconImage style={styles.iconImage} />
             <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
               Đăng ảnh
             </Text>
           </Pressable>
-          <Pressable style={styles.mediaPost} onPress={()=>{mode.current = 'video', inputRef.current.focus()}}>
+          <Pressable style={styles.mediaPost} onPress={() => { mode.current = 'video', inputRef.current.focus() }}>
             <IconVideo style={styles.iconVideo} />
             <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
               Đăng video
@@ -252,6 +252,7 @@ export default function TimeLineScreen({ navigation }) {
       </>
     );
   }
+
 
   return (
     <View style={styles.container}>
@@ -309,9 +310,8 @@ export default function TimeLineScreen({ navigation }) {
             <Post mode={"timeline"} updateFunc={getPosts} post={item} navigation={navigation} />
           </View>
         )}
-        style={{marginBottom: 74}}
+        style={{ marginBottom: 74 }}
       />
-
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useRef, useEffect } from 'react';
+import React, { useState, useLayoutEffect, useRef, useEffect , useContext} from 'react';
 import { StyleSheet, StatusBar, LinearGradient, Text, View, Button, ScrollView, TextInput, FlatList, TouchableOpacity, Pressable, KeyboardAvoidingView, Keyboard } from 'react-native';
 import { Avatar, ListItem, Icon } from 'react-native-elements';
 import HeaderBar from '../screens/components/HeaderBar'
@@ -10,8 +10,7 @@ import IconPhoto from '../../assets/icn_csc_menu_sticker_n.svg'
 import AuthContext from '../components/context/AuthContext';
 import { Api } from '../api/Api.js';
 import { TimeUtility } from '../utils/TimeUtility.js';
-import FlashMessage from "react-native-flash-message";
-import { showMessage, hideMessage } from "react-native-flash-message";
+import AppContext from "../components/context/AppContext";
 
 const BaseURL = 'http://13.76.46.159:8000/files/';
 const renderItem = ({ item }) => (
@@ -44,12 +43,14 @@ const renderItem = ({ item }) => (
 export default function PostScreen({ navigation, route }) {
     const mounted = useRef(false);
     const flatList = useRef(null);
+    const flashMessage = useRef("commentFlash");
 
     useEffect(() => {
         mounted.current = true;
 
         return () => { mounted.current = false; };
     }, []);
+    const appContext = useContext(AppContext)
     const context = React.useContext(AuthContext);
     const [listComment, setListComment] = useState("");
     const [countComment, setCountComment] = useState(0);
@@ -66,11 +67,14 @@ export default function PostScreen({ navigation, route }) {
             setNeedUpdateParent(true);
             setDidComment(true);
             Keyboard.dismiss();
-            showMessage({
+            appContext.displayMessage({
                 message: "Đã gửi bình luận",
                 type: "info",
                 style: { marginLeft: "auto" },
-                // backgroundColor: "#0092fa",
+                icon:"success",
+                position: "top",
+                duration: 1600,
+                backgroundColor: "#008bd7",
             });
             getListComment();
         } catch (err) {
@@ -195,7 +199,6 @@ export default function PostScreen({ navigation, route }) {
 
     return (
         <>
-            <FlashMessage position="top" titleStyle={{ fontSize: 16, marginLeft: 12, marginTop: 1 }} icon="success" />
             <View style={styles.container} >
                 <HeaderBar text="Bình luận" goBackFunc={goBackFunc} navigation={navigation} />
                 <View style={styles.postAndComment}>
