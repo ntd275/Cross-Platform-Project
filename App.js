@@ -22,6 +22,7 @@ import { LogBox } from 'react-native';
 import FlashMessage from "react-native-flash-message";
 import { showMessage, hideMessage } from "react-native-flash-message";
 
+
 const Tab = createBottomTabNavigator();
 
 export default function App() {
@@ -55,6 +56,15 @@ export default function App() {
     }
   }
 
+  let socket = null;
+
+  if(loginState.accessToken){
+    const { io } = require("socket.io-client");
+    socket = io("http://13.76.46.159:3000", {auth: {
+      token: loginState.accessToken,
+    }});
+
+
   const [keyBoardHeight, setKeyBoardHeight] = React.useState(0)
   const [avatar, setAvatar] = React.useState("avatar_2.png")
   const appContext = {
@@ -63,6 +73,9 @@ export default function App() {
     avatar,
     setAvatar: _setAvatar,
     displayMessage: displayMessage,
+    socket: socket
+  }
+
   }
 
   return (
