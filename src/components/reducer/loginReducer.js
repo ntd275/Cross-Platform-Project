@@ -3,10 +3,11 @@ export const loginReducer = (prevState, action) => {
         case 'LOGIN': 
             return {
                 ...prevState,
-                userName: action.userName,
+                userName: action.username,
                 accessToken: action.accessToken,
                 userId: action.userId,
                 isLoading: false,
+                socket:  action.socket,
             }
         case 'LOGOUT':
             return {
