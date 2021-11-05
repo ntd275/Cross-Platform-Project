@@ -39,18 +39,34 @@ export default function HomeMessageScreen({ navigation }) {
     setSearch(search);
   };
 
+
   const getListChats = async () => {
     if (isLoading) {
       return
     }
-    console.log("called")
+    // console.log("called")
     setIsLoading(true)
     try {
       accessToken = context.loginState.accessToken;
 
       const res = await Api.getChats(accessToken);
       let listChats = res.data.data;
+      let listChatId = [];
+      let listUnseens = chatContext.listUnseens;
+      for(let i=0; i< listChats.length; i++){
+        if(!listChats[i].seen){
+          listChatId.push(listChats[i].chatId);
+        }else{
+          let index = listUnseens.indexOf(listChats[i].chatId);
+          if(index !== -1){
+            listUnseens.splice(index, 1);
+          }
+        }
+      }
+      let temp = Array.from(new Set(listChatId.concat(listUnseens)));
+      // console.log(temp);
       chatContext.setListChats(listChats);
+      chatContext.setListUnseens(temp);
       // console.log(chatContext.listChats);
 
       if (needReload) {
@@ -86,19 +102,25 @@ export default function HomeMessageScreen({ navigation }) {
   };
 
   var Message = (userName, lastMessage, avatarURL, isread) => {
+    let content = lastMessage.content;
+    if(lastMessage.senderId == context.loginState.userId){
+      content= "Bạn: " + content;
+    }
     return (
-      <TouchableOpacity onPress={pressChat}>
+      <TouchableOpacity 
+      onPress={pressChat}
+      >
         <View style={{ flexDirection: "row", alignItems: "center"}}>
           <View style={styles.avatars}>
             <Avatar
               rounded
-              size={56.5}
+              size={55.5}
               source={{
                 uri: avatarURL,
               }}
             />
           </View>
-          <View style={{ marginLeft: 14, width: "80%", borderBottomColor: "#ebeceb",borderBottomWidth: 1, marginTop: 12, paddingBottom: 20 }}>
+          <View style={{ marginLeft: 12, width: "80%", borderBottomColor: "#ebeceb",borderBottomWidth: 1, marginTop: 12, paddingBottom: 16 }}>
             <View style={{ flexDirection: "row" }}>
               <View>
                 <Text style={{ fontSize: 17, fontWeight:  isread? '500': '700', paddingBottom: 6 }}>{userName}</Text>
@@ -107,7 +129,7 @@ export default function HomeMessageScreen({ navigation }) {
                 <Text style={{ textAlign: "right", opacity: isread ? 0.5 : 1, fontSize: 13, fontWeight:  isread? '400': '500', }}>{TimeUtility.getTimeStr(new Date(lastMessage.time))} </Text>
               </View>
             </View >
-            <Text style={{ opacity: isread ? 0.5 : 1, fontSize: 15, maxWidth: "74%", fontWeight:  isread? '400': '500',}} numberOfLines={1}>{lastMessage.content}</Text>
+            <Text style={{ opacity: isread ? 0.5 : 1, fontSize: 15, maxWidth: "74%", fontWeight:  isread? '400': '500',}} numberOfLines={1}>{content}</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -119,9 +141,9 @@ export default function HomeMessageScreen({ navigation }) {
   if (chats) {
     for (let i = 0; i < chats.length; i++) {
       chatList.push(
-        <TouchableHighlight key={i} style={{ marginTop: 12 }}>
+        <View key={i} style={{ marginTop: 12 }}>
           {Message(chats[i].friend.username, chats[i].lastMessage, BaseURL +  chats[i].friend.avatar.fileName, chats[i].seen)}
-        </TouchableHighlight>
+        </View>
       );
     }
   }
@@ -243,7 +265,7 @@ export default function HomeMessageScreen({ navigation }) {
         >
           {NotiHeader()}
           {chatList}
-          <View style={{height:134}}></View>
+          <View style={{height:194}}></View>
         </ScrollView>
       </View>
     </View>

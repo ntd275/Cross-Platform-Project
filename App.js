@@ -22,6 +22,7 @@ import ChatContext from './src/components/context/ChatContext';
 import { LogBox } from 'react-native';
 import FlashMessage from "react-native-flash-message";
 import { showMessage, hideMessage } from "react-native-flash-message";
+import {Api} from './src/api/Api'
 
 
 const Tab = createBottomTabNavigator();
@@ -74,6 +75,33 @@ export default function App() {
   const [curMessages, setCurMessages] = React.useState([]);
   const [listChats, setListChats] = React.useState(null);
 
+  const getListChats = async () => {
+    try {
+      accessToken = loginState.accessToken;
+
+      const res = await Api.getChats(accessToken);
+      let listChats = res.data.data;
+      let listChatId = [];
+      let temp = listUnseens;
+      for(let i=0; i< listChats.length; i++){
+        if(!listChats[i].seen){
+          listChatId.push(listChats[i].chatId);
+        }else{
+          let index = temp.indexOf(listChats[i].chatId);
+          if(index !== -1){
+            temp.splice(index, 1);
+          }
+        }
+      }
+      temp = Array.from(new Set(listChatId.concat(temp)));
+      // console.log(temp);
+      setListChats(listChats);
+      setListUnseens(temp);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   var resetChat = () => {
     setCurFriendId(null);
     setCurChatId(null);
@@ -94,6 +122,7 @@ export default function App() {
     setListChats,
     curChatId,
     setCurChatId,
+    getListChats,
   }
 
   return (
@@ -119,7 +148,9 @@ export default function App() {
                           return <IconTabMessageFocus />
                         }
                         return <IconTabMessage />
-                      }
+                      },
+                      tabBarBadge: listUnseens.length,
+                      tabBarBadgeStyle: {display: listUnseens.length>0 ? "flex" : "none"}
                     }}
                   />
                   <Tab.Screen name="Danh bạ" component={ContactStackScreen}
