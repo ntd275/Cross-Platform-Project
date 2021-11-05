@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, KeyboardAvoidingView, TextInput, Pressable, Text, View, StatusBar, Button, ImageBackground, TouchableHighlight, TouchableOpacity } from 'react-native';
+import { ScrollView, Image, StyleSheet, KeyboardAvoidingView, TextInput, Pressable, Text, View, StatusBar, Button, ImageBackground, TouchableHighlight, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import IconBack from '../../assets/ic_nav_header_back.svg'
 import { TextField } from 'rn-material-ui-textfield';
 import { Icon, Avatar } from 'react-native-elements';
 import { Api } from '../api/Api'
 import AuthContext from '../components/context/AuthContext';
+import ChatContext from '../components/context/ChatContext';
 import IconSend from '../../assets/icn_send.svg'
 import IconSendDiable from '../../assets/icn_send_disable.svg'
 import IconPhoto from '../../assets/icn_csc_menu_sticker_n.svg'
@@ -15,98 +16,75 @@ import IconAddFriend from '../../assets/ic_adduser_line_24.svg'
 import { color } from 'react-native-elements/dist/helpers';
 import { TimeUtility } from '../utils/TimeUtility'
 import { TextUtility } from '../utils/TextUtility'
+import ExpoFastImage from 'expo-fast-image';
+import { setStatusBarNetworkActivityIndicatorVisible } from 'expo-status-bar';
 
 
-const minPasswordLength = 6;
-const maxPasswordLength = 10;
-const ERROR_PHONENUMBER_AND_PASSWORD = "Mật khẩu không được trùng với số điện thoại";
-
-export default function ConversationScreen({ navigation, friendInfo }) {
-    let testInfo = {
-        username: "Nguyễn Thế Đức",
-        avatar: "https://scontent.fhan3-4.fna.fbcdn.net/v/t1.6435-9/82941062_2537534526492475_6431974749965910016_n.jpg?_nc_cat=104&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=fR3LcuaIaT8AX-g_OEo&_nc_ht=scontent.fhan3-4.fna&oh=c607895b42fed9c264a0e2321819ebad&oe=61980AEA",
-        id: "2",
-        phonenumber: "0987654321"
-    }
-    let testListMessage = [
-        {
-            content: "Alo",
-            reciverId: "1",
-            senderId: "2",
-            date: new Date(1635549188000)
-        },
-        {
-            content: "Alo",
-            reciverId: "2",
-            senderId: "1",
-            date: new Date(1635549647000)
-        },
-        {
-            content: "Ông có đang rảnh không?",
-            reciverId: "1",
-            senderId: "2",
-            date: new Date(1635549947000)
-        },
-        {
-            content: "Tôi nhờ một chút",
-            reciverId: "1",
-            senderId: "2",
-            date: new Date(1635549957000)
-        },
-        {
-            content: "Sao thế?",
-            reciverId: "2",
-            senderId: "1",
-            date: new Date(1635550127000)
-        },
-        {
-            content: "Số điện thoại tôi là gì thế nhỉ, tôi quên rồi :((",
-            reciverId: "1",
-            senderId: "2",
-            date: new Date(1635550247000)
-        },
-        {
-            content: "Đây",
-            reciverId: "1",
-            senderId: "1",
-            date: new Date(1635550307000)
-        },
-        {
-            content: "0987654321",
-            reciverId: "1",
-            senderId: "1",
-            date: new Date(1635550307000)
-        },
-        {
-            content: "À trang ictsv của trường mình là gì thế nhỉ?",
-            reciverId: "1",
-            senderId: "2",
-            date: new Date(1635615107000)
-        },
-        {
-            content: "Đây",
-            reciverId: "1",
-            senderId: "1",
-            date: new Date(1635618707000)
-        },
-        {
-            content: "Link này: ctsv.hust.edu.vn, à số điện thoại ông đây chắc ông quên r: 0987654321",
-            reciverId: "1",
-            senderId: "1",
-            date: new Date(1635618707000)
-        },
-    ];
-    const [friend, setFriend] = useState(testInfo);
+export default function ConversationScreen({ route, navigation }) {
+    const context = React.useContext(AuthContext);
+    const chatContext = React.useContext(ChatContext);
     const [messageContent, setMessageContent] = useState("");
     const [inputHeight, setInputHeight] = useState(40);
-    const [messages, setMessages] = useState(testListMessage);
+    const friend = route.params.friend;
+    var messages = [];
     const [isFriend, setIsFriend] = useState(false);
-    const [showRecommend, setShowRecommend] = useState(true);
-    let userId = "1";
+    const [showRecommend, setShowRecommend] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    let userId = context.loginState.userId;
 
-    if (friendInfo) {
-        setFriend(friendInfo);
+    const getListMessages = async () => {
+        if (isLoading) {
+            return
+        }
+        // console.log("called")
+        setIsLoading(true)
+        try {
+            accessToken = context.loginState.accessToken;
+
+            const res = await Api.getMessages(accessToken, route.params.chatId);
+            console.log("called")
+            let listMessages = res.data.data;
+            messages = listMessages;
+            chatContext.setNeedGetMessages(false);
+            chatContext.setCurMessages(listMessages);
+
+
+            setIsLoading(false)
+        } catch (err) {
+            if (err.response && err.response.status == 401) {
+                console.log(err.response.data.message);
+                // setNotification("Không thể nhận diện");
+                // console.log(notification)
+                setIsLoading(false)
+                return;
+            }
+            console.log(err);
+            navigation.navigate("NoConnectionScreen", {
+                message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+            });
+        }
     }
+
+    if (chatContext.needGetMessages && !isLoading) {
+
+        if (route.params.chatId) {
+            if (!route.params.isread) {
+                context.loginState.socket.emit("seenMessage", {
+                    token: "a " + context.loginState.accessToken,
+                    chatId: route.params.chatId.chatId
+                });
+            }
+            getListMessages();
+        }
+        else {
+            // chatContext.setCurMessages([]);
+            chatContext.setNeedGetMessages(false);
+        }
+    } else if (!chatContext.needGetMessages && !isLoading) {
+        messages = chatContext.curMessages;
+    }
+
+
 
     var sendMessage = () => {
         console.log("sending ...");
@@ -114,10 +92,10 @@ export default function ConversationScreen({ navigation, friendInfo }) {
 
     var goToOption = () => {
         // console.log("navigating ...");
-        navigation.navigate("ConversationOption", {friendInfo: friend})
+        navigation.navigate("ConversationOption", { friendInfo: friend })
     }
-    
-    var requestFriend = ()=>{
+
+    var requestFriend = () => {
         console.log("sending friend request. ...")
         setShowRecommend(false);
     }
@@ -168,17 +146,18 @@ export default function ConversationScreen({ navigation, friendInfo }) {
         );
     }
 
-    var FriendAvatar = () => {
+    var FriendAvatar = ({ friend }) => {
         return (
-            <Avatar
-                size={28}
-                rounded
-                onPress={() => goToUserPage(friend)}
-                activeOpacity={0.8}
-                source={{ uri: friend.avatar }}
-            />
+            <TouchableOpacity onPress={() => goToUserPage(friend)}>
+                <ExpoFastImage
+                    style={{ height: 28, width: 28, borderRadius: 28 }}
+                    uri={friend.avatar}
+                    cacheKey={friend.userId + 'avatar' + new Date().getMinutes() + new Date().getHours() +new Date().getDay() + new Date().getMonth() + new Date().getFullYear()}
+                    resizeMode="contain"
+                />
+            </TouchableOpacity>
         );
-    }
+    };
 
     var UserMessage = (key, message, isShowTime) => {
         const [phoneInfo, setPhoneInfo] = useState(null);
@@ -197,7 +176,7 @@ export default function ConversationScreen({ navigation, friendInfo }) {
             <View key={key} style={styles.userMessage}>
                 {TextUI}
                 {userTag}
-                {isShowTime ? HourTag(new Date(message.date)) : <></>}
+                {isShowTime ? HourTag(new Date(message.time)) : <></>}
             </View>
         );
     }
@@ -212,10 +191,10 @@ export default function ConversationScreen({ navigation, friendInfo }) {
 
         return (
             <View key={key} style={styles.friendMessageContainer}>
-                {isShowAvatar ? FriendAvatar() : <></>}
+                {isShowAvatar ? <FriendAvatar friend={friend} /> : <></>}
                 <View style={messageStyle}>
                     {TextUI}
-                    {isShowTime ? HourTag(new Date(message.date)) : <></>}
+                    {isShowTime ? HourTag(new Date(message.time)) : <></>}
                 </View>
             </View>
         );
@@ -225,14 +204,40 @@ export default function ConversationScreen({ navigation, friendInfo }) {
         console.log("Go to user's page!");
     }
 
-    var RecommendFriend = ()=>{
-        return(
+    var RecommendFriend = () => {
+        return (
             <View style={styles.recommendFriend}>
-                <TouchableOpacity style={{flexDirection: "row", alignSelf:"center", marginTop: 11}} onPress={requestFriend}>
-                    <IconAddFriend/>
-                    <Text style={{fontSize: 16, marginLeft: 6, paddingTop:3}}>Kết bạn</Text>
+                <TouchableOpacity style={{ flexDirection: "row", alignSelf: "center", marginTop: 11 }} onPress={requestFriend}>
+                    <IconAddFriend />
+                    <Text style={{ fontSize: 16, marginLeft: 6, paddingTop: 3 }}>Kết bạn</Text>
                 </TouchableOpacity>
             </View>
+        );
+    }
+
+
+    var NotiHeader = () => {
+        if (chatContext.needGetMessages && isLoading) {
+            return (
+                <View style={{ marginTop: 10 }}>
+                    <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
+                    <Image
+                        source={require("../../assets/loading.gif")}
+                        style={{ alignSelf: "center" }}
+                    />
+                </View>
+            );
+        }
+        if (messages && messages.length == 0) {
+            return (
+                <View style={{ marginTop: 10 }}>
+                    <Text style={styles.describeText}>Hãy bắt đầu cuộc trò chuyện nào!</Text>
+                </View>
+            );
+        }
+
+        return (
+            <></>
         );
     }
 
@@ -244,7 +249,7 @@ export default function ConversationScreen({ navigation, friendInfo }) {
             let isShowTime = false;
             let curMessage = messages[i];
             curSender = curMessage.senderId;
-            curDate = curMessage.date;
+            curDate = curMessage.time;
             if (!prevDate || TimeUtility.getHourDiff(prevDate, curDate) > 4) {
                 list.push(DateTag(new Date(curDate), "date" + i));
             }
@@ -265,10 +270,12 @@ export default function ConversationScreen({ navigation, friendInfo }) {
         }
         return (
             <View style={{ marginBottom: 40 }}>
+                <NotiHeader />
                 {list}
             </View>
         );
     }
+
 
     return (
         <View style={styles.container}>
@@ -306,7 +313,7 @@ export default function ConversationScreen({ navigation, friendInfo }) {
             {(showRecommend && isFriend == false) ? RecommendFriend() : <></>}
             <View flex={1}>
                 <ScrollView style={styles.listMessage} scrollEnabled={true}>
-                    {ListMessage()}
+                    {!chatContext.needGetMessages && !isLoading ? <ListMessage /> : <></>}
                 </ScrollView>
             </View>
             <KeyboardAvoidingView style={styles.inputContainer} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -477,7 +484,16 @@ const styles = StyleSheet.create({
     recommendFriend: {
         width: "100%",
         height: 45,
-        alignContent:"center",
+        alignContent: "center",
         backgroundColor: "#fff",
+    },
+    describeText: {
+        fontSize: 14,
+        paddingLeft: 16,
+        paddingRight: 16,
+        color: "#778993",
+        marginTop: 12,
+        marginBottom: 12,
+        textAlign: "center"
     },
 });

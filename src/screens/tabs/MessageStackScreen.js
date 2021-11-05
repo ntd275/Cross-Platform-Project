@@ -5,10 +5,20 @@ import ConversationScreen from '../ConversationScreen';
 import ConversationOptionScreen from '../ConversationOptionScreen';
 import NoConnectionScreen from "../NoConnectionScreen";
 import Post from "../components/Post"
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 const MessageStack = createNativeStackNavigator();
 
-export default function MessageStackScreen() {
+export default function MessageStackScreen({route, navigation}) {
+  React.useLayoutEffect(() => {
+    const routeName = getFocusedRouteNameFromRoute(route);
+    const hideScreens = ["ConversationScreen", "ConversationOption"]
+    if (hideScreens.includes(routeName)) {
+      navigation.setOptions({ tabBarStyle: { display: 'none' } });
+    } else {
+      navigation.setOptions({ tabBarStyle: { display: null } });
+    }
+  }, [navigation, route]);
   return (
     <MessageStack.Navigator
       screenOptions={{
@@ -18,7 +28,7 @@ export default function MessageStackScreen() {
       <MessageStack.Screen name="HomeMessageScreen" component={HomeMessageScreen} />
       <MessageStack.Screen name="ConversationScreen" component={ConversationScreen} />
       <MessageStack.Screen name="ConversationOption" component={ConversationOptionScreen} />
-      <MessageStack.Screen name="NoConnectionScreen" component={NoConnectionScreen}/>
+      <MessageStack.Screen name="NoConnectionScreen" component={NoConnectionScreen} />
     </MessageStack.Navigator>
   )
 }

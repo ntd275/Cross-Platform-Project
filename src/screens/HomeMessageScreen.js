@@ -97,18 +97,30 @@ export default function HomeMessageScreen({ navigation }) {
     }
   };
 
-  const pressChat = () => {
+  const pressChat = (chatId, friend, isread) => {
+    chatContext.setCurChatId(chatId);
+    chatContext.setCurFriendId(friend.id);
+    chatContext.setNeedGetMessages(true);
+    navigation.navigate("ConversationScreen", {chatId: chatId, friend: friend, isread: isread});
     console.log("go to chat screen");
   };
 
-  var Message = (userName, lastMessage, avatarURL, isread) => {
+  var Message = (userName, lastMessage, avatarURL, isread, chatId, userId, phonenumber) => {
     let content = lastMessage.content;
     if(lastMessage.senderId == context.loginState.userId){
       content= "Bạn: " + content;
     }
     return (
       <TouchableOpacity 
-      onPress={pressChat}
+      onPress={()=>{
+          let friend = {
+            username: userName,
+            avatar: avatarURL,
+            id: userId,
+            phonenumber: phonenumber
+          }
+          pressChat(chatId, friend, isread);
+      }}
       >
         <View style={{ flexDirection: "row", alignItems: "center"}}>
           <View style={styles.avatars}>
@@ -142,7 +154,8 @@ export default function HomeMessageScreen({ navigation }) {
     for (let i = 0; i < chats.length; i++) {
       chatList.push(
         <View key={i} style={{ marginTop: 12 }}>
-          {Message(chats[i].friend.username, chats[i].lastMessage, BaseURL +  chats[i].friend.avatar.fileName, chats[i].seen)}
+          {Message(chats[i].friend.username, chats[i].lastMessage, BaseURL +  chats[i].friend.avatar.fileName, chats[i].seen,
+           chats[i].chatId, chats[i].friend._id, chats[i].friend.phonenumber)}
         </View>
       );
     }

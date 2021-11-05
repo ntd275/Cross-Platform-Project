@@ -71,6 +71,7 @@ export default function App() {
 
   const [curFriendId, setCurFriendId] = React.useState(null);
   const [curChatId, setCurChatId] = React.useState(null);
+  const [needGetMessages, setNeedGetMessages] = React.useState(true);
   const [listUnseens, setListUnseens] = React.useState([]);
   const [curMessages, setCurMessages] = React.useState([]);
   const [listChats, setListChats] = React.useState(null);
@@ -123,6 +124,33 @@ export default function App() {
     curChatId,
     setCurChatId,
     getListChats,
+    needGetMessages,
+    setNeedGetMessages,
+  }
+
+  if(loginState && loginState.socket){
+    loginState.socket.on("message", (msg)=>{
+      if(msg.senderId == curFriendId || msg.receiverId == curFriendId ){
+        loginState.socket.emit("seenMessage", {
+          token: "a " + loginState.accessToken,
+          chatId: msg.chatId
+        });
+        if(curChatId !== msg.chatId){
+          setCurChatId(msg.chatId);
+        }
+        let temp = curMessages;
+        curMessages.push(msg);
+        setCurMessages(msg);
+      }else if(msg.senderId !== loginState.userId){
+        let chatId = msg.chatId;
+        let temp = listUnseens;
+        let index = temp.indexOf(chatId);
+        if(index !== -1){
+          temp.splice(index, 1);
+          setListUnseens(temp);
+        }
+      }
+    });
   }
 
   return (
