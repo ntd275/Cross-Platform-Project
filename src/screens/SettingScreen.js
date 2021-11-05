@@ -17,14 +17,17 @@ import { TextField } from "rn-material-ui-textfield";
 import { Icon } from "react-native-elements";
 import { Api } from "../api/Api";
 import AuthContext from "../components/context/AuthContext";
+import ChatContext from "../components/context/ChatContext";
 import IconSearch from "../../assets/ic_searchbox.svg";
 import { ListItem, Avatar } from "react-native-elements";
 import IconLogout from "../../assets/ic_logout.svg"
 
 export default function SettingScreen({ navigation }) {
   const {dispatch} = React.useContext(AuthContext)
+  const chatContext = React.useContext(ChatContext);
   const logout = () => {
     dispatch({ type: "LOGOUT" });
+    chatContext.resetChat();
   };
   return (
     <View style={styles.container}>

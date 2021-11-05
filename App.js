@@ -18,6 +18,7 @@ import IconTabSocial from './assets/ic_tab_social.svg'
 import IconTabSocialFocus from './assets/ic_tab_social_focus.svg'
 import CreatePost from './src/screens/CreatePost';
 import AppContext from './src/components/context/AppContext';
+import ChatContext from './src/components/context/ChatContext';
 import { LogBox } from 'react-native';
 import FlashMessage from "react-native-flash-message";
 import { showMessage, hideMessage } from "react-native-flash-message";
@@ -67,59 +68,89 @@ export default function App() {
   }
 
 
+  const [curFriendId, setCurFriendId] = React.useState(null);
+  const [curChatId, setCurChatId] = React.useState(null);
+  const [listUnseens, setListUnseens] = React.useState([]);
+  const [curMessages, setCurMessages] = React.useState([]);
+  const [listChats, setListChats] = React.useState(null);
+
+  var resetChat = () => {
+    setCurFriendId(null);
+    setCurChatId(null);
+    setListUnseens([]);
+    setCurMessages([]);
+    setListChats(null);
+  }
+
+  const chatContext = {
+    curFriendId,
+    setCurFriendId,
+    listUnseens,
+    setListUnseens,
+    curMessages,
+    setCurMessages,
+    resetChat,
+    listChats,
+    setListChats,
+    curChatId,
+    setCurChatId,
+  }
+
   return (
     <>
       <FlashMessage ref={flashMessage} position="top" titleStyle={{ fontSize: 16, marginLeft: 12, marginTop: 1 }} />
       <AppContext.Provider value={appContext}>
 
         <AuthContext.Provider value={authContext}>
-          <NavigationContainer>
+          <ChatContext.Provider value={chatContext}>
+            <NavigationContainer>
 
-            {loginState.accessToken == null ? <LoginStackScreen /> :
-              (<Tab.Navigator
-                screenOptions={{
-                  headerShown: false
-                }}
-              >
+              {loginState.accessToken == null ? <LoginStackScreen /> :
+                (<Tab.Navigator
+                  screenOptions={{
+                    headerShown: false
+                  }}
+                >
 
-                <Tab.Screen name="Tin nhắn" component={MessageStackScreen}
-                  options={{
+                  <Tab.Screen name="Tin nhắn" component={MessageStackScreen}
+                    options={{
+                      tabBarIcon: ({ focused }) => {
+                        if (focused) {
+                          return <IconTabMessageFocus />
+                        }
+                        return <IconTabMessage />
+                      }
+                    }}
+                  />
+                  <Tab.Screen name="Danh bạ" component={ContactStackScreen}
+                    options={{
+                      tabBarIcon: ({ focused }) => {
+                        if (focused) {
+                          return <IconTabContactFocus />
+                        }
+                        return <IconTabContact />
+                      }
+                    }}
+                  />
+                  <Tab.Screen name="Nhật ký" component={TimeLineStackScreen} options={{
                     tabBarIcon: ({ focused }) => {
                       if (focused) {
-                        return <IconTabMessageFocus />
+                        return <IconTabSocialFocus />
                       }
-                      return <IconTabMessage />
+                      return <IconTabSocial />
                     }
-                  }}
-                />
-                <Tab.Screen name="Danh bạ" component={ContactStackScreen}
-                  options={{
+                  }} />
+                  <Tab.Screen name="Cá nhân" component={ProfileStackScreen} options={{
                     tabBarIcon: ({ focused }) => {
                       if (focused) {
-                        return <IconTabContactFocus />
+                        return <IconTabMeFocus />
                       }
-                      return <IconTabContact />
+                      return <IconTabMe />
                     }
-                  }}
-                />
-                <Tab.Screen name="Nhật ký" component={TimeLineStackScreen} options={{
-                  tabBarIcon: ({ focused }) => {
-                    if (focused) {
-                      return <IconTabSocialFocus />
-                    }
-                    return <IconTabSocial />
-                  }
-                }} />
-                <Tab.Screen name="Cá nhân" component={ProfileStackScreen} options={{
-                  tabBarIcon: ({ focused }) => {
-                    if (focused) {
-                      return <IconTabMeFocus />
-                    }
-                    return <IconTabMe />
-                  }
-                }} />
-              </Tab.Navigator>)}
-          </NavigationContainer>
+                  }} />
+                </Tab.Navigator>)}
+            </NavigationContainer>
+          </ChatContext.Provider>
         </AuthContext.Provider>
       </AppContext.Provider>
     </>

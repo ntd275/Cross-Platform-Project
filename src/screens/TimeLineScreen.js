@@ -277,7 +277,7 @@ export default function TimeLineScreen({ navigation }) {
                 value={search}
                 // onTouchStart={()=>  alert("Hello...")}
                 onEndEditing={getSearchText}
-                placeholder="Tìm bạn bè, tin nhắn, ..."
+                placeholder="Tìm bạn bè, tin nhắn..."
                 placeholderTextColor="#fff"
               ></TextInput>
             </View>

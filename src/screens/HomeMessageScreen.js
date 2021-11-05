@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   StyleSheet,
   ScrollView,
@@ -6,59 +6,195 @@ import {
   TouchableHighlight,
   TouchableOpacity,
   TextInput,
+  Animated,
+  Easing,
+  Image,
+  Text,
+  StatusBar
 } from "react-native";
+import { Avatar } from "react-native-elements";
 import AuthContext from "../components/context/AuthContext";
+import ChatContext from "../components/context/ChatContext";
 import { LinearGradient } from "expo-linear-gradient";
 import IconSearch from "../../assets/search-outline.svg";
 import IconQR from "../../assets/ic_scan_qr_footer.svg";
 import IconAdd from "../../assets/add-outline.svg";
-import Message from "./components/Message";
-export default function HomeMessageScreen() {
+import { Api } from '../api/Api'
+import { TimeUtility } from "../utils/TimeUtility";
+
+const BaseURL = "http://13.76.46.159:8000/files/"
+
+export default function HomeMessageScreen({ navigation }) {
+  const context = React.useContext(AuthContext);
+  const chatContext = React.useContext(ChatContext);
   const [search, setSearch] = useState("");
-  const [isRead, setIsRead] = useState(false)
+  const [needReload, setNeedReload] = useState(chatContext.listChats ? false : true);
+  const [firstLoad, setFirstLoad] = useState(chatContext.listChats ? false : true);
+  const [isLoading, setIsLoading] = useState(false);
+  // if(firstLoad){
+  //   chatContext.setGetListChats(getListChats);
+  // }
+
   const updateSearch = (search) => {
     setSearch(search);
   };
+
+  const getListChats = async () => {
+    if (isLoading) {
+      return
+    }
+    console.log("called")
+    setIsLoading(true)
+    try {
+      accessToken = context.loginState.accessToken;
+
+      const res = await Api.getChats(accessToken);
+      let listChats = res.data.data;
+      chatContext.setListChats(listChats);
+      // console.log(chatContext.listChats);
+
+      if (needReload) {
+        setNeedReload(false);
+      }
+
+      if (firstLoad) {
+        setFirstLoad(false);
+      }
+
+      setIsLoading(false)
+      if (!firstLoad) {
+        closeLoading()
+      }
+
+    } catch (err) {
+      if (err.response && err.response.status == 401) {
+        console.log(err.response.data.message);
+        // setNotification("Không thể nhận diện");
+        // console.log(notification)
+        setIsLoading(false)
+        return;
+      }
+      console.log(err);
+      navigation.navigate("NoConnectionScreen", {
+        message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+      });
+    }
+  };
+
+  const pressChat = () => {
+    console.log("go to chat screen");
+  };
+
+  var Message = (userName, lastMessage, avatarURL, isread) => {
+    return (
+      <TouchableOpacity onPress={pressChat}>
+        <View style={{ flexDirection: "row", alignItems: "center"}}>
+          <View style={styles.avatars}>
+            <Avatar
+              rounded
+              size={56.5}
+              source={{
+                uri: avatarURL,
+              }}
+            />
+          </View>
+          <View style={{ marginLeft: 14, width: "80%", borderBottomColor: "#ebeceb",borderBottomWidth: 1, marginTop: 12, paddingBottom: 20 }}>
+            <View style={{ flexDirection: "row" }}>
+              <View>
+                <Text style={{ fontSize: 17, fontWeight:  isread? '500': '700', paddingBottom: 6 }}>{userName}</Text>
+              </View>
+              <View style={{ marginLeft: "auto", marginRight: 14 }}>
+                <Text style={{ textAlign: "right", opacity: isread ? 0.5 : 1, fontSize: 13, fontWeight:  isread? '400': '500', }}>{TimeUtility.getTimeStr(new Date(lastMessage.time))} </Text>
+              </View>
+            </View >
+            <Text style={{ opacity: isread ? 0.5 : 1, fontSize: 15, maxWidth: "74%", fontWeight:  isread? '400': '500',}} numberOfLines={1}>{lastMessage.content}</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+
+  let chats = chatContext.listChats;
+  let chatList = [];
+  if (chats) {
+    for (let i = 0; i < chats.length; i++) {
+      chatList.push(
+        <TouchableHighlight key={i} style={{ marginTop: 12 }}>
+          {Message(chats[i].friend.username, chats[i].lastMessage, BaseURL +  chats[i].friend.avatar.fileName, chats[i].seen)}
+        </TouchableHighlight>
+      );
+    }
+  }
+
+
+  let opacity = useRef(new Animated.Value(0))
+
+  let openLoading = () => {
+    opacity.current.setValue(100)
+  }
+
   const getSearchText = () => {
     console.log(search);
   };
-  let datas = [
-    {
-      avatar:
-        "https://scontent.fhan2-4.fna.fbcdn.net/v/t1.6435-9/133090782_1371551809851101_5019511807721447445_n.jpg?_nc_cat=100&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=bCAO7C_sS4EAX_qyJiC&tn=3oiMvUeJSpvhduTu&_nc_ht=scontent.fhan2-4.fna&oh=48243902ce00139fbac561642e71d76a&oe=61994089",
-      userName: "Tiểu Mai",
-      lastMessage: "Em Yêu Anh",
-      lastTimeChat: "Vừa xong",
-    },
-    {
-      avatar:
-        "https://scontent.fhan14-2.fna.fbcdn.net/v/t1.6435-9/69630456_1167922943417332_306513317491376128_n.jpg?_nc_cat=108&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=aIiB6rnovfIAX-fgy8j&tn=3oiMvUeJSpvhduTu&_nc_ht=scontent.fhan14-2.fna&oh=dddc5362a24270abd0562e3fe3b9fcd6&oe=61A1F823",
-      userName: "Phong Ha",
-      lastMessage: "Ah hihi ",
-      lastTimeChat: "Vừa xong",
-    },
-    {
-      avatar:
-        "https://scontent.fhan14-2.fna.fbcdn.net/v/t31.18172-8/28164977_894042084103505_4027496170173227810_o.jpg?_nc_cat=103&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=X4w42rK-MncAX8oyX-3&_nc_ht=scontent.fhan14-2.fna&oh=c3e8c090d382a5a841eec2ba78849ab1&oe=61A2ADC0",
-      userName: "Vũ Nhật Anh",
-      lastMessage: "Anh gửi em mấy tỉ tiêu dần",
-      lastTimeChat: "2 phút trước",
-    },
-  ];
-  messageList = [];
-  for (let i = 0; i < datas.length; i++) {
-    messageList.push(
-      <TouchableHighlight key={i} style={{ marginTop: 12 }}>
-        <Message
-          userName={datas[i].userName}
-          lastMessage={datas[i].lastMessage}
-          lastTimeChat={datas[i].lastTimeChat}
-          avatar={datas[i].avatar}
-          isread = {isRead}
-        ></Message>
-      </TouchableHighlight>
+
+  let closeLoading = () => {
+    opacity.current.setValue(100)
+    Animated.timing(opacity.current, {
+      toValue: 0,
+      duration: 500,
+      easing: Easing.ease,
+      useNativeDriver: false
+    }).start();
+  }
+
+  if (needReload && !isLoading) {
+    getListChats();
+  }
+
+  var NotiHeader = () => {
+    if (needReload && firstLoad) {
+      return (
+        <View style={{ marginTop: 10 }}>
+          <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
+          <Image
+            source={require("../../assets/loading.gif")}
+            style={{ alignSelf: "center" }}
+          />
+        </View>
+      );
+    }
+    if (chats && chats.length == 0) {
+      return (
+        <View style={{ marginTop: 10 }}>
+          <Text style={styles.describeText}>Chưa có cuộc trò chuyện nào</Text>
+        </View>
+      );
+    }
+
+    return (
+      <></>
     );
   }
+
+  var LoadingHeader = () => {
+    return (
+      <Animated.View style={{ height: opacity.current, overflow:"hidden" }} >
+        <Image
+          source={require("../../assets/loading.gif")}
+          style={{ alignSelf: "center", marginTop: 10}}
+        />
+        <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
+      </Animated.View>
+    );
+  }
+
+  var handleScrollDrag = function (event) {
+    if (event.nativeEvent.contentOffset.y < -80 && !needReload) {
+      openLoading()
+      setNeedReload(true)
+    }
+  }
+
   return (
     <View style={styles.container}>
       <View>
@@ -81,7 +217,7 @@ export default function HomeMessageScreen() {
                 onChangeText={updateSearch}
                 value={search}
                 onEndEditing={getSearchText}
-                placeholder="Tìm bạn bè, tin nhắn, ..."
+                placeholder="Tìm bạn bè, tin nhắn,..."
                 placeholderTextColor="#fff"
               ></TextInput>
             </View>
@@ -92,20 +228,35 @@ export default function HomeMessageScreen() {
               <IconAdd style={styles.iconAdd} />
             </View>
           </View>
+          <StatusBar
+            backgroundColor="#00000000"
+            barStyle="light-content"
+            translucent={true}
+          />
         </LinearGradient>
-        <ScrollView style={{ height: "100%" }}>{messageList}</ScrollView>
+        <View>
+          {LoadingHeader()}
+        </View>
+        <ScrollView
+          onScrollEndDrag={handleScrollDrag}
+          style={{minHeight: '100%', backgroundColor: "#fff"}}
+        >
+          {NotiHeader()}
+          {chatList}
+          <View style={{height:134}}></View>
+        </ScrollView>
       </View>
     </View>
   );
 }
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f6f6f6",
+    backgroundColor: "#fff",
     flexDirection: "column",
   },
   input: {
     color: "white",
-    fontSize: 18,
+    fontSize: 16,
     marginLeft: 16,
     width: "100%",
     marginTop: 4,
@@ -137,5 +288,19 @@ const styles = StyleSheet.create({
     marginLeft: "auto",
     marginRight: 12,
     marginTop: 0,
+  },
+  describeText: {
+    fontSize: 14,
+    paddingLeft: 16,
+    paddingRight: 16,
+    color: "#778993",
+    marginTop: 12,
+    marginBottom: 12,
+    textAlign: "center"
+  },
+  avatars: {
+    marginLeft: 12,
+    marginTop: 6,
+    marginBottom: 10,
   },
 });

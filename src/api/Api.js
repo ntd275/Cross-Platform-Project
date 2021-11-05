@@ -103,6 +103,21 @@ export const Api = {
                 "authorization":token
             }
         })
-    }
+    },
+    getChats: (token) => {
+        return axios({
+            method: 'get',
+            url: `${BaseURL}/chats/getChats`,
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', authorization: "a "+token },
+        })
+    },
+
+    getMessages: (token, chatId) => {
+        return axios({
+            method: 'get',
+            url: `${BaseURL}/chats/getMessages/${chatId}`,
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', authorization: "a "+token },
+        })
+    },
 }
 
