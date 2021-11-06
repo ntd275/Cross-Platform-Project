@@ -112,7 +112,7 @@ export default function ConversationScreen({ route, navigation }) {
         setMessages(temp);
         setNewMessage(null);
         if (isSending) {
-            Keyboard.dismiss();
+            // Keyboard.dismiss();
             setIsSending(false);
         }
     }
@@ -125,7 +125,7 @@ export default function ConversationScreen({ route, navigation }) {
         let content = messageContent
         setTimeout(()=>{
             setMessageContent("");
-        }, 200);
+        }, 100);
  
         setIsSending(true);
         context.loginState.socket.emit("chatmessage", {
