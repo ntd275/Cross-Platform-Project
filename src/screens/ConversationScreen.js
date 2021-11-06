@@ -20,6 +20,73 @@ import ExpoFastImage from 'expo-fast-image';
 import { setStatusBarNetworkActivityIndicatorVisible } from 'expo-status-bar';
 
 
+function ChatInput({ scrollViewRef, isLoading, isSending, setIsSending }) {
+    const context = React.useContext(AuthContext);
+    const chatContext = React.useContext(ChatContext);
+    const [messageContent, setMessageContent] = useState("");
+    const [inputHeight, setInputHeight] = useState(40);
+    var sendMessage = () => {
+        if (isSending || isLoading) {
+            return;
+        }
+        let content = messageContent
+        setTimeout(() => {
+            setMessageContent("");
+        }, 100);
+
+        setIsSending(true);
+        context.loginState.socket.emit("chatmessage", {
+            token: context.loginState.accessToken,
+            chatId: chatContext.curChatId ? chatContext.curChatId : null,
+            receiverId: chatContext.curFriendId,
+            content: content
+        });
+        console.log("sending ...");
+    };
+
+    return (
+        <View style={{ flexDirection: 'row' }}>
+            <View style={styles.sendButton}>
+                <TouchableOpacity>
+                    <IconPhoto />
+                </TouchableOpacity>
+            </View>
+            <View style={styles.enterMessageText}>
+
+                <TextInput style={[styles.enterMessage, { height: inputHeight }]}
+                    onFocus={() => scrollViewRef.current.scrollToEnd({ animated: true })}
+                    selectionColor="#2f9afd"
+                    text
+                    keyboardType="default"
+                    placeholderTextColor={"#aeb6bb"}
+                    multiline={true}
+                    placeholder="Tin nhắn"
+                    returnKeyType="none"
+                    enablesReturnKeyAutomatically={false}
+                    onChangeText={text => setMessageContent(text)}
+                    onContentSizeChange={(event) => {
+                        let height = event.nativeEvent.contentSize.height + 8;
+                        if (height > 70) {
+                            height = 70;
+                        }
+                        if (height < 40) {
+                            height = 40;
+                        }
+                        setInputHeight(height);
+                    }}
+                    defaultValue={messageContent}>
+                </TextInput>
+
+            </View>
+            <View style={styles.sendButton}>
+                <TouchableOpacity disabled={!messageContent.match(/\S/)} onPress={sendMessage}>
+                    {messageContent.match(/\S/) ? <IconSend /> : <IconSendDiable />}
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+}
+
 export default function ConversationScreen({ route, navigation }) {
     const mounted = useRef(false);
     const scrollViewRef = useRef(null);
@@ -28,7 +95,6 @@ export default function ConversationScreen({ route, navigation }) {
     const context = React.useContext(AuthContext);
     const chatContext = React.useContext(ChatContext);
     const [messageContent, setMessageContent] = useState("");
-    const [inputHeight, setInputHeight] = useState(40);
     const friend = route.params.friend;
     const [isFriend, setIsFriend] = useState(false);
     const [showRecommend, setShowRecommend] = useState(false);
@@ -51,7 +117,7 @@ export default function ConversationScreen({ route, navigation }) {
                 setNewMessage(msg);
             }
         }
-    
+
         context.loginState.socket.on("message", listener)
         return () => {
             context.loginState.socket.removeListener("message", listener)
@@ -75,7 +141,7 @@ export default function ConversationScreen({ route, navigation }) {
             if (mounted.current == false) {
                 return;
             }
-            if(firstLoad){
+            if (firstLoad) {
                 setFirstLoad(false);
             }
             setIsLoading(false)
@@ -106,7 +172,7 @@ export default function ConversationScreen({ route, navigation }) {
         }
     }
 
-    if(!isLoading && newMessage){
+    if (!isLoading && newMessage) {
         let temp = messages;
         temp.push(newMessage);
         setMessages(temp);
@@ -116,26 +182,6 @@ export default function ConversationScreen({ route, navigation }) {
             setIsSending(false);
         }
     }
-
-
-    var sendMessage = () => {
-        if (isSending || isLoading) {
-            return;
-        }
-        let content = messageContent
-        setTimeout(()=>{
-            setMessageContent("");
-        }, 100);
- 
-        setIsSending(true);
-        context.loginState.socket.emit("chatmessage", {
-            token: context.loginState.accessToken,
-            chatId: chatContext.curChatId ? chatContext.curChatId : null,
-            receiverId: chatContext.curFriendId,
-            content: content
-        });
-        console.log("sending ...");
-    };
 
     var goToOption = () => {
         // console.log("navigating ...");
@@ -377,45 +423,7 @@ export default function ConversationScreen({ route, navigation }) {
                 </ScrollView>
             </View>
             <KeyboardAvoidingView style={styles.inputContainer} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-                <View style={{ flexDirection: 'row' }}>
-                    <View style={styles.sendButton}>
-                        <TouchableOpacity>
-                            <IconPhoto />
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.enterMessageText}>
-
-                        <TextInput style={[styles.enterMessage, { height: inputHeight }]}
-                            onFocus={() => scrollViewRef.current.scrollToEnd({ animated: true })}
-                            selectionColor="#2f9afd"
-                            text
-                            keyboardType="default"
-                            placeholderTextColor={"#aeb6bb"}
-                            multiline={true}
-                            placeholder="Tin nhắn"
-                            returnKeyType="none"
-                            enablesReturnKeyAutomatically={false}
-                            onChangeText={text => setMessageContent(text)}
-                            onContentSizeChange={(event) => {
-                                let height = event.nativeEvent.contentSize.height + 8;
-                                if (height > 70) {
-                                    height = 70;
-                                }
-                                if (height < 40) {
-                                    height = 40;
-                                }
-                                setInputHeight(height);
-                            }}
-                            defaultValue={messageContent}>
-                        </TextInput>
-
-                    </View>
-                    <View style={styles.sendButton}>
-                        <TouchableOpacity disabled={!messageContent.match(/\S/)} onPress={sendMessage}>
-                            {messageContent.match(/\S/) ? <IconSend /> : <IconSendDiable />}
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                <ChatInput scrollViewRef={scrollViewRef} isLoading={isLoading} isSending={isSending} setIsSending={setIsSending} />
             </KeyboardAvoidingView>
         </View>
     )
