@@ -22,7 +22,7 @@ import ChatContext from './src/components/context/ChatContext';
 import { LogBox } from 'react-native';
 import FlashMessage from "react-native-flash-message";
 import { showMessage, hideMessage } from "react-native-flash-message";
-import {Api} from './src/api/Api'
+import { Api } from './src/api/Api'
 import { NativeBaseProvider } from 'native-base';
 
 
@@ -87,23 +87,23 @@ export default function App() {
     setDescription
   }
 
-  const getMe = async()=>{
-    try{
-      const token = "lol "+ loginState.accessToken 
-      let res =await Api.getMe(token)
+  const getMe = async () => {
+    try {
+      const token = "lol " + loginState.accessToken
+      let res = await Api.getMe(token)
       _setAvatar(res.data.data.avatar.fileName)
       _setCoverImage(res.data.data.cover_image.fileName)
       _setDescription(res.data.data.description)
-    } catch (e){
+    } catch (e) {
       console.log(e)
     }
   }
 
-  if(loginState.accessToken){
+  if (loginState.accessToken) {
     getMe()
   }
 
-  
+
 
 
   const [curFriendId, setCurFriendId] = React.useState(null);
@@ -111,7 +111,48 @@ export default function App() {
   const [listUnseens, setListUnseens] = React.useState([]);
   const [listChats, setListChats] = React.useState(null);
   const [inChat, setInChat] = React.useState(false);
+  const [needUpdateListChat, setNeedUpdateListChat] = React.useState(false);
+  const [socket, setSocket] = React.useState(null);
 
+  if (!socket && loginState.userId) {
+    const { io } = require("socket.io-client");
+    const socket = io("http://13.76.46.159:3000", {
+      transportOptions: {
+        polling: {
+          extraHeaders: {
+            token: loginState.accessToken
+          }
+        }
+      }
+    });
+    setSocket(socket);
+
+    socket.on("message", (msg) => {
+      if ((msg.senderId == curFriendId || msg.receiverId == curFriendId) && inChat) {
+        socket.emit("seenMessage", {
+          token: loginState.accessToken,
+          chatId: msg.chatId
+        });
+        if (curChatId !== msg.chatId) {
+          setCurChatId(msg.chatId);
+        }
+      } else if (msg.senderId !== loginState.userId) {
+        let chatId = msg.chatId;
+        let temp = listUnseens;
+        let index = temp.indexOf(chatId);
+        if (index == -1) {
+          temp.push(chatId)
+          setListUnseens(temp);
+        }
+        // console.log("here")
+        // console.log(listUnseens)
+      }
+      if (!needUpdateListChat) {
+        setNeedUpdateListChat(true);
+      }
+    });
+
+  }
 
   const getListChats = async () => {
     try {
@@ -119,17 +160,17 @@ export default function App() {
 
       const res = await Api.getChats(accessToken);
       let listChats = res.data.data;
-      listChats.sort((chata, chatb)=>{
+      listChats.sort((chata, chatb) => {
         return new Date(chata.lastMessage.time).getTime() < new Date(chatb.lastMessage.time).getTime();
       })
       let listChatId = [];
       let temp = listUnseens;
-      for(let i=0; i< listChats.length; i++){
-        if(!listChats[i].seen){
+      for (let i = 0; i < listChats.length; i++) {
+        if (!listChats[i].seen) {
           listChatId.push(listChats[i].chatId);
-        }else{
+        } else {
           let index = temp.indexOf(listChats[i].chatId);
-          if(index !== -1){
+          if (index !== -1) {
             temp.splice(index, 1);
           }
         }
@@ -162,30 +203,10 @@ export default function App() {
     setCurChatId,
     getListChats,
     inChat,
-    setInChat
-  }
-
-  if(loginState && loginState.socket){
-    loginState.socket.removeAllListeners("message");
-    loginState.socket.on("message", (msg)=>{
-      if((msg.senderId == curFriendId || msg.receiverId == curFriendId) && inChat){
-        loginState.socket.emit("seenMessage", {
-          token: loginState.accessToken,
-          chatId: msg.chatId
-        });
-        if(curChatId !== msg.chatId){
-          setCurChatId(msg.chatId);
-        }
-      }else if(msg.senderId !== loginState.userId){
-        let chatId = msg.chatId;
-        let temp = listUnseens;
-        let index = temp.indexOf(chatId);
-        if(index !== -1){
-          temp.splice(index, 1);
-          setListUnseens(temp);
-        }
-      }
-    });
+    setInChat,
+    needUpdateListChat,
+    setNeedUpdateListChat,
+    socket
   }
 
   return (
@@ -207,13 +228,13 @@ export default function App() {
                   <Tab.Screen name="Tin nhắn" component={MessageStackScreen}
                     options={{
                       tabBarIcon: ({ focused }) => {
-                        if (focused) {
+                        if (focused && listUnseens) {
                           return <IconTabMessageFocus />
                         }
                         return <IconTabMessage />
                       },
                       tabBarBadge: listUnseens.length,
-                      tabBarBadgeStyle: {display: listUnseens.length>0 ? "flex" : "none"}
+                      tabBarBadgeStyle: { height: listUnseens.length ? 18 : 0 }
                     }}
                   />
                   <Tab.Screen name="Danh bạ" component={ContactStackScreen}

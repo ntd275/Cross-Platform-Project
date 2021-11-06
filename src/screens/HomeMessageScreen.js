@@ -21,10 +21,13 @@ import IconQR from "../../assets/ic_scan_qr_footer.svg";
 import IconAdd from "../../assets/add-outline.svg";
 import { Api } from '../api/Api'
 import { TimeUtility } from "../utils/TimeUtility";
+import { useIsFocused } from '@react-navigation/native';
 
 const BaseURL = "http://13.76.46.159:8000/files/"
 
 export default function HomeMessageScreen({ navigation }) {
+  const isFocused = useIsFocused();
+  const scrollViewRef = useRef(null);
   const context = React.useContext(AuthContext);
   const chatContext = React.useContext(ChatContext);
   const [search, setSearch] = useState("");
@@ -38,7 +41,6 @@ export default function HomeMessageScreen({ navigation }) {
   const updateSearch = (search) => {
     setSearch(search);
   };
-
 
   const getListChats = async () => {
     if (isLoading) {
@@ -80,10 +82,16 @@ export default function HomeMessageScreen({ navigation }) {
         setFirstLoad(false);
       }
 
-      setIsLoading(false)
-      if (!firstLoad) {
+      if (!firstLoad && !chatContext.needUpdateListChat) {
         closeLoading()
       }
+
+      if(chatContext.needUpdateListChat){
+        chatContext.setNeedUpdateListChat(false);
+        scrollViewRef.current.scrollTo({x: 0, y: 0, animated: true})
+      }
+
+      setIsLoading(false)
 
     } catch (err) {
       if (err.response && err.response.status == 401) {
@@ -100,10 +108,19 @@ export default function HomeMessageScreen({ navigation }) {
     }
   };
 
+  if(!firstLoad && !isLoading && chatContext.needUpdateListChat && isFocused){
+    getListChats();
+  }
+
+
+
   const pressChat = (chatId, friend, isread) => {
     chatContext.setCurChatId(chatId);
     chatContext.setCurFriendId(friend.id);
     chatContext.setInChat(true);
+    if(!isread){
+      chatContext.setNeedUpdateListChat(true);
+    }
     navigation.navigate("ConversationScreen", {chatId: chatId, friend: friend, isread: isread});
     console.log("go to chat screen");
   };
@@ -216,7 +233,7 @@ export default function HomeMessageScreen({ navigation }) {
 
   var LoadingHeader = () => {
     return (
-      <Animated.View style={{ height: opacity.current, overflow:"hidden" }} >
+      <Animated.View style={{ height: opacity.current, overflow:"hidden"}} >
         <Image
           source={require("../../assets/loading.gif")}
           style={{ alignSelf: "center", marginTop: 10}}
@@ -227,7 +244,7 @@ export default function HomeMessageScreen({ navigation }) {
   }
 
   var handleScrollDrag = function (event) {
-    if (event.nativeEvent.contentOffset.y < -80 && !needReload) {
+    if (event.nativeEvent.contentOffset.y < -80 && !needReload && !isLoading) {
       openLoading()
       setNeedReload(true)
     }
@@ -278,6 +295,7 @@ export default function HomeMessageScreen({ navigation }) {
         <ScrollView
           onScrollEndDrag={handleScrollDrag}
           style={{minHeight: '100%', backgroundColor: "#fff"}}
+          ref={scrollViewRef}
         >
           {NotiHeader()}
           {chatList}

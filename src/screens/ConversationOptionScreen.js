@@ -32,6 +32,7 @@ export default function ConversationOptionScreen({ route, navigation }) {
 
     var confirmDeleteConverSation = () => {
         console.log("conversation deleted");
+        navigation.pop(2);
     }
 
     var confirmBlock = () => {

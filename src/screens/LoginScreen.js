@@ -134,17 +134,7 @@ export default function LoginScreen({ navigation }) {
     const login = async () => {
         try {
             const res = await Api.login(phonenumber,password);
-            const { io } = require("socket.io-client");
-            const socket = io("http://13.76.46.159:3000", {
-              transportOptions: {
-                polling: {
-                  extraHeaders: {
-                    token: res.data.token
-                  }
-                }
-              }
-            });
-            context.dispatch({type: 'LOGIN', accessToken: res.data.token, username: res.data.data.username, userId :res.data.data.id, socket: socket})
+            context.dispatch({type: 'LOGIN', accessToken: res.data.token, username: res.data.data.username, userId :res.data.data.id})
         } catch (err) {
             if (err.response && err.response.status == 400) {
                 console.log(err.response.data.message)

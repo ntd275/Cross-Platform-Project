@@ -20,6 +20,8 @@ import ExpoFastImage from 'expo-fast-image';
 import { setStatusBarNetworkActivityIndicatorVisible } from 'expo-status-bar';
 
 
+const BaseURL = "http://13.76.46.159:8000/files/"
+
 function ChatInput({ scrollViewRef, isLoading, isSending, setIsSending }) {
     const context = React.useContext(AuthContext);
     const chatContext = React.useContext(ChatContext);
@@ -35,13 +37,16 @@ function ChatInput({ scrollViewRef, isLoading, isSending, setIsSending }) {
         }, 100);
 
         setIsSending(true);
-        context.loginState.socket.emit("chatmessage", {
+        chatContext.socket.emit("chatmessage", {
             token: context.loginState.accessToken,
             chatId: chatContext.curChatId ? chatContext.curChatId : null,
             receiverId: chatContext.curFriendId,
             content: content
         });
-        console.log("sending ...");
+        if(!chatContext.needUpdateListChat){
+            chatContext.setNeedUpdateListChat(true);
+        }
+
     };
 
     return (
@@ -94,7 +99,6 @@ export default function ConversationScreen({ route, navigation }) {
 
     const context = React.useContext(AuthContext);
     const chatContext = React.useContext(ChatContext);
-    const [messageContent, setMessageContent] = useState("");
     const friend = route.params.friend;
     const [isFriend, setIsFriend] = useState(false);
     const [showRecommend, setShowRecommend] = useState(false);
@@ -109,7 +113,6 @@ export default function ConversationScreen({ route, navigation }) {
         mounted.current = true;
         const listener = (msg) => {
             if (mounted.current === false) {
-                context.loginState.socket.removeListener("message", listener)
                 return;
             }
             // console.log("msg: "+ msg)
@@ -118,14 +121,15 @@ export default function ConversationScreen({ route, navigation }) {
             }
         }
 
-        context.loginState.socket.on("message", listener)
+        chatContext.socket.on("message", listener)
         return () => {
-            context.loginState.socket.removeListener("message", listener)
+            chatContext.socket.removeListener("message", listener)
             mounted.current = false;
         };
     }, []);
 
     const getListMessages = async () => {
+        
         if (isLoading) {
             return
         }
@@ -135,12 +139,13 @@ export default function ConversationScreen({ route, navigation }) {
             accessToken = context.loginState.accessToken;
 
             const res = await Api.getMessages(accessToken, route.params.chatId);
-            console.log("called")
+            // console.log("called")
             let listMessages = res.data.data;
-            setMessages(listMessages);
             if (mounted.current == false) {
                 return;
             }
+            setMessages(listMessages);
+      
             if (firstLoad) {
                 setFirstLoad(false);
             }
@@ -150,6 +155,9 @@ export default function ConversationScreen({ route, navigation }) {
                 console.log(err.response.data.message);
                 // setNotification("Không thể nhận diện");
                 // console.log(notification)
+                if (mounted.current == false) {
+                    return;
+                }
                 setIsLoading(false)
                 return;
             }
@@ -160,12 +168,13 @@ export default function ConversationScreen({ route, navigation }) {
         }
     }
 
+
     if (firstLoad && !isLoading) {
         if (route.params.chatId) {
             if (!route.params.isread) {
-                context.loginState.socket.emit("seenMessage", {
-                    token: "a " + context.loginState.accessToken,
-                    chatId: route.params.chatId.chatId
+                chatContext.socket.emit("seenMessage", {
+                    token: context.loginState.accessToken,
+                    chatId: route.params.chatId
                 });
             }
             getListMessages();
@@ -243,9 +252,9 @@ export default function ConversationScreen({ route, navigation }) {
         return (
             <TouchableOpacity onPress={() => goToUserPage(friend)}>
                 <ExpoFastImage
-                    style={{ height: 28, width: 28, borderRadius: 28, backgroundColor: "#bdbdbd" }}
+                    style={{ height: 28, width: 28, borderRadius: 28,  }}
                     uri={friend.avatar}
-                    cacheKey={friend.userId + 'avatar' + new Date().getMinutes() + new Date().getHours() + new Date().getDay() + new Date().getMonth() + new Date().getFullYear()}
+                    cacheKey={friend.avatar.split(BaseURL)[1]}
                     resizeMode="contain"
                 />
             </TouchableOpacity>
@@ -310,7 +319,7 @@ export default function ConversationScreen({ route, navigation }) {
 
 
     var NotiHeader = () => {
-        if (chatContext.needGetMessages && isLoading) {
+        if (firstLoad && isLoading) {
             return (
                 <View style={{ marginTop: 10 }}>
                     <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
@@ -363,7 +372,6 @@ export default function ConversationScreen({ route, navigation }) {
         }
         return (
             <View style={{ marginBottom: 20 }}>
-                <NotiHeader />
                 {list}
             </View>
         );
@@ -419,7 +427,8 @@ export default function ConversationScreen({ route, navigation }) {
                     }}
 
                 >
-                    {!chatContext.needGetMessages && !isLoading ? <ListMessage /> : <></>}
+                    <NotiHeader />
+                    {!firstLoad && !isLoading ? <ListMessage /> : <></>}
                 </ScrollView>
             </View>
             <KeyboardAvoidingView style={styles.inputContainer} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
