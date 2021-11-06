@@ -23,6 +23,7 @@ import { LogBox } from 'react-native';
 import FlashMessage from "react-native-flash-message";
 import { showMessage, hideMessage } from "react-native-flash-message";
 import {Api} from './src/api/Api'
+import { NativeBaseProvider } from 'native-base';
 
 
 const Tab = createBottomTabNavigator();
@@ -58,15 +59,51 @@ export default function App() {
     }
   }
 
+  const _setCoverImage = (v) => {
+    if (v != coverImage) {
+      setCoverImage(v)
+    }
+  }
+
+  const _setDescription = (v) => {
+    if (v != description) {
+      setDescription(v)
+    }
+  }
+
   const [keyBoardHeight, setKeyBoardHeight] = React.useState(0)
   const [avatar, setAvatar] = React.useState("avatar_2.png")
+  const [coverImage, setCoverImage] = React.useState("defaul_cover_image.jpg")
+  const [description, setDescription] = React.useState(undefined)
   const appContext = {
     keyBoardHeight,
     setKeyBoardHeight: _setKeyBoardHeight,
     avatar,
     setAvatar: _setAvatar,
     displayMessage: displayMessage,
+    coverImage,
+    setCoverImage: _setCoverImage,
+    description,
+    setDescription
   }
+
+  const getMe = async()=>{
+    try{
+      const token = "lol "+ loginState.accessToken 
+      let res =await Api.getMe(token)
+      _setAvatar(res.data.data.avatar.fileName)
+      _setCoverImage(res.data.data.cover_image.fileName)
+      _setDescription(res.data.data.description)
+    } catch (e){
+      console.log(e)
+    }
+  }
+
+  if(loginState.accessToken){
+    getMe()
+  }
+
+  
 
 
   const [curFriendId, setCurFriendId] = React.useState(null);
@@ -154,7 +191,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <NativeBaseProvider>
       <FlashMessage ref={flashMessage} position="top" titleStyle={{ fontSize: 16, marginLeft: 12, marginTop: 1 }} />
       <AppContext.Provider value={appContext}>
 
@@ -212,6 +249,6 @@ export default function App() {
           </ChatContext.Provider>
         </AuthContext.Provider>
       </AppContext.Provider>
-    </>
+    </NativeBaseProvider>
   );
 }

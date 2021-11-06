@@ -25,6 +25,7 @@
     "expo-screen-orientation": "~3.3.0",
     "expo-status-bar": "~1.0.4",
     "install": "^0.13.0",
+    "native-base": "^3.2.1",
     "npm": "^8.1.0",
     "react": "16.8.6",
     "react-dom": "16.13.1",
@@ -45,6 +46,8 @@
     "react-native-web": "^0.17.5",
     "rn-material-ui-textfield": "^1.0.5",
     "socket.io-client": "^4.3.2",
+    "styled-components": "^5.3.3",
+    "styled-system": "^5.1.5",
     "unimodules-permissions-interface": "^6.1.0"
   },
   "devDependencies": {

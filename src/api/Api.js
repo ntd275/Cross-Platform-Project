@@ -2,14 +2,6 @@ import axios from 'axios';
 
 const BaseURL = "http://13.76.46.159:8000/api/v1"
 
-const config = (token)=>{
-    return {
-        headers: {
-            authorization: "a "+token,
-        }
-    }
-}
-
 export const Api = {
     login: (phonenumber, password) => {
         return axios.post(`${BaseURL}/users/login`,{
@@ -117,6 +109,13 @@ export const Api = {
             method: 'get',
             url: `${BaseURL}/chats/getMessages/${chatId}`,
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', authorization: "a "+token },
+        })
+    },
+    getPostsById: (token,id) =>{
+        return axios.get(`${BaseURL}/posts/list?userId=${id}`,{
+            "headers": {
+                "authorization":token
+            }
         })
     },
 }
