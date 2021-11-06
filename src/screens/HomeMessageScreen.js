@@ -51,6 +51,9 @@ export default function HomeMessageScreen({ navigation }) {
 
       const res = await Api.getChats(accessToken);
       let listChats = res.data.data;
+      listChats.sort((chata, chatb)=>{
+        return new Date(chata.lastMessage.time).getTime() < new Date(chatb.lastMessage.time).getTime();
+      })
       let listChatId = [];
       let listUnseens = chatContext.listUnseens;
       for(let i=0; i< listChats.length; i++){
@@ -100,7 +103,7 @@ export default function HomeMessageScreen({ navigation }) {
   const pressChat = (chatId, friend, isread) => {
     chatContext.setCurChatId(chatId);
     chatContext.setCurFriendId(friend.id);
-    chatContext.setNeedGetMessages(true);
+    chatContext.setInChat(true);
     navigation.navigate("ConversationScreen", {chatId: chatId, friend: friend, isread: isread});
     console.log("go to chat screen");
   };

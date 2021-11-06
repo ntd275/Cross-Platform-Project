@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ScrollView, Image, StyleSheet, KeyboardAvoidingView, TextInput, Pressable, Text, View, StatusBar, Button, ImageBackground, TouchableHighlight, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { ScrollView, Image, StyleSheet, KeyboardAvoidingView, TextInput, Pressable, Text, View, StatusBar, Button, ImageBackground, TouchableHighlight, TouchableOpacity, Keyboard } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import IconBack from '../../assets/ic_nav_header_back.svg'
 import { TextField } from 'rn-material-ui-textfield';
@@ -21,16 +21,43 @@ import { setStatusBarNetworkActivityIndicatorVisible } from 'expo-status-bar';
 
 
 export default function ConversationScreen({ route, navigation }) {
+    const mounted = useRef(false);
+    const scrollViewRef = useRef(null);
+
+
     const context = React.useContext(AuthContext);
     const chatContext = React.useContext(ChatContext);
     const [messageContent, setMessageContent] = useState("");
     const [inputHeight, setInputHeight] = useState(40);
     const friend = route.params.friend;
-    var messages = [];
     const [isFriend, setIsFriend] = useState(false);
     const [showRecommend, setShowRecommend] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+    const [firstLoad, setFirstLoad] = useState(true);
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState(null);
     let userId = context.loginState.userId;
+
+    useEffect(() => {
+        mounted.current = true;
+        const listener = (msg) => {
+            if (mounted.current === false) {
+                context.loginState.socket.removeListener("message", listener)
+                return;
+            }
+            // console.log("msg: "+ msg)
+            if (msg.chatId == chatContext.curChatId || msg.receiverId == chatContext.curFriendId || msg.senderId == chatContext.curFriendId) {
+                setNewMessage(msg);
+            }
+        }
+    
+        context.loginState.socket.on("message", listener)
+        return () => {
+            context.loginState.socket.removeListener("message", listener)
+            mounted.current = false;
+        };
+    }, []);
 
     const getListMessages = async () => {
         if (isLoading) {
@@ -44,11 +71,13 @@ export default function ConversationScreen({ route, navigation }) {
             const res = await Api.getMessages(accessToken, route.params.chatId);
             console.log("called")
             let listMessages = res.data.data;
-            messages = listMessages;
-            chatContext.setNeedGetMessages(false);
-            chatContext.setCurMessages(listMessages);
-
-
+            setMessages(listMessages);
+            if (mounted.current == false) {
+                return;
+            }
+            if(firstLoad){
+                setFirstLoad(false);
+            }
             setIsLoading(false)
         } catch (err) {
             if (err.response && err.response.status == 401) {
@@ -65,8 +94,7 @@ export default function ConversationScreen({ route, navigation }) {
         }
     }
 
-    if (chatContext.needGetMessages && !isLoading) {
-
+    if (firstLoad && !isLoading) {
         if (route.params.chatId) {
             if (!route.params.isread) {
                 context.loginState.socket.emit("seenMessage", {
@@ -76,17 +104,36 @@ export default function ConversationScreen({ route, navigation }) {
             }
             getListMessages();
         }
-        else {
-            // chatContext.setCurMessages([]);
-            chatContext.setNeedGetMessages(false);
+    }
+
+    if(!isLoading && newMessage){
+        let temp = messages;
+        temp.push(newMessage);
+        setMessages(temp);
+        setNewMessage(null);
+        if (isSending) {
+            Keyboard.dismiss();
+            setIsSending(false);
         }
-    } else if (!chatContext.needGetMessages && !isLoading) {
-        messages = chatContext.curMessages;
     }
 
 
-
     var sendMessage = () => {
+        if (isSending || isLoading) {
+            return;
+        }
+        let content = messageContent
+        setTimeout(()=>{
+            setMessageContent("");
+        }, 200);
+ 
+        setIsSending(true);
+        context.loginState.socket.emit("chatmessage", {
+            token: context.loginState.accessToken,
+            chatId: chatContext.curChatId ? chatContext.curChatId : null,
+            receiverId: chatContext.curFriendId,
+            content: content
+        });
         console.log("sending ...");
     };
 
@@ -100,7 +147,7 @@ export default function ConversationScreen({ route, navigation }) {
         setShowRecommend(false);
     }
 
-    var DateTag = (date, key) => {
+    var DateTag = ({ date }) => {
         let hour = date.getHours();
         if (hour < 10) hour = '0' + hour;
         let minute = date.getMinutes();
@@ -108,14 +155,14 @@ export default function ConversationScreen({ route, navigation }) {
         let dateStr = hour + ":" + minute + " " + date.toLocaleDateString();
 
         return (
-            <View style={styles.dateTag} key={key}>
+            <View style={styles.dateTag}>
                 <Text style={styles.dateString}>{dateStr}</Text>
             </View>
         );
     }
 
 
-    var HourTag = (date) => {
+    var HourTag = ({ date }) => {
         let hour = date.getHours();
         if (hour < 10) hour = '0' + hour;
         let minute = date.getMinutes();
@@ -126,7 +173,7 @@ export default function ConversationScreen({ route, navigation }) {
         );
     }
 
-    var UserTag = (userInfo) => {
+    var UserTag = ({ userInfo }) => {
         return (
             <TouchableOpacity style={styles.userInfo} onPress={() => goToUserPage(userInfo)}>
                 <Avatar
@@ -150,16 +197,16 @@ export default function ConversationScreen({ route, navigation }) {
         return (
             <TouchableOpacity onPress={() => goToUserPage(friend)}>
                 <ExpoFastImage
-                    style={{ height: 28, width: 28, borderRadius: 28 }}
+                    style={{ height: 28, width: 28, borderRadius: 28, backgroundColor: "#bdbdbd" }}
                     uri={friend.avatar}
-                    cacheKey={friend.userId + 'avatar' + new Date().getMinutes() + new Date().getHours() +new Date().getDay() + new Date().getMonth() + new Date().getFullYear()}
+                    cacheKey={friend.userId + 'avatar' + new Date().getMinutes() + new Date().getHours() + new Date().getDay() + new Date().getMonth() + new Date().getFullYear()}
                     resizeMode="contain"
                 />
             </TouchableOpacity>
         );
     };
 
-    var UserMessage = (key, message, isShowTime) => {
+    var UserMessage = ({ message, isShowTime }) => {
         const [phoneInfo, setPhoneInfo] = useState(null);
         let [phoneNumber, TextUI] = TextUtility.detectThenFormatPhoneAndURL(message.content)
         if (phoneNumber) {
@@ -170,18 +217,18 @@ export default function ConversationScreen({ route, navigation }) {
         }
         let userTag = <></>;
         if (phoneInfo) {
-            userTag = UserTag(phoneInfo);
+            userTag = <UserTag userInfo={phoneInfo} />;
         }
         return (
-            <View key={key} style={styles.userMessage}>
+            <View style={styles.userMessage}>
                 {TextUI}
                 {userTag}
-                {isShowTime ? HourTag(new Date(message.time)) : <></>}
+                {isShowTime ? <HourTag date={new Date(message.time)} /> : <></>}
             </View>
         );
     }
 
-    var FrientMessage = (key, message, isShowAvatar, isShowTime) => {
+    var FrientMessage = ({ message, isShowAvatar, isShowTime }) => {
         const [phoneInfo, setPhoneInfo] = useState(null);
         let messageStyle = [styles.friendMessage];
         if (!isShowAvatar) {
@@ -190,11 +237,11 @@ export default function ConversationScreen({ route, navigation }) {
         let [phoneNumber, TextUI] = TextUtility.detectThenFormatPhoneAndURL(message.content)
 
         return (
-            <View key={key} style={styles.friendMessageContainer}>
+            <View style={styles.friendMessageContainer}>
                 {isShowAvatar ? <FriendAvatar friend={friend} /> : <></>}
                 <View style={messageStyle}>
                     {TextUI}
-                    {isShowTime ? HourTag(new Date(message.time)) : <></>}
+                    {isShowTime ? <HourTag date={new Date(message.time)} /> : <></>}
                 </View>
             </View>
         );
@@ -251,25 +298,25 @@ export default function ConversationScreen({ route, navigation }) {
             curSender = curMessage.senderId;
             curDate = curMessage.time;
             if (!prevDate || TimeUtility.getHourDiff(prevDate, curDate) > 4) {
-                list.push(DateTag(new Date(curDate), "date" + i));
+                list.push(<DateTag date={new Date(curDate)} key={"date" + i} />);
             }
             if (i == messages.length - 1 || curSender != messages[i + 1].senderId) {
                 isShowTime = true;
             }
             if (curSender == userId) {
-                list.push(UserMessage(i, messages[i], isShowTime));
+                list.push(<UserMessage key={i} message={messages[i]} isShowTime={isShowTime} />);
             } else {
                 let isShowAvatar = false;
                 if (!prevSender || prevSender != curSender) {
                     isShowAvatar = true;
                 }
-                list.push(FrientMessage(i, messages[i], isShowAvatar, isShowTime));
+                list.push(<FrientMessage key={i} message={messages[i]} isShowAvatar={isShowAvatar} isShowTime={isShowTime} />);
             }
             prevDate = curDate;
             prevSender = curSender;
         }
         return (
-            <View style={{ marginBottom: 40 }}>
+            <View style={{ marginBottom: 20 }}>
                 <NotiHeader />
                 {list}
             </View>
@@ -295,7 +342,10 @@ export default function ConversationScreen({ route, navigation }) {
                         <View style={{ flex: 1, flexDirection: "row" }}>
                             <TouchableOpacity
                                 style={styles.iconBackWrap}
-                                onPress={() => { navigation.goBack() }}
+                                onPress={() => {
+                                    chatContext.setInChat(false);
+                                    navigation.goBack()
+                                }}
                             >
                                 <IconBack style={styles.iconBack} />
                             </TouchableOpacity>
@@ -312,7 +362,17 @@ export default function ConversationScreen({ route, navigation }) {
             </View>
             {(showRecommend && isFriend == false) ? RecommendFriend() : <></>}
             <View flex={1}>
-                <ScrollView style={styles.listMessage} scrollEnabled={true}>
+                <ScrollView
+                    style={styles.listMessage}
+                    scrollEnabled={true}
+                    ref={scrollViewRef}
+                    onContentSizeChange={() => {
+                        setTimeout(() => {
+                            scrollViewRef.current.scrollToEnd({ animated: true })
+                        }, 100)
+                    }}
+
+                >
                     {!chatContext.needGetMessages && !isLoading ? <ListMessage /> : <></>}
                 </ScrollView>
             </View>
@@ -326,6 +386,7 @@ export default function ConversationScreen({ route, navigation }) {
                     <View style={styles.enterMessageText}>
 
                         <TextInput style={[styles.enterMessage, { height: inputHeight }]}
+                            onFocus={() => scrollViewRef.current.scrollToEnd({ animated: true })}
                             selectionColor="#2f9afd"
                             text
                             keyboardType="default"

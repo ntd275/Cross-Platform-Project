@@ -71,10 +71,10 @@ export default function App() {
 
   const [curFriendId, setCurFriendId] = React.useState(null);
   const [curChatId, setCurChatId] = React.useState(null);
-  const [needGetMessages, setNeedGetMessages] = React.useState(true);
   const [listUnseens, setListUnseens] = React.useState([]);
-  const [curMessages, setCurMessages] = React.useState([]);
   const [listChats, setListChats] = React.useState(null);
+  const [inChat, setInChat] = React.useState(false);
+
 
   const getListChats = async () => {
     try {
@@ -82,6 +82,9 @@ export default function App() {
 
       const res = await Api.getChats(accessToken);
       let listChats = res.data.data;
+      listChats.sort((chata, chatb)=>{
+        return new Date(chata.lastMessage.time).getTime() < new Date(chatb.lastMessage.time).getTime();
+      })
       let listChatId = [];
       let temp = listUnseens;
       for(let i=0; i< listChats.length; i++){
@@ -107,7 +110,6 @@ export default function App() {
     setCurFriendId(null);
     setCurChatId(null);
     setListUnseens([]);
-    setCurMessages([]);
     setListChats(null);
   }
 
@@ -116,31 +118,27 @@ export default function App() {
     setCurFriendId,
     listUnseens,
     setListUnseens,
-    curMessages,
-    setCurMessages,
     resetChat,
     listChats,
     setListChats,
     curChatId,
     setCurChatId,
     getListChats,
-    needGetMessages,
-    setNeedGetMessages,
+    inChat,
+    setInChat
   }
 
   if(loginState && loginState.socket){
+    loginState.socket.removeAllListeners("message");
     loginState.socket.on("message", (msg)=>{
-      if(msg.senderId == curFriendId || msg.receiverId == curFriendId ){
+      if((msg.senderId == curFriendId || msg.receiverId == curFriendId) && inChat){
         loginState.socket.emit("seenMessage", {
-          token: "a " + loginState.accessToken,
+          token: loginState.accessToken,
           chatId: msg.chatId
         });
         if(curChatId !== msg.chatId){
           setCurChatId(msg.chatId);
         }
-        let temp = curMessages;
-        curMessages.push(msg);
-        setCurMessages(msg);
       }else if(msg.senderId !== loginState.userId){
         let chatId = msg.chatId;
         let temp = listUnseens;
