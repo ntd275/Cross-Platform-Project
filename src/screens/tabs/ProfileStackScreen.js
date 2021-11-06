@@ -3,13 +3,16 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeProfileScreen from '../HomeProfileScreen';
 import SettingScreen from '../SettingScreen';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import ProfileScreen from '../ProfileScreen';
+import CreatePost from '../CreatePost';
+import PostScreen from '../PostScreen';
 
 const ProfileStack = createNativeStackNavigator();
 
 export default function ProfileStackScreen({route, navigation}){
     React.useLayoutEffect(() => {
         const routeName = getFocusedRouteNameFromRoute(route);
-        const hideScreens = ["SettingScreen"]
+        const hideScreens = ["SettingScreen","ProfileScreen","CreatePost"]
         if (hideScreens.includes(routeName)){
             navigation.setOptions({tabBarStyle:{display: 'none'}});
         }else {
@@ -24,6 +27,9 @@ export default function ProfileStackScreen({route, navigation}){
       >
         <ProfileStack.Screen name="HomeProfileScreen" component={HomeProfileScreen} />
         <ProfileStack.Screen name="SettingScreen" component={SettingScreen} />
+        <ProfileStack.Screen name="ProfileScreen" component={ProfileScreen}/>
+        <ProfileStack.Screen name="CreatePost" component={CreatePost} />
+        <ProfileStack.Screen name="PostScreen" component={PostScreen} />
       </ProfileStack.Navigator>
     )
 }
