@@ -2,7 +2,7 @@ import React, { useContext, useRef, useState } from "react";
 import IconImage from "../../assets/ic_photo_grd.svg";
 import IconVideo from "../../assets/ic_video_solid_24.svg";
 import IconAlbum from "../../assets/ic_album.svg";
-import { Avatar } from "react-native-elements";
+import { Avatar, Image as Image2, Divider } from "react-native-elements";
 import Post from "./components/Post";
 import { Api } from "../api/Api";
 import AuthContext from "../components/context/AuthContext";
@@ -21,6 +21,7 @@ import {
   Easing,
   Dimensions,
   StatusBar,
+  Alert,
 } from "react-native";
 import { useKeyboard } from "./components/useKeyboard";
 import AppContext from "../components/context/AppContext";
@@ -29,10 +30,13 @@ import IconBackBlack from "../../assets/ic_nav_header_back_black.svg";
 import IconOption from "../../assets/button_option_menu.svg";
 import IconOptionBlack from "../../assets/button_option_menu_black.svg";
 import IconEdit from "../../assets/ic_profile_edit_bio.svg";
-import { Avatar as Avatar2 } from "native-base";
+import { Avatar as Avatar2, Actionsheet, Box } from "native-base";
 import { LinearGradient } from "expo-linear-gradient";
 import IconImageSolid from "../../assets/ic_photo_solidhollow_24.svg";
 import IconVideoSolid from "../../assets/ic_video_solid_24_white.svg";
+import RBSheet from "react-native-raw-bottom-sheet";
+import ImageView from "react-native-image-viewing";
+import * as ImagePicker from "expo-image-picker";
 
 const BaseURL = "http://13.76.46.159:8000/files/";
 const FULL_WIDTH = Dimensions.get("window").width;
@@ -47,7 +51,7 @@ export default function ProfileScreen({ navigation }) {
   const appContext = useContext(AppContext);
   const getAvatar = async () => {
     try {
-      accessToken = "lol " + context.loginState.accessToken;
+      const accessToken = "lol " + context.loginState.accessToken;
       let user = await Api.getMe(accessToken);
       //console.log(user.data)
       appContext.setAvatar(user.data.data.avatar.fileName);
@@ -83,12 +87,9 @@ export default function ProfileScreen({ navigation }) {
       if (!firstLoad) {
         closeLoading();
       }
-      // console.log(postList)
     } catch (err) {
       if (err.response && err.response.status == 401) {
         console.log(err.response.data.message);
-        // setNotification("Không thể nhận diện");
-        // console.log(notification)
         setIsLoading(false);
         return;
       }
@@ -100,10 +101,6 @@ export default function ProfileScreen({ navigation }) {
   };
 
   let opacity = useRef(new Animated.Value(0));
-
-  let openLoading = () => {
-    opacity.current.setValue(100);
-  };
 
   let closeLoading = () => {
     opacity.current.setValue(100);
@@ -119,13 +116,6 @@ export default function ProfileScreen({ navigation }) {
     getAvatar();
     getPosts();
   }
-
-  var handleScrollDrag = function (event) {
-    if (event.nativeEvent.contentOffset.y < -80 && !needReload) {
-      openLoading();
-      setNeedReload(true);
-    }
-  };
 
   var NotiHeader = () => {
     if (needReload && firstLoad) {
@@ -169,15 +159,19 @@ export default function ProfileScreen({ navigation }) {
     );
   };
 
+  const refCoverImageOption = useRef();
+  const [isViewCoverImage, setIsViewCoverImage] = useState(false);
+
   var ListHeader = () => {
     return (
       <>
         {LoadingHeader()}
         <View style={{ position: "relative" }}>
-          <Image
+          <Image2
             style={{ width: FULL_WIDTH, height: 200 }}
             source={{ uri: BaseURL + appContext.coverImage }}
-          ></Image>
+            onPress={() => refCoverImageOption.current.open()}
+          ></Image2>
           <View style={{ alignItems: "center", backgroundColor: "#fff" }}>
             <Text style={{ fontSize: 26, fontWeight: "500", marginTop: 50 }}>
               {context.loginState.userName}
@@ -199,13 +193,13 @@ export default function ProfileScreen({ navigation }) {
               )}
             </Pressable>
           </View>
-          <View style={{ position: "absolute", alignSelf: "center", top: 120 }}>
+          <Pressable onPress={()=> refAvatarImageOption.current.open()} style={{ position: "absolute", alignSelf: "center", top: 120 }}>
             <Avatar2
               size={"2xl"}
               source={{ uri: BaseURL + appContext.avatar }}
               style={{ borderWidth: 2, borderColor: "#fff" }}
             ></Avatar2>
-          </View>
+          </Pressable>
         </View>
         <ScrollView
           horizontal={true}
@@ -378,12 +372,81 @@ export default function ProfileScreen({ navigation }) {
   });
 
   const [iconColor, setIconColor] = useState("white");
+  const refCallBack = useRef(() => {});
+
+  const changeCoverPicture = async (mode) => {
+    let result;
+    if (mode == "camera") {
+      result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.5,
+        base64: true,
+        allowsEditing: true,
+      });
+    } else {
+      result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+        base64: true,
+        allowsEditing: true,
+      });
+    }
+    refCoverImageOption.current.close();
+    if (!result.cancelled) {
+      try {
+        let res = await Api.editUser("lol " + context.loginState.accessToken, {
+          cover_image: "data:image;base64," + result.base64,
+        });
+        console.log(res.data.data.cover_image.fileName)
+        appContext.setCoverImage(res.data.data.cover_image.fileName)
+        Alert.alert("Thành công", "Đã thay đổi ảnh bìa", [{ text: "OK" }]);
+        
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  };
+
+  const refAvatarImageOption = useRef();
+
+  const changeAvatarPicture = async (mode) => {
+    let result;
+    if (mode == "camera") {
+      result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.5,
+        base64: true,
+        allowsEditing: true,
+      });
+    } else {
+      result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+        base64: true,
+        allowsEditing: true,
+      });
+    }
+    refAvatarImageOption.current.close();
+    if (!result.cancelled) {
+      try {
+        let res = await Api.editUser("lol " + context.loginState.accessToken, {
+            avatar: "data:image;base64," + result.base64,
+        })
+        await getPosts()
+        console.log(res.data.data.avatar.fileName)
+        appContext.setAvatar(res.data.data.avatar.fileName)
+        Alert.alert("Thành công", "Đã thay đổi ảnh đại diện", [{ text: "OK" }]);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
       <StatusBar
         backgroundColor="#00000000"
-        barStyle={iconColor=="white"?"light-content":"dark-content"}
+        barStyle={iconColor == "white" ? "light-content" : "dark-content"}
         translucent={true}
       />
       <Animated.View
@@ -396,6 +459,8 @@ export default function ProfileScreen({ navigation }) {
           opacity: opacityOnScroll,
           zIndex: 2,
           flexDirection: "row",
+          borderBottomColor: "#cdcdcd",
+          borderBottomWidth: 1,
         }}
       >
         <View style={{ marginTop: 25, marginLeft: 60 }}>
@@ -427,6 +492,232 @@ export default function ProfileScreen({ navigation }) {
       >
         {iconColor == "white" ? <IconOption /> : <IconOptionBlack />}
       </TouchableOpacity>
+      <RBSheet
+        ref={refCoverImageOption}
+        closeOnDragDown={true}
+        closeOnPressMask={true}
+        closeOnPressBack={true}
+        animationType="fade"
+        height={320}
+        closeDuration={0}
+        onClose={() => refCallBack.current()}
+        customStyles={{
+          wrapper: {
+            backgroundColor: "rgba(0,0,0,0.28)",
+            width: "100%",
+          },
+          container: {
+            marginBottom: 10,
+            width: "95%",
+            alignSelf: "center",
+            backgroundColor: "rgba(255,255,255,0)",
+          },
+          draggableIcon: {
+            opacity: 0,
+          },
+        }}
+      >
+        <View
+          style={{
+            justifyContent: "center",
+            flexDirection: "column",
+            height: "100%",
+            width: "100%",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "rgba(240,240,240,1)",
+              borderTopLeftRadius: 15,
+              borderTopEndRadius: 15,
+              borderBottomRightRadius: 15,
+              borderBottomStartRadius: 15,
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "400",
+                color: "#767676",
+                textAlign: "center",
+                marginTop: 15,
+                marginBottom: 10,
+              }}
+            >
+              Ảnh bìa
+            </Text>
+            <Divider orientation="horizontal" />
+            <TouchableHighlight
+              style={styles.reportOption}
+              onPress={() => {
+                refCallBack.current = () => {
+                  setIsViewCoverImage(true);
+                };
+                refCoverImageOption.current.close();
+              }}
+              activeOpacity={0.99}
+              underlayColor="#989898"
+            >
+              <Text style={styles.reportOptionText}>Xem ảnh bìa</Text>
+            </TouchableHighlight>
+            <Divider orientation="horizontal" />
+            <TouchableHighlight
+              style={styles.reportOption}
+              onPress={() => {
+                changeCoverPicture("camera");
+              }}
+              activeOpacity={0.99}
+              underlayColor="#989898"
+            >
+              <Text style={styles.reportOptionText}>Chụp ảnh mới</Text>
+            </TouchableHighlight>
+            <Divider orientation="horizontal" />
+            <TouchableHighlight
+              style={styles.reportOption}
+              onPress={() => {
+                changeCoverPicture("library");
+              }}
+              activeOpacity={0.99}
+              underlayColor="#989898"
+            >
+              <Text style={styles.reportOptionText}>Chọn ảnh từ thư viện</Text>
+            </TouchableHighlight>
+          </View>
+          <TouchableHighlight
+            style={{
+              backgroundColor: "#fff",
+              borderTopLeftRadius: 15,
+              borderTopEndRadius: 15,
+              borderBottomRightRadius: 15,
+              borderBottomStartRadius: 15,
+              justifyContent: "center",
+              alignItems: "center",
+              height: 60,
+              marginTop: 10,
+              marginBottom: 10,
+            }}
+            onPress={() => refCoverImageOption.current.close()}
+            activeOpacity={0.999}
+            underlayColor="#989898"
+          >
+            <Text style={{ color: "#0085ff", fontWeight: "600", fontSize: 19 }}>
+              Hủy
+            </Text>
+          </TouchableHighlight>
+        </View>
+      </RBSheet>
+      <ImageView
+        images={[{ uri: BaseURL + appContext.coverImage }]}
+        imageIndex={0}
+        visible={isViewCoverImage}
+        onRequestClose={() => {
+          refCallBack.current = () => {};
+          setIsViewCoverImage(false);
+        }}
+        swipeToCloseEnabled={true}
+      />
+        <RBSheet
+        ref={refAvatarImageOption}
+        closeOnDragDown={true}
+        closeOnPressMask={true}
+        closeOnPressBack={true}
+        animationType="fade"
+        height={280}
+        closeDuration={0}
+        onClose={() => refCallBack.current()}
+        customStyles={{
+          wrapper: {
+            backgroundColor: "rgba(0,0,0,0.28)",
+            width: "100%",
+          },
+          container: {
+            marginBottom: 10,
+            width: "95%",
+            alignSelf: "center",
+            backgroundColor: "rgba(255,255,255,0)",
+          },
+          draggableIcon: {
+            opacity: 0,
+          },
+        }}
+      >
+        <View
+          style={{
+            justifyContent: "center",
+            flexDirection: "column",
+            height: "100%",
+            width: "100%",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "rgba(240,240,240,1)",
+              borderTopLeftRadius: 15,
+              borderTopEndRadius: 15,
+              borderBottomRightRadius: 15,
+              borderBottomStartRadius: 15,
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "400",
+                color: "#767676",
+                textAlign: "center",
+                marginTop: 15,
+                marginBottom: 10,
+              }}
+            >
+              Ảnh đại diện
+            </Text>
+            <Divider orientation="horizontal" />
+            <TouchableHighlight
+              style={styles.reportOption}
+              onPress={() => {
+                changeAvatarPicture("camera");
+              }}
+              activeOpacity={0.99}
+              underlayColor="#989898"
+            >
+              <Text style={styles.reportOptionText}>Chụp ảnh mới</Text>
+            </TouchableHighlight>
+            <Divider orientation="horizontal" />
+            <TouchableHighlight
+              style={styles.reportOption}
+              onPress={() => {
+                changeAvatarPicture("library");
+              }}
+              activeOpacity={0.99}
+              underlayColor="#989898"
+            >
+              <Text style={styles.reportOptionText}>Chọn ảnh từ thư viện</Text>
+            </TouchableHighlight>
+          </View>
+          <TouchableHighlight
+            style={{
+              backgroundColor: "#fff",
+              borderTopLeftRadius: 15,
+              borderTopEndRadius: 15,
+              borderBottomRightRadius: 15,
+              borderBottomStartRadius: 15,
+              justifyContent: "center",
+              alignItems: "center",
+              height: 60,
+              marginTop: 10,
+              marginBottom: 10,
+            }}
+            onPress={() => refAvatarImageOption.current.close()}
+            activeOpacity={0.999}
+            underlayColor="#989898"
+          >
+            <Text style={{ color: "#0085ff", fontWeight: "600", fontSize: 19 }}>
+              Hủy
+            </Text>
+          </TouchableHighlight>
+        </View>
+      </RBSheet>
       <FlatList
         scrollEventThrottle={16}
         onScroll={Animated.event(
@@ -562,5 +853,15 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 12,
     textAlign: "center",
+  },
+  reportOption: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: 55,
+  },
+  reportOptionText: {
+    color: "#0085ff",
+    fontSize: 20,
+    fontWeight: "400",
   },
 });
