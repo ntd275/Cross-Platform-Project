@@ -44,6 +44,7 @@ function ChatInput({ scrollViewRef, isLoading, isSending, setIsSending }) {
             content: content
         });
         if(!chatContext.needUpdateListChat){
+            
             chatContext.setNeedUpdateListChat(true);
         }
 

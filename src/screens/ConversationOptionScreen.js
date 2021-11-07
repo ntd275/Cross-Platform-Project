@@ -38,9 +38,9 @@ export default function ConversationOptionScreen({ route, navigation }) {
 
                 const res = await Api.deleteChat(accessToken, chatContext.curChatId);
                 // console.log("called")
-                if (!chatContext.needUpdateListChat) {
-                    chatContext.setNeedUpdateListChat(true);
-                }
+                chatContext.setListUnseens([]);
+                chatContext.setNeedUpdateListChat(true);
+
 
                 console.log("conversation deleted");
                 navigation.pop(2);

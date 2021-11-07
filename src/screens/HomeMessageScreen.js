@@ -157,7 +157,7 @@ export default function HomeMessageScreen({ navigation }) {
               <View>
                 <Text style={{ fontSize: 17, fontWeight:  isread? '500': '700', paddingBottom: 6 }}>{userName}</Text>
               </View>
-              <View style={{ marginLeft: "auto", marginRight: 14 }}>
+              <View style={{ marginLeft: "auto", marginRight: 10 }}>
                 <Text style={{ textAlign: "right", opacity: isread ? 0.5 : 1, fontSize: 13, fontWeight:  isread? '400': '500', }}>{TimeUtility.getTimeStr(new Date(lastMessage.time))} </Text>
               </View>
             </View >
