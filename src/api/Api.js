@@ -166,4 +166,20 @@ export const Api = {
             }
         );
     },
+    setBlockDiary: (token, userId, type) => {
+        // type = true (block) or false (unblock)
+        return axios({
+            method: "post",
+            url: `${BaseURL}/users/set-block-diary`,
+            data: {
+                user_id: userId,
+                type: type,
+            },
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                authorization: "a " + token,
+            },
+        });
+    },
 };

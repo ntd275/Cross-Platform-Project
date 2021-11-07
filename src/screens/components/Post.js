@@ -15,6 +15,7 @@ import {
     TouchableNativeFeedback,
     TouchableHighlightBase,
     Dimensions,
+    Alert,
 } from "react-native";
 import {
     Avatar,
@@ -202,8 +203,54 @@ export default function Post(props) {
         console.log("pressed Delete");
         // refRBSheet.current.close();
     };
-    var onPressHide = () => {
-        console.log("pressed Hide");
+    var onPressHide = async () => {
+        let hide = !appContext.blockedDiary.includes(props.post.author._id);
+        Alert.alert("Xác nhận", "Bạn có muốn ".concat(hide?"":"bỏ ", "ẩn nhật ký của người này?"), [
+            { text: "Không" },
+            { text: "Có", onPress: async () => {
+                // navigation.goBack()
+                refRBSheet.current.close();
+                try {
+                    let accessToken = context.loginState.accessToken;
+                    const res = await Api.setBlockDiary(
+                        accessToken,
+                        props.post.author._id,
+                        hide
+                    );
+                    if (res.status == 200) {
+                        appContext.displayMessage({
+                            message: hide?"Chặn thành công":"Bỏ chặn thành công",
+                            type: "default",
+                            style: { width: 195, marginBottom: 200 },
+                            titleStyle: {fontSize: 14},
+                            duration: 1900,
+                            icon:"success",
+                            position: "center",
+                            backgroundColor: "#262626",
+                        });
+                        appContext.setBlockedDiary(res.data.dkata.blocked_diary)
+                    }
+                    // console.log(res.data);
+                    // console.log(res.status);
+                } catch (err) {
+                    console.log(err);
+                    if (err.response && err.response.status == 400) {
+                        console.log(err.response.data.message)
+                        appContext.displayMessage({
+                            message: err.response.data.message,
+                            type: "default",
+                            style: { width: 195, marginBottom: 200 },
+                            titleStyle: {fontSize: 14},
+                            duration: 1900,
+                            position: "center",
+                            backgroundColor: "#262626",
+                        });
+                        return
+                    }
+                    props.navigation.navigate("NoConnectionScreen", { message: "" });
+                }
+            }}
+        ])
     };
 
     var onPressBlock = () => {
@@ -416,7 +463,8 @@ export default function Post(props) {
                             </Text>
                         </View>
                     </Pressable>
-
+                    
+                    {props.post.author._id != context.loginState.userId &&
                     <Pressable
                         style={[styles.menuOption, { height: 90 }]}
                         onPress={onPressHide}
@@ -429,13 +477,14 @@ export default function Post(props) {
                             <Text
                                 style={{ fontSize: 16, fontWeight: "400", marginBottom: 4 }}
                             >
-                                Ẩn nhật ký của {userName}
+                                {appContext.blockedDiary.includes(props.post.author._id)?"Bỏ ẩn":"Ẩn"} nhật ký của {userName}
                             </Text>
                             <Text style={{ fontSize: 14, color: "#9ea1a6" }}>
-                                Toàn bộ bài đăng và khoảnh khắc của người này sẽ bị ẩn đi
+                                Toàn bộ bài đăng và khoảnh khắc của người này sẽ {appContext.blockedDiary.includes(props.post.author._id)?"được bỏ ẩn":"bị ẩn đi"}
                             </Text>
                         </View>
                     </Pressable>
+                    }
 
                     <Pressable
                         style={[styles.menuOption, { height: 90 }]}

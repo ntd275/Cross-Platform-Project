@@ -71,8 +71,22 @@ export default function App() {
     }
   }
 
+  const _setBlockedInbox = (v) => {
+    if (v.length != blockedInbox.length) {
+      setBlockedInbox(v)
+    }
+  }
+
+  const _setBlockedDiary = (v) => {
+    if (v.length != blockedDiary.length) {
+      setBlockedDiary(v)
+    }
+  }
+
   const [keyBoardHeight, setKeyBoardHeight] = React.useState(0)
   const [avatar, setAvatar] = React.useState("avatar_2.png")
+  const [blockedInbox, setBlockedInbox] = React.useState(new Array())
+  const [blockedDiary, setBlockedDiary] = React.useState(new Array())
   const [coverImage, setCoverImage] = React.useState("defaul_cover_image.jpg")
   const [description, setDescription] = React.useState(undefined)
   const appContext = {
@@ -84,7 +98,11 @@ export default function App() {
     coverImage,
     setCoverImage: _setCoverImage,
     description,
-    setDescription
+    setDescription,
+    blockedInbox,
+    setBlockedInbox: _setBlockedInbox,
+    blockedDiary,
+    setBlockedDiary: _setBlockedDiary,
   }
 
   const getMe = async () => {
@@ -94,6 +112,8 @@ export default function App() {
       _setAvatar(res.data.data.avatar.fileName)
       _setCoverImage(res.data.data.cover_image.fileName)
       _setDescription(res.data.data.description)
+      _setBlockedInbox(res.data.data.blocked_inbox)
+      _setBlockedDiary(res.data.data.blocked_diary)
     } catch (e) {
       console.log(e)
     }
@@ -102,9 +122,6 @@ export default function App() {
   if (loginState.accessToken) {
     getMe()
   }
-
-
-
 
   const [curFriendId, setCurFriendId] = React.useState(null);
   const [curChatId, setCurChatId] = React.useState(null);

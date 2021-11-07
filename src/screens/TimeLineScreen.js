@@ -68,8 +68,14 @@ export default function TimeLineScreen({ navigation }) {
       // console.log(accessToken)
       const res = await Api.getPosts(accessToken);
       let postList = res.data.data;
+      let newPostList = new Array();
+      for (let i = 0; i < postList.length; i++){
+        if (!appContext.blockedDiary.includes(postList[i].author._id)){
+            newPostList.push(postList[i]);
+        }
+      }
 
-      setPosts(postList.reverse());
+      setPosts(newPostList.reverse());
 
       if (firstLoad) {
         setFirstLoad(false);
