@@ -148,6 +148,7 @@ export default function App() {
         // console.log(listUnseens)
       }
       if (!needUpdateListChat) {
+        console.log("here")
         setNeedUpdateListChat(true);
       }
     });
@@ -187,8 +188,18 @@ export default function App() {
   var resetChat = () => {
     setCurFriendId(null);
     setCurChatId(null);
+    setInChat(false);
     setListUnseens([]);
     setListChats(null);
+    socket.disconnect();
+    setSocket(null);
+    setNeedUpdateListChat(false);
+  }
+
+  var outChatRoom = ()=>{
+    setCurFriendId(null);
+    setCurChatId(null);
+    setInChat(false);
   }
 
   const chatContext = {
@@ -206,7 +217,8 @@ export default function App() {
     setInChat,
     needUpdateListChat,
     setNeedUpdateListChat,
-    socket
+    socket,
+    outChatRoom
   }
 
   return (

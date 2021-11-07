@@ -111,6 +111,16 @@ export const Api = {
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', authorization: "a "+token },
         })
     },
+
+    deleteChat: (token, chatId) => {
+        return axios({
+            method: 'delete',
+            url: `${BaseURL}/chats/deleteChat/${chatId}`,
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', authorization: "a "+token },
+        })
+    },
+    
+
     getPostsById: (token,id) =>{
         return axios.get(`${BaseURL}/posts/list?userId=${id}`,{
             "headers": {

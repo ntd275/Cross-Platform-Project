@@ -397,7 +397,7 @@ export default function ConversationScreen({ route, navigation }) {
                             <TouchableOpacity
                                 style={styles.iconBackWrap}
                                 onPress={() => {
-                                    chatContext.setInChat(false);
+                                    chatContext.outChatRoom();
                                     navigation.goBack()
                                 }}
                             >

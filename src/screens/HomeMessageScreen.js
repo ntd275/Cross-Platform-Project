@@ -88,7 +88,7 @@ export default function HomeMessageScreen({ navigation }) {
 
       if(chatContext.needUpdateListChat){
         chatContext.setNeedUpdateListChat(false);
-        scrollViewRef.current.scrollTo({x: 0, y: 0, animated: true})
+        // scrollViewRef.current.scrollTo({x: 0, y: 0, animated: true})
       }
 
       setIsLoading(false)
