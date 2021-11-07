@@ -272,7 +272,7 @@ export default function HomeMessageScreen({ navigation }) {
                 onChangeText={updateSearch}
                 value={search}
                 onEndEditing={getSearchText}
-                placeholder="Tìm bạn bè, tin nhắn,..."
+                placeholder="Tìm bạn bè, tin nhắn..."
                 placeholderTextColor="#fff"
               ></TextInput>
             </View>

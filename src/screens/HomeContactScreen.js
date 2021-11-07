@@ -11,6 +11,8 @@ import {
   TouchableHighlight,
   TouchableOpacity,
   FlatList,
+  Dimensions,
+  TextInput,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import IconBack from "../../assets/ic_nav_header_back.svg";
@@ -18,69 +20,36 @@ import { TextField } from "rn-material-ui-textfield";
 import { Icon } from "react-native-elements";
 import { Api } from "../api/Api";
 import AuthContext from "../components/context/AuthContext";
-import SettingIcon from "../../assets/addfr.svg";
-import IconSearch from "../../assets/ic_searchbox.svg";
+import AddFriendIcon from "../../assets/ic_cscsticky_addfriend.svg";
+import IconSearch from "../../assets/search-outline.svg";
 import Loimoiketban from "../../assets/loimoiketban.svg";
-import Danhba from "../../assets/danhba.svg";
+import Danhba from "../../assets/icn_friend_from_contacts.svg";
 import { useLinkProps } from "@react-navigation/native";
-import { Avatar, ListItem } from "react-native-elements";
 import VideoIcon from "../../assets/ic_video_line_24.svg";
 import CallIcon from "../../assets/ic_call_line_24.svg";
+import { Avatar } from "native-base";
 
 const Friend = (props) => {
   return (
-    <View
-      style={{
-        flexDirection: "row",
-      }}
+    <TouchableHighlight
+      style={{ paddingTop: 10, paddingBottom: 10, paddingLeft: 15 }}
+      onPress={() => {}}
+      activeOpacity={0.99999}
+      underlayColor="#05adff22"
     >
-      <TouchableOpacity
-        style={{
-          width: 270,
-          flexDirection: "row",
-          paddingLeft: 15,
-          paddingTop: 10,
-          paddingBottom: 10,
-          paddingRight: 10,
-        }}
-      >
-        <Avatar size="small" rounded source={{ uri: props.img }} />
+      <View style={{ flexDirection: "row" }}>
+        <Avatar size="12" source={{ uri: props.img }} />
         <Text
           style={{
-            width: 230,
-            paddingLeft: 8,
-            paddingRight: 8,
-            paddingTop: 8,
-            paddingBottom: 8,
+            alignSelf: "center",
+            marginLeft: 15,
+            fontSize: 16,
           }}
         >
           {props.name}
         </Text>
-      </TouchableOpacity>
-      <View
-        style={{
-          flexDirection: "row",
-          marginLeft: 0,
-          marginTop: 7,
-        }}
-      >
-        <TouchableOpacity>
-          <CallIcon
-            style={{
-              marginTop: 12,
-            }}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <VideoIcon
-            style={{
-              marginTop: 12,
-              marginLeft: 15,
-            }}
-          />
-        </TouchableOpacity>
       </View>
-    </View>
+    </TouchableHighlight>
   );
 };
 //////////////////
@@ -98,53 +67,27 @@ const ListFr = (props) => {
     );
   }
   let tmp = [];
-  data = props.listFr;
-  for(let i = 0; i<data.length; i++){
-    tmp.push(<Friend key = {i} name={data[i].name} img={data[i].img} />)
+  let data = props.listFr;
+  for (let i = 0; i < data.length; i++) {
+    tmp.push(<Friend key={i} name={data[i].name} img={data[i].img} />);
   }
 
-  return (
-    // <FlatList
-    //   data={props.listFr}
-    //   renderItem={({ item }) => <Friend name={item.name} img={item.img} />}
-    //   keyExtractor={(item, index) => index.toString()}
-    // />
-    <ScrollView>{tmp}</ScrollView>
-  );
+  return <ScrollView>{tmp}</ScrollView>;
 };
 
 const ListFr1 = (props) => {
   if (props.listFr.length == 0) {
-    return <View></View>;
+    return <></>;
   }
   let tmp = [];
-  data = props.listFr;
-  for(let i = 0; i<data.length; i++){
-    tmp.push(<Friend key = {i} name={data[i].name} img={data[i].img} />)
-  }
-
-
-  return (
-    <View>
-      <Text style={{ marginLeft: 20 }}>{props.chucai}</Text>
-      <ScrollView key={(item, index) => index.toString()}>{tmp}</ScrollView>
-      {/* <FlatList
-        data={props.listFr}
-        renderItem={({ item }) => <Friend name={item.name} img={item.img} />}
-        keyExtractor={(item, index) => index.toString()}
-      /> */}
-    </View>
-  );
-};
-
-const ChuCai = (props) => {
-  if (props.listFr.length == 0) {
-    return;
+  const data = props.listFr;
+  for (let i = 0; i < data.length; i++) {
+    tmp.push(<Friend key={i} name={data[i].name} img={data[i].img} />);
   }
   return (
     <View>
-      <Text>{props.chucai}</Text>
-      <ListFr listFr={props.listFr} />
+      <Text style={{ paddingLeft: 15 }}>{props.chucai}</Text>
+      {tmp}
     </View>
   );
 };
@@ -156,14 +99,16 @@ const ListDanhBa = (props) => {
     return (
       <Text
         style={{
-          marginBottom: 10,
-          marginLeft: 63,
+          textAlign: "center",
+          color: "#767676",
+          paddingBottom: Dimensions.get("window").height - 300,
         }}
       >
         (Không có)
       </Text>
     );
   }
+
   function removeVietnameseTones(str) {
     str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
     str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
@@ -187,10 +132,11 @@ const ListDanhBa = (props) => {
     return str;
   }
 
-  myArr.forEach(function (val, index) {
+  myArr.forEach(function (val) {
     val.name = val.name.trim();
   });
-  myArr.sort((a, b) => +(a.name > b.name) || -(a.name < b.name));
+
+  myArr.sort((a, b) => a.name > b.name);
   let a = [];
   let b = [];
   let c = [];
@@ -328,41 +274,39 @@ const ListDanhBa = (props) => {
     other.push(myArr[i]);
   }
   return (
-    <View>
-      <View>
-        <ListFr1 chucai="A" listFr={a} />
-        <ListFr1 chucai="B" listFr={b} />
-        <ListFr1 chucai="C" listFr={c} />
-        <ListFr1 chucai="D" listFr={d} />
-        <ListFr1 chucai="E" listFr={e} />
-        <ListFr1 chucai="F" listFr={f} />
-        <ListFr1 chucai="G" listFr={g} />
-        <ListFr1 chucai="H" listFr={h} />
-        <ListFr1 chucai="I" listFr={ii} />
-        <ListFr1 chucai="J" listFr={j} />
-        <ListFr1 chucai="K" listFr={k} />
-        <ListFr1 chucai="L" listFr={l} />
-        <ListFr1 chucai="M" listFr={m} />
-        <ListFr1 chucai="N" listFr={n} />
-        <ListFr1 chucai="O" listFr={o} />
-        <ListFr1 chucai="P" listFr={p} />
-        <ListFr1 chucai="Q" listFr={q} />
-        <ListFr1 chucai="R" listFr={r} />
-        <ListFr1 chucai="S" listFr={s} />
-        <ListFr1 chucai="T" listFr={t} />
-        <ListFr1 chucai="U" listFr={u} />
-        <ListFr1 chucai="W" listFr={w} />
-        <ListFr1 chucai="X" listFr={x} />
-        <ListFr1 chucai="Y" listFr={y} />
-        <ListFr1 chucai="Z" listFr={z} />
-        <ListFr1 chucai="Other" listFr={other} />
-      </View>
-    </View>
+    <>
+      <ListFr1 chucai="A" listFr={a} />
+      <ListFr1 chucai="B" listFr={b} />
+      <ListFr1 chucai="C" listFr={c} />
+      <ListFr1 chucai="D" listFr={d} />
+      <ListFr1 chucai="E" listFr={e} />
+      <ListFr1 chucai="F" listFr={f} />
+      <ListFr1 chucai="G" listFr={g} />
+      <ListFr1 chucai="H" listFr={h} />
+      <ListFr1 chucai="I" listFr={ii} />
+      <ListFr1 chucai="J" listFr={j} />
+      <ListFr1 chucai="K" listFr={k} />
+      <ListFr1 chucai="L" listFr={l} />
+      <ListFr1 chucai="M" listFr={m} />
+      <ListFr1 chucai="N" listFr={n} />
+      <ListFr1 chucai="O" listFr={o} />
+      <ListFr1 chucai="P" listFr={p} />
+      <ListFr1 chucai="Q" listFr={q} />
+      <ListFr1 chucai="R" listFr={r} />
+      <ListFr1 chucai="S" listFr={s} />
+      <ListFr1 chucai="T" listFr={t} />
+      <ListFr1 chucai="U" listFr={u} />
+      <ListFr1 chucai="W" listFr={w} />
+      <ListFr1 chucai="X" listFr={x} />
+      <ListFr1 chucai="Y" listFr={y} />
+      <ListFr1 chucai="Z" listFr={z} />
+      <ListFr1 chucai="Other" listFr={other} />
+    </>
   );
 };
 
 export default function HomeContactScreen({ navigation }) {
-  test = [
+  const test = [
     {
       name: "Nguyen Van Nam",
       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
@@ -372,7 +316,7 @@ export default function HomeContactScreen({ navigation }) {
       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
     },
   ];
-  listFriend = [
+  const listFriend = [
     {
       name: "Phan ",
       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
@@ -429,152 +373,98 @@ export default function HomeContactScreen({ navigation }) {
   ];
   return (
     <View style={styles.container}>
-      <View>
-        <StatusBar
-          backgroundColor="#00000000"
-          barStyle="light-content"
-          translucent={true}
-        />
+      <StatusBar
+        backgroundColor="#00000000"
+        barStyle="light-content"
+        translucent={true}
+      />
 
-        <LinearGradient
-          colors={["#0085ff", "#05adff"]}
-          start={[0, 1]}
-          end={[1, 0]}
-          style={styles.header}
-        >
-          <View style={{ flex: 1, flexDirection: "row" }}>
-            <TouchableOpacity
-              activeOpacity={1}
-              style={styles.searchWrap}
-              onPress={() => {}}
-            >
-              <View style={{ flex: 1, flexDirection: "row" }}>
-                <IconSearch style={styles.iconSearch} />
-                <Text style={styles.placeHold}>Tìm bạn bè, tin nhắn...</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconSettingWrap} onPress={() => {}}>
-              <SettingIcon style={styles.iconSetting} />
-            </TouchableOpacity>
+      <LinearGradient
+        colors={["#0085ff", "#05adff"]}
+        start={[0, 1]}
+        end={[1, 0]}
+        style={styles.header}
+      >
+        <View style={{ flexDirection: "row", marginTop: 28 }}>
+          <TouchableOpacity>
+            <View style={{ flex: 1 }}>
+              <IconSearch style={styles.iconSearch} />
+            </View>
+          </TouchableOpacity>
+
+          <View style={{ flex: 6 }}>
+            <TextInput
+              style={styles.input}
+              placeholder="Tìm bạn bè, tin nhắn..."
+              placeholderTextColor="#fff"
+            ></TextInput>
           </View>
-        </LinearGradient>
-      </View>
-      <ScrollView >
+          <View style={{marginLeft : 'auto',marginRight: 15, marginTop:2 }}>
+            <AddFriendIcon style={{height: 28, width: 28,}}/>
+          </View>
+        </View>
+      </LinearGradient>
+      <ScrollView style={{ backgroundColor: "#f6f6f6" }}>
+        <View style={styles.part1}>
+          <TouchableHighlight
+            style={{ paddingTop: 10, paddingBottom: 10, paddingLeft: 15 }}
+            onPress={() => {}}
+            activeOpacity={0.99999}
+            underlayColor="#05adff22"
+          >
+            <View style={{ flexDirection: "row" }}>
+              <Loimoiketban />
+              <Text
+                style={{
+                  fontSize: 16,
+                  marginLeft: 15,
+                  alignSelf: "center",
+                }}
+              >
+                Lời mời kết bạn
+              </Text>
+            </View>
+          </TouchableHighlight>
+
+          <TouchableHighlight
+            style={{
+              paddingTop: 10,
+              paddingBottom: 10,
+              paddingLeft: 15,
+            }}
+            onPress={() => {}}
+            activeOpacity={0.99999}
+            underlayColor="#05adff22"
+          >
+            <View style={{ flexDirection: "row" }}>
+              <Danhba />
+              <Text
+                style={{
+                  fontSize: 16,
+                  alignSelf: "center",
+                  marginLeft: 15,
+                }}
+              >
+                Bạn từ danh bạ máy
+              </Text>
+            </View>
+          </TouchableHighlight>
+        </View>
         <View
           style={{
-            flex: 1,
-            flexDirection: "row",
-            borderBottomWidth: 0.5,
-            borderBottomColor: "lightgray",
-          }}
-        >
-          <TouchableOpacity>
-            <Text
-              style={{
-                fontWeight: "bold",
-                fontSize: 13,
-                paddingTop: 10,
-                paddingLeft: 19,
-                paddingBottom: 10,
-              }}
-            >
-              DANH BẠ
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Text
-              style={{
-                fontSize: 13,
-                paddingTop: 10,
-                paddingLeft: 36,
-                paddingBottom: 10,
-              }}
-            >
-              OFFICIAL ACCOUNT
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Text
-              style={{
-                fontSize: 13,
-                paddingTop: 10,
-                paddingLeft: 36,
-                paddingBottom: 10,
-              }}
-            >
-              NHÓM
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.part1}>
-          <TouchableOpacity style={{ flex: 1, flexDirection: "row" }}>
-            <Loimoiketban
-              style={{
-                fill: "#05adff",
-                paddingLeft: 40,
-                marginLeft: 20,
-                marginTop: 4,
-              }}
-            />
-            <Text
-              style={{
-                fontSize: 15,
-                paddingLeft: 5,
-                marginLeft: 10,
-                marginTop: 17,
-              }}
-            >
-              Lời mời kết bạn
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={{ flex: 1, flexDirection: "row" }}>
-            <Danhba
-              style={{
-                fill: "green",
-                paddingLeft: 40,
-                marginLeft: 17,
-                marginTop: 10,
-              }}
-            />
-            <Text
-              style={{
-                fontSize: 15,
-                paddingLeft: 0,
-                marginLeft: 10,
-                marginTop: 25,
-              }}
-            >
-              Bạn từ danh bạ máy
-            </Text>
-          </TouchableOpacity>
-        </View>
-        {/* <View
-          style={{
-            borderBottomColor: "lightgray",
-            borderBottomWidth: 10,
+            marginTop: 10,
+            backgroundColor: "#fff",
+            paddingTop: 10,
           }}
         >
           <Text
             style={{
+              fontWeight: "600",
+              marginBottom: 10,
               paddingLeft: 15,
-              fontWeight: "bold",
             }}
           >
-            Bạn bè mới truy cập
-          </Text>
-          <View>
-            <ListFr listFr={test} />
-          </View>
-        </View> */}
-        <View>
-          <Text
-            style={{
-              paddingLeft: 15,
-              fontWeight: "bold",
-            }}
-          >
-            Tất cả danh bạ
+            Danh bạ
           </Text>
           <ListDanhBa listFr={listFriend} />
         </View>
@@ -585,21 +475,32 @@ export default function HomeContactScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   part1: {
-    borderBottomWidth: 2,
-    borderBottomColor: "lightgray",
-    borderBottomWidth: 1,
-    marginBottom: 2,
-    paddingBottom: 4,
-    borderBottomWidth: 10,
+    borderBottomColor: "#ababab",
+    borderBottomWidth: 0.1,
+    backgroundColor: "#fff",
   },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#f6f6f6",
+  },
+  input: {
+    color: "white",
+    fontSize: 16,
+    marginLeft: 16,
+    width: "100%",
+    marginTop: 4,
   },
   header: {
     width: "100%",
     color: "#fff",
     height: 62,
+  },
+  iconSearch: {
+    width: 24,
+    height: 24,
+    color: "white",
+    marginLeft: 10,
+    marginTop: 2,
   },
   chucai: {
     marginLeft: 20,
@@ -607,33 +508,11 @@ const styles = StyleSheet.create({
   Loimoiketban: {
     marginTop: 32,
     marginLeft: 10,
-    // fill: green
-  },
-  iconSearch: {
-    marginTop: 32,
-    marginLeft: 10,
-    // paddingRight: 5,
-    // marginRight:10,
-  },
-  searchWrap: {
-    position: "absolute",
-    left: 12,
   },
   placeHold: {
     marginTop: 32,
     marginLeft: 25,
     color: "#fff",
     fontSize: 14,
-  },
-  iconSettingWrap: {
-    width: 35,
-    position: "absolute",
-    right: 0,
-  },
-  iconSetting: {
-    marginTop: 17,
-    marginRight: 50,
-    marginEnd: 5,
-    marginLeft: -30,
   },
 });
