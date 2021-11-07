@@ -44,6 +44,7 @@ function ChatInput({ scrollViewRef, isLoading, isSending, setIsSending }) {
             content: content
         });
         if(!chatContext.needUpdateListChat){
+            
             chatContext.setNeedUpdateListChat(true);
         }
 
@@ -397,7 +398,7 @@ export default function ConversationScreen({ route, navigation }) {
                             <TouchableOpacity
                                 style={styles.iconBackWrap}
                                 onPress={() => {
-                                    chatContext.setInChat(false);
+                                    chatContext.outChatRoom();
                                     navigation.goBack()
                                 }}
                             >

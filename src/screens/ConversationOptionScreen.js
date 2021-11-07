@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { ScrollView, StyleSheet, Pressable, Text, View, StatusBar, ImageBackground, TouchableHighlight, TouchableOpacity, PointPropType } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import IconBack from '../../assets/ic_nav_header_back.svg'
@@ -7,21 +7,22 @@ import { Icon, Avatar } from 'react-native-elements';
 import { Api } from '../api/Api'
 import Modal from "react-native-modal";
 import AuthContext from '../components/context/AuthContext';
+import ChatContext from '../components/context/ChatContext';
+import AppContext from '../components/context/AppContext';
 import IconMenuDelete from '../../assets/ic_bottom_sheet_menu_delete.svg'
 import IconMenuUser from '../../assets/ic_user_line_24.svg'
 import IconMenuBan from '../../assets/ic_ban_line_24.svg'
 import { showMessage, hideMessage } from "react-native-flash-message";
 import FlashMessage from "react-native-flash-message";
 
-const minPasswordLength = 6;
-const maxPasswordLength = 10;
-const ERROR_PHONENUMBER_AND_PASSWORD = "Mật khẩu không được trùng với số điện thoại";
 
 export default function ConversationOptionScreen({ route, navigation }) {
     const [friend, setFriend] = useState(route.params.friendInfo);
     const [menuDeleteVisible, setMenuDeleteVisible] = useState(false);
     const [menuBlockVisible, setMenuBlockVisible] = useState(false);
-
+    const context = React.useContext(AuthContext);
+    const chatContext = React.useContext(ChatContext);
+    const appContext = useContext(AppContext);
     var goToUserPage = () => {
         showMessage({
             message: "Simple message",
@@ -30,9 +31,53 @@ export default function ConversationOptionScreen({ route, navigation }) {
         console.log("Go to user's page!");
     }
 
-    var confirmDeleteConverSation = () => {
-        console.log("conversation deleted");
-        navigation.pop(2);
+    var confirmDeleteConverSation = async () => {
+        if (chatContext.curChatId) {
+            try {
+                accessToken = context.loginState.accessToken;
+
+                const res = await Api.deleteChat(accessToken, chatContext.curChatId);
+                // console.log("called")
+                chatContext.setListUnseens([]);
+                chatContext.setNeedUpdateListChat(true);
+
+
+                console.log("conversation deleted");
+                navigation.pop(2);
+                appContext.displayMessage({
+                    message: "Đã xoá cuộc trò chuyện",
+                    type: "info",
+                    style: { marginLeft: "auto" },
+                    icon: "success",
+                    position: "top",
+                    duration: 2000,
+                    backgroundColor: "#008bd7",
+                });
+            } catch (err) {
+                if (err.response && err.response.status == 401) {
+                    console.log(err.response.data.message);
+                    // setNotification("Không thể nhận diện");
+                    // console.log(notification)
+                    return;
+                }
+                console.log(err);
+                navigation.navigate("NoConnectionScreen", {
+                    message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+                });
+            }
+        } else {
+            console.log("conversation deleted");
+            navigation.pop(2);
+            appContext.displayMessage({
+                message: "Đã xoá cuộc trò chuyện",
+                type: "info",
+                style: { marginLeft: "auto" },
+                icon: "success",
+                position: "top",
+                duration: 2000,
+                backgroundColor: "#008bd7",
+            });
+        }
     }
 
     var confirmBlock = () => {

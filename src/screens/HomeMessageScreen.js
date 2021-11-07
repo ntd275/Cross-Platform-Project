@@ -88,7 +88,7 @@ export default function HomeMessageScreen({ navigation }) {
 
       if(chatContext.needUpdateListChat){
         chatContext.setNeedUpdateListChat(false);
-        scrollViewRef.current.scrollTo({x: 0, y: 0, animated: true})
+        // scrollViewRef.current.scrollTo({x: 0, y: 0, animated: true})
       }
 
       setIsLoading(false)
@@ -157,7 +157,7 @@ export default function HomeMessageScreen({ navigation }) {
               <View>
                 <Text style={{ fontSize: 17, fontWeight:  isread? '500': '700', paddingBottom: 6 }}>{userName}</Text>
               </View>
-              <View style={{ marginLeft: "auto", marginRight: 14 }}>
+              <View style={{ marginLeft: "auto", marginRight: 10 }}>
                 <Text style={{ textAlign: "right", opacity: isread ? 0.5 : 1, fontSize: 13, fontWeight:  isread? '400': '500', }}>{TimeUtility.getTimeStr(new Date(lastMessage.time))} </Text>
               </View>
             </View >
