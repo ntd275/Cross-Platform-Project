@@ -268,7 +268,7 @@ export default function Post(props) {
     };
 
     const context = useContext(AuthContext);
-    const appContext = useContext(AppContext)
+    const appContext = useContext(AppContext);
 
     const sendReport = async (reason, details) => {
         let accessToken = "lol " + context.loginState.accessToken;

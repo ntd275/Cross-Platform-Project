@@ -83,8 +83,15 @@ export default function App() {
     }
   }
 
+  const _setPhonenumber = (v) => {
+    if (v != phonenumber) {
+      setPhonenumber(v)
+    }
+  }
+
   const [keyBoardHeight, setKeyBoardHeight] = React.useState(0)
   const [avatar, setAvatar] = React.useState("avatar_2.png")
+  const [phonenumber, setPhonenumber] = React.useState("")
   const [blockedInbox, setBlockedInbox] = React.useState(new Array())
   const [blockedDiary, setBlockedDiary] = React.useState(new Array())
   const [coverImage, setCoverImage] = React.useState("defaul_cover_image.jpg")
@@ -103,6 +110,8 @@ export default function App() {
     setBlockedInbox: _setBlockedInbox,
     blockedDiary,
     setBlockedDiary: _setBlockedDiary,
+    phonenumber,
+    setPhonenumber: _setPhonenumber,
   }
 
   const getMe = async () => {
@@ -114,6 +123,7 @@ export default function App() {
       _setDescription(res.data.data.description)
       _setBlockedInbox(res.data.data.blocked_inbox)
       _setBlockedDiary(res.data.data.blocked_diary)
+      _setPhonenumber(res.data.data.phonenumber)
     } catch (e) {
       console.log(e)
     }

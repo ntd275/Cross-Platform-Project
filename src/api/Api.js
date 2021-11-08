@@ -182,4 +182,20 @@ export const Api = {
             },
         });
     },
+    // setBlock
+    changePassword: (token, currentPassword, newPassword) => {
+        return axios({
+            method: "post",
+            url: `${BaseURL}/users/change-password`,
+            data: {
+                currentPassword,
+                newPassword,
+            },
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                authorization: "a " + token,
+            },
+        });
+    }
 };

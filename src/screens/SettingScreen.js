@@ -21,6 +21,7 @@ import ChatContext from "../components/context/ChatContext";
 import IconSearch from "../../assets/ic_searchbox.svg";
 import { ListItem, Avatar } from "react-native-elements";
 import IconLogout from "../../assets/ic_logout.svg"
+import IconChangePassword from "../../assets/ic_icon_password_on.svg"
 
 export default function SettingScreen({ navigation }) {
   const {dispatch} = React.useContext(AuthContext)
@@ -62,9 +63,19 @@ export default function SettingScreen({ navigation }) {
         </View>
         <View>
           <ListItem bottomDivider onPress={logout} underlayColor="#0085ff">
-            <Avatar Component={IconLogout}/>
+            <Avatar Component={() => 
+                <IconLogout/>
+            }/>
             <ListItem.Content >
               <ListItem.Title>Đăng xuất</ListItem.Title>
+            </ListItem.Content>
+          </ListItem>
+          <ListItem bottomDivider onPress={() => navigation.navigate("ChangePasswordScreen")} underlayColor="#0085ff">
+            <Avatar Component={() => 
+                <IconChangePassword/>
+            }/>
+            <ListItem.Content >
+              <ListItem.Title>Đổi mật khẩu</ListItem.Title>
             </ListItem.Content>
           </ListItem>
         </View>
@@ -105,5 +116,5 @@ const styles = StyleSheet.create({
   },
   iconSearch: {
     marginTop: 32,
-  }
+  },
 });
