@@ -31,6 +31,7 @@ export default function ChangePasswordScreen({ navigation }) {
     const [passwordError, setPasswordError] = useState("");
     const [confirmPasswordError, setConfirmPasswordError] = useState("");
     const [phoneNumberError, setPhoneNumberError] = useState("");
+    const [successNoti, setSuccessNoti] = useState(false);
 
     useEffect(()=>{
         setSubmitEnable(password !== "" && currentPassword !== "" && confirmPassword !== "" && checkNoneError());
@@ -113,9 +114,6 @@ export default function ChangePasswordScreen({ navigation }) {
     }
 
     checkPhoneNumberAndPassWordOk = (password) => {
-        console.log(appContext.phonenumber);
-        console.log(password);
-        console.log(appContext.phonenumber !== password);
         if (password == "" || appContext.phonenumber !== password) {
             return true;
         }
@@ -153,20 +151,24 @@ export default function ChangePasswordScreen({ navigation }) {
     const changePassword = async () => {
         try {
             let token = authContext.loginState.accessToken;
-            const res = await Api.changePassword(token, currentPassword, password)
-            setNotification("Đổi mật khẩu thành công")
+            const res = await Api.changePassword(token, currentPassword, password);
+            setSuccessNoti(true);
+            setNotification("Đổi mật khẩu thành công");
         } catch(err){
             if (err.response && err.response.status == 401) {
-                console.log(err.response.data.message)
-                setNotification("Không thể xác thực đăng nhập")
+                console.log(err.response.data.message);
+                setSuccessNoti(true);
+                setNotification("Không thể xác thực đăng nhập");
                 return
             } else if (err.response && err.response.status == 400) {
-                console.log(err.response.data.message)
-                setNotification("Mật khẩu cũ không chính xác")
+                console.log(err.response.data.message);
+                setSuccessNoti(true);
+                setNotification("Mật khẩu cũ không chính xác");
                 return
             } else if (err.response && err.response.status == 404) {
-                console.log(err.response.data.message)
-                setNotification("Tài khoản không hợp lệ")
+                console.log(err.response.data.message);
+                setSuccessNoti(true);
+                setNotification("Tài khoản không hợp lệ");
                 return
             }
             console.log(err)
@@ -283,7 +285,9 @@ export default function ChangePasswordScreen({ navigation }) {
                         </View>
                     </View>
                     {notification && <View>
-                        <Text style={styles.notificationText}>{notification}</Text>
+                        <Text style={successNoti?styles.notificationSuccessfulText:styles.notificationText}>
+                            {notification}
+                        </Text>
                     </View>}
                     <View style={{ marginTop: 50 }}>
                         < TouchableHighlight
@@ -365,6 +369,10 @@ const styles = StyleSheet.create({
     },
     notificationText: {
         color: "#f00",
+        left: 20,
+    },
+    notificationSuccessfulText: {
+        color: "#0f0",
         left: 20,
     },
 });
