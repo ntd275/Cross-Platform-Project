@@ -203,6 +203,10 @@ export default function Post(props) {
         console.log("pressed Delete");
         // refRBSheet.current.close();
     };
+    var onPressEdit = () => {
+        console.log("pressed Edit");
+        // refRBSheet.current.close();
+    };
     var onPressHide = async () => {
         let hide = !appContext.blockedDiary.includes(props.post.author._id);
         Alert.alert("Xác nhận", "Bạn có muốn ".concat(hide?"":"bỏ ", "ẩn nhật ký của người này?"), [
@@ -422,7 +426,7 @@ export default function Post(props) {
                 closeOnPressBack={true}
                 onClose={() => refCallBack.current()}
                 animationType="fade"
-                height={320}
+                height={(props.post.author._id==context.loginState.userId)?240:160}
                 customStyles={{
                     wrapper: {
                         backgroundColor: "rgba(0,0,0,0.28)",
@@ -440,10 +444,11 @@ export default function Post(props) {
                     style={{
                         justifyContent: "center",
                         flexDirection: "column",
-                        height: 320,
+                        height: (props.post.author._id==context.loginState.userId)?240:160,
                         marginTop: -20,
                     }}
                 >
+                    {props.post.author._id == context.loginState.userId &&
                     <Pressable
                         style={[styles.menuOption, { height: 72 }]}
                         onPress={onPressDelete}
@@ -463,6 +468,29 @@ export default function Post(props) {
                             </Text>
                         </View>
                     </Pressable>
+                    }
+
+                    {props.post.author._id == context.loginState.userId &&
+                    <Pressable
+                        style={[styles.menuOption, { height: 72 }]}
+                        onPress={onPressEdit}
+                    >
+                        <IconMenuDelete
+                            flex={1}
+                            style={{ marginTop: "auto", marginBottom: "auto" }}
+                        />
+                        <View flex={10} style={styles.inMenuOption}>
+                            <Text
+                                style={{ fontSize: 16, fontWeight: "400", marginBottom: 4 }}
+                            >
+                                Sửa bài đăng
+                            </Text>
+                            <Text style={{ fontSize: 14, color: "#9ea1a6" }}>
+                                Sửa nội dung bài đăng
+                            </Text>
+                        </View>
+                    </Pressable>
+                    }
                     
                     {props.post.author._id != context.loginState.userId &&
                     <Pressable
@@ -486,7 +514,7 @@ export default function Post(props) {
                     </Pressable>
                     }
 
-                    <Pressable
+                    {/* <Pressable
                         style={[styles.menuOption, { height: 90 }]}
                         onPress={onPressBlock}
                     >
@@ -504,7 +532,7 @@ export default function Post(props) {
                                 Người này sẽ không thấy toàn bộ bài đăng và khoảnh khắc của bạn
                             </Text>
                         </View>
-                    </Pressable>
+                    </Pressable> */}
 
                     <Pressable
                         style={[styles.menuOption, { height: 68 }]}
