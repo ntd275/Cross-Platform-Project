@@ -152,22 +152,34 @@ export default function ChangePasswordScreen({ navigation }) {
         try {
             let token = authContext.loginState.accessToken;
             const res = await Api.changePassword(token, currentPassword, password);
-            setSuccessNoti(true);
-            setNotification("Đổi mật khẩu thành công");
+            if (res.status == 200) {
+                setSuccessNoti(true);
+                setNotification("Đổi mật khẩu thành công");
+                appContext.displayMessage({
+                    message: "Đổi mật khẩu thành công",
+                    type: "default",
+                    style: { width: 195, marginBottom: 200 },
+                    titleStyle: {fontSize: 14},
+                    duration: 1900,
+                    icon:"success",
+                    position: "center",
+                    backgroundColor: "#262626",
+                });
+            }
         } catch(err){
             if (err.response && err.response.status == 401) {
                 console.log(err.response.data.message);
-                setSuccessNoti(true);
+                setSuccessNoti(false);
                 setNotification("Không thể xác thực đăng nhập");
                 return
             } else if (err.response && err.response.status == 400) {
                 console.log(err.response.data.message);
-                setSuccessNoti(true);
+                setSuccessNoti(false);
                 setNotification("Mật khẩu cũ không chính xác");
                 return
             } else if (err.response && err.response.status == 404) {
                 console.log(err.response.data.message);
-                setSuccessNoti(true);
+                setSuccessNoti(false);
                 setNotification("Tài khoản không hợp lệ");
                 return
             }

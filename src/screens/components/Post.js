@@ -228,7 +228,7 @@ export default function Post(props) {
                             position: "center",
                             backgroundColor: "#262626",
                         });
-                        appContext.setBlockedDiary(res.data.dkata.blocked_diary)
+                        appContext.setBlockedDiary(res.data.data.blocked_diary)
                     }
                     // console.log(res.data);
                     // console.log(res.status);
