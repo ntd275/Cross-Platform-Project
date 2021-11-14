@@ -116,6 +116,13 @@ export const Api = {
             },
         });
     },
+    getUser: (token, id) => {
+        return axios.get(`${BaseURL}/users/show/${id}`, {
+            headers: {
+                authorization: token,
+            },
+        });
+    },
     getChats: (token) => {
         return axios({
             method: "get",

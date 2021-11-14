@@ -203,6 +203,7 @@ export default function ProfileScreen({ navigation }) {
         </View>
         <ScrollView
           horizontal={true}
+          showsHorizontalScrollIndicator= {false}
           style={{
             paddingLeft: 10,
             paddingTop: 10,
@@ -249,6 +250,7 @@ export default function ProfileScreen({ navigation }) {
               width: 200,
               borderRadius: 10,
               marginLeft: 10,
+              marginRight: 15,
             }}
           >
             <View
@@ -489,6 +491,7 @@ export default function ProfileScreen({ navigation }) {
       </TouchableOpacity>
       <TouchableOpacity
         style={{ position: "absolute", top: 25, right: 10, zIndex: 2 }}
+        onPress={() => navigation.navigate('ViewProfileScreen',{userId: '60c45025ae8c0f00220f4616'})}
       >
         {iconColor == "white" ? <IconOption /> : <IconOptionBlack />}
       </TouchableOpacity>
