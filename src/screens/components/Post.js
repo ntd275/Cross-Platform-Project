@@ -63,11 +63,6 @@ export default function Post(props) {
     let numComment = props.post.countComments;
 
     var goToUserPage = () => {
-        context.loginState.socket.emit("chatmessage", {
-            "token": context.loginState.accessToken,
-            "content": "helloo",
-            "receiverId": "60c45025ae8c0f00220f4616",
-          });
         console.log("Go to user's page!");
     };
 

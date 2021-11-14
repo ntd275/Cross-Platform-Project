@@ -43,6 +43,7 @@ export default function ConversationOptionScreen({ route, navigation }) {
 
 
                 console.log("conversation deleted");
+                chatContext.outChatRoom();
                 navigation.pop(2);
                 appContext.displayMessage({
                     message: "Đã xoá cuộc trò chuyện",
@@ -67,6 +68,7 @@ export default function ConversationOptionScreen({ route, navigation }) {
             }
         } else {
             console.log("conversation deleted");
+            chatContext.outChatRoom();
             navigation.pop(2);
             appContext.displayMessage({
                 message: "Đã xoá cuộc trò chuyện",

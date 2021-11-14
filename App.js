@@ -46,6 +46,11 @@ export default function App() {
     dispatch
   }
 
+  React.useEffect(()=>{
+    console.log(needUpdateListChat);
+    console.log(listUnseens);
+  }, listUnseens);
+
 
   const _setKeyBoardHeight = (h) => {
     if (h > 0) {
@@ -163,19 +168,18 @@ export default function App() {
         if (curChatId !== msg.chatId) {
           setCurChatId(msg.chatId);
         }
-      } else if (msg.senderId !== loginState.userId) {
+      } else if (msg.senderId != loginState.userId) {
         let chatId = msg.chatId;
         let temp = listUnseens;
         let index = temp.indexOf(chatId);
+        console.log(temp);
         if (index == -1) {
           temp.push(chatId)
-          setListUnseens(temp);
         }
-        // console.log("here")
+        setListUnseens(temp);
         // console.log(listUnseens)
       }
       if (!needUpdateListChat) {
-        console.log("here")
         setNeedUpdateListChat(true);
       }
     });
