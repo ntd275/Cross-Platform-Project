@@ -204,5 +204,95 @@ export const Api = {
                 authorization: "a " + token,
             },
         });
-    }
+    },
+
+    getUserByPhone: (token, phonenumber) => {
+        return axios({
+            method: "get",
+            url: `${BaseURL}/users/showbyphone/${phonenumber}`,
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                authorization: "a " + token,
+            },
+        });
+    },
+
+    getFriendStatus: (token, friendId) => {
+        return axios({
+            method: "get",
+            url: `${BaseURL}/friends/status/${friendId}`,
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                authorization: "a " + token,
+            },
+        });
+    },
+
+    sendFriendRequest: (token, friendId) => {
+        // type = true (block) or false (unblock)
+        return axios({
+            method: "post",
+            url: `${BaseURL}/friends/set-request-friend`,
+            data: {
+                user_id: friendId,
+            },
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                authorization: "a " + token,
+            },
+        });
+    },
+
+    sendAcceptFriendRequest: (token, friendId) => {
+        // type = true (block) or false (unblock)
+        return axios({
+            method: "post",
+            url: `${BaseURL}/friends/set-accept`,
+            data: {
+                user_id: friendId,
+                is_accept: '1'
+            },
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                authorization: "a " + token,
+            },
+        });
+    },
+
+    sendRejectFriendRequest: (token, friendId) => {
+        // type = true (block) or false (unblock)
+        return axios({
+            method: "post",
+            url: `${BaseURL}/friends/set-accept`,
+            data: {
+                user_id: friendId,
+                is_accept: '2'
+            },
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                authorization: "a " + token,
+            },
+        });
+    },
+
+    sendCancelFriendRequest: (token, friendId) => {
+        // type = true (block) or false (unblock)
+        return axios({
+            method: "post",
+            url: `${BaseURL}/friends/cancel-request`,
+            data: {
+                user_id: friendId,
+            },
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                authorization: "a " + token,
+            },
+        });
+    },
 };
