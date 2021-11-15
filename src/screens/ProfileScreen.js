@@ -489,6 +489,7 @@ export default function ProfileScreen({ navigation }) {
       </TouchableOpacity>
       <TouchableOpacity
         style={{ position: "absolute", top: 25, right: 10, zIndex: 2 }}
+        onPress={() => navigation.navigate("ProfileOptionScreen")}
       >
         {iconColor == "white" ? <IconOption /> : <IconOptionBlack />}
       </TouchableOpacity>
