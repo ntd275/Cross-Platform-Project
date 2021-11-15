@@ -1,9 +1,5 @@
-import React, { useContext, useRef, useState } from "react";
-import IconImage from "../../assets/ic_photo_grd.svg";
-import IconVideo from "../../assets/ic_video_solid_24.svg";
-import IconAlbum from "../../assets/ic_album.svg";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Avatar, Image as Image2, Divider } from "react-native-elements";
-import Post from "./components/Post";
 import { Api } from "../api/Api";
 import AuthContext from "../components/context/AuthContext";
 import {
@@ -11,29 +7,21 @@ import {
   Text,
   View,
   Image,
-  ScrollView,
   TextInput,
   TouchableOpacity,
   TouchableHighlight,
   Pressable,
-  FlatList,
   Animated,
   Easing,
   Dimensions,
   StatusBar,
   Alert,
 } from "react-native";
-import { useKeyboard } from "./components/useKeyboard";
 import AppContext from "../components/context/AppContext";
 import IconBack from "../../assets/ic_nav_header_back.svg";
 import IconBackBlack from "../../assets/ic_nav_header_back_black.svg";
-import IconOption from "../../assets/button_option_menu.svg";
-import IconOptionBlack from "../../assets/button_option_menu_black.svg";
-import IconEdit from "../../assets/ic_profile_edit_bio.svg";
 import { Avatar as Avatar2, Actionsheet, Box } from "native-base";
 import { LinearGradient } from "expo-linear-gradient";
-import IconImageSolid from "../../assets/ic_photo_solidhollow_24.svg";
-import IconVideoSolid from "../../assets/ic_video_solid_24_white.svg";
 import RBSheet from "react-native-raw-bottom-sheet";
 import ImageView from "react-native-image-viewing";
 import * as ImagePicker from "expo-image-picker";
@@ -41,12 +29,7 @@ import * as ImagePicker from "expo-image-picker";
 const BaseURL = "http://13.76.46.159:8000/files/";
 const FULL_WIDTH = Dimensions.get("window").width;
 
-export default function ProfileScreen({ navigation }) {
-  const [needReload, setNeedReload] = useState(true);
-  const [firstLoad, setFirstLoad] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [posts, setPosts] = useState([]);
-
+export default function PersonalInformationScreen({ navigation }) {
   const context = React.useContext(AuthContext);
   const appContext = useContext(AppContext);
   const getAvatar = async () => {
@@ -60,321 +43,12 @@ export default function ProfileScreen({ navigation }) {
       console.log(e);
     }
   };
-  const getPosts = async () => {
-    if (isLoading) {
-      return;
-    }
-    setIsLoading(true);
-    try {
-      accessToken = context.loginState.accessToken;
-      accessToken = "lol " + accessToken;
-      // console.log(accessToken)
-      const res = await Api.getPostsById(
-        accessToken,
-        context.loginState.userId
-      );
-      let postList = res.data.data;
 
-      setPosts(postList.reverse());
-
-      if (firstLoad) {
-        setFirstLoad(false);
-      }
-      if (needReload) {
-        setNeedReload(false);
-      }
-      setIsLoading(false);
-      if (!firstLoad) {
-        closeLoading();
-      }
-    } catch (err) {
-      if (err.response && err.response.status == 401) {
-        console.log(err.response.data.message);
-        setIsLoading(false);
-        return;
-      }
-      console.log(err);
-      navigation.navigate("NoConnectionScreen", {
-        message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
-      });
-    }
-  };
-
-  let opacity = useRef(new Animated.Value(0));
-
-  let closeLoading = () => {
-    opacity.current.setValue(100);
-    Animated.timing(opacity.current, {
-      toValue: 0,
-      duration: 500,
-      easing: Easing.ease,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  if (needReload && !isLoading) {
+  useEffect(() => {
     getAvatar();
-    getPosts();
-  }
+  }, []);
 
-  var NotiHeader = () => {
-    if (needReload && firstLoad) {
-      return (
-        <View style={{ marginTop: 10 }}>
-          <Text style={styles.describeText}>
-            Đang tải dữ liệu, chờ chút thôi ...
-          </Text>
-          <Image
-            source={require("../../assets/loading.gif")}
-            style={{ alignSelf: "center" }}
-          />
-        </View>
-      );
-    }
-    if (posts.length == 0) {
-      return (
-        <View style={{ marginTop: 10 }}>
-          <Text style={styles.describeText}>Chưa có bài đăng nào</Text>
-        </View>
-      );
-    }
-
-    return <></>;
-  };
-
-  const keyBoardHeight = useKeyboard();
-  const inputRef = useRef();
-  const mode = useRef("image");
-  var LoadingHeader = () => {
-    return (
-      <Animated.View style={{ height: opacity.current }}>
-        <Image
-          source={require("../../assets/loading.gif")}
-          style={{ alignSelf: "center", marginTop: 10 }}
-        />
-        <Text style={styles.describeText}>
-          Đang tải dữ liệu, chờ chút thôi ...
-        </Text>
-      </Animated.View>
-    );
-  };
-
-  const refCoverImageOption = useRef();
   const [isViewCoverImage, setIsViewCoverImage] = useState(false);
-
-  var ListHeader = () => {
-    return (
-      <>
-        {LoadingHeader()}
-        <View style={{ position: "relative" }}>
-          <Image2
-            style={{ width: FULL_WIDTH, height: 200 }}
-            source={{ uri: BaseURL + appContext.coverImage }}
-            onPress={() => refCoverImageOption.current.open()}
-          ></Image2>
-          <View style={{ alignItems: "center", backgroundColor: "#fff" }}>
-            <Text style={{ fontSize: 26, fontWeight: "500", marginTop: 50 }}>
-              {context.loginState.userName}
-            </Text>
-            <Pressable style={{ marginTop: 4 }}>
-              {appContext.decription ? (
-                <Text style={{ fontSize: 16, color: "#767676" }}>
-                  {appContext.decription}
-                </Text>
-              ) : (
-                <View style={{ alignItems: "center", flexDirection: "row" }}>
-                  <IconEdit />
-                  <Text
-                    style={{ color: "#1e96f2", fontSize: 16, marginLeft: 2 }}
-                  >
-                    Thêm lời giới thiệu của bạn
-                  </Text>
-                </View>
-              )}
-            </Pressable>
-          </View>
-          <Pressable onPress={()=> refAvatarImageOption.current.open()} style={{ position: "absolute", alignSelf: "center", top: 120 }}>
-            <Avatar2
-              size={"2xl"}
-              source={{ uri: BaseURL + appContext.avatar }}
-              style={{ borderWidth: 2, borderColor: "#fff" }}
-            ></Avatar2>
-          </Pressable>
-        </View>
-        <ScrollView
-          horizontal={true}
-          showsHorizontalScrollIndicator= {false}
-          style={{
-            paddingLeft: 10,
-            paddingTop: 10,
-            paddingBottom: 10,
-            backgroundColor: "#fff",
-          }}
-        >
-          <LinearGradient
-            colors={["#469065", "#90b97b", "#e6f2c2"]}
-            start={[0, 1]}
-            end={[1, 0]}
-            style={{ height: 100, width: 200, borderRadius: 10 }}
-          >
-            <View
-              style={{
-                marginTop: 12,
-                marginLeft: 15,
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <IconImageSolid />
-              <Text
-                style={{
-                  color: "#fff",
-                  fontWeight: "600",
-                  fontSize: 16,
-                  marginLeft: 2,
-                }}
-              >
-                Ảnh của tôi
-              </Text>
-            </View>
-            <Text style={{ marginLeft: 15, color: "#fff", marginTop: 5 }}>
-              Xem tất cả ảnh và
-            </Text>
-            <Text style={{ marginLeft: 15, color: "#fff" }}>video đã đăng</Text>
-          </LinearGradient>
-          <LinearGradient
-            colors={["#e16779", "#d88d92", "#c6abac"]}
-            end={[1, 0]}
-            style={{
-              height: 100,
-              width: 200,
-              borderRadius: 10,
-              marginLeft: 10,
-              marginRight: 15,
-            }}
-          >
-            <View
-              style={{
-                marginTop: 12,
-                marginLeft: 15,
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <IconVideoSolid />
-              <Text
-                style={{
-                  color: "#fff",
-                  fontWeight: "600",
-                  fontSize: 16,
-                  marginLeft: 2,
-                }}
-              >
-                Video của tôi
-              </Text>
-            </View>
-            <Text style={{ marginLeft: 15, color: "#fff", marginTop: 5 }}>
-              Xem tất cả video đã đăng
-            </Text>
-          </LinearGradient>
-        </ScrollView>
-        <View style={styles.createPostArea}>
-          <View style={styles.avatar}>
-            <Avatar
-              rounded
-              size="medium"
-              source={{
-                uri: BaseURL + appContext.avatar,
-              }}
-            />
-          </View>
-          <View style={{ marginTop: 25, marginLeft: 10 }}>
-            <TextInput
-              style={{ color: "black", fontSize: 18 }}
-              // onTouchStart={()=>  alert("Hello...")}
-              placeholder="Hôm nay bạn thế nào?"
-              placeholderTextColor="#dedede"
-              onFocus={() => {
-                inputRef.current.blur();
-                navigation.navigate("CreatePost", { mode: mode.current });
-              }}
-              onBlur={() => {
-                appContext.setKeyBoardHeight(keyBoardHeight);
-              }}
-              ref={inputRef}
-            ></TextInput>
-          </View>
-        </View>
-        <View style={styles.mediaArea}>
-          <Pressable
-            style={styles.mediaPost}
-            onPress={() => {
-              (mode.current = "image"), inputRef.current.focus();
-            }}
-          >
-            <IconImage style={styles.iconImage} />
-            <Text
-              style={{
-                marginLeft: 5,
-                marginRight: "auto",
-                fontWeight: "600",
-                fontSize: 13,
-              }}
-            >
-              Đăng ảnh
-            </Text>
-          </Pressable>
-          <Pressable
-            style={styles.mediaPost}
-            onPress={() => {
-              (mode.current = "video"), inputRef.current.focus();
-            }}
-          >
-            <IconVideo style={styles.iconVideo} />
-            <Text
-              style={{
-                marginLeft: 5,
-                marginRight: "auto",
-                fontWeight: "600",
-                fontSize: 13,
-              }}
-            >
-              Đăng video
-            </Text>
-          </Pressable>
-          <View style={styles.mediaPost}>
-            <IconAlbum style={styles.iconAlbum} />
-            <Text
-              style={{
-                marginLeft: 5,
-                marginRight: "auto",
-                fontWeight: "600",
-                fontSize: 13,
-              }}
-            >
-              Tạo album
-            </Text>
-          </View>
-        </View>
-        <NotiHeader />
-      </>
-    );
-  };
-
-  const offset = useRef(new Animated.Value(0)).current;
-  const opacityOnScroll = offset.interpolate({
-    inputRange: [0, 200],
-    outputRange: [0, 1],
-    extrapolate: "clamp",
-  });
-
-  opacityOnScroll.addListener((e) => {
-    if (e.value == 1 && iconColor == "white") setIconColor("black");
-    if (e.value < 1 && iconColor == "black") setIconColor("white");
-  });
-
-  const [iconColor, setIconColor] = useState("white");
-  const refCallBack = useRef(() => {});
 
   const changeCoverPicture = async (mode) => {
     let result;
@@ -399,17 +73,18 @@ export default function ProfileScreen({ navigation }) {
         let res = await Api.editUser("lol " + context.loginState.accessToken, {
           cover_image: "data:image;base64," + result.base64,
         });
-        console.log(res.data.data.cover_image.fileName)
-        appContext.setCoverImage(res.data.data.cover_image.fileName)
+        console.log(res.data.data.cover_image.fileName);
+        appContext.setCoverImage(res.data.data.cover_image.fileName);
         Alert.alert("Thành công", "Đã thay đổi ảnh bìa", [{ text: "OK" }]);
-        
       } catch (e) {
         console.log(e);
       }
     }
   };
 
+  const refCoverImageOption = useRef();
   const refAvatarImageOption = useRef();
+  const refCallBack = useRef(() => {});
 
   const changeAvatarPicture = async (mode) => {
     let result;
@@ -432,11 +107,11 @@ export default function ProfileScreen({ navigation }) {
     if (!result.cancelled) {
       try {
         let res = await Api.editUser("lol " + context.loginState.accessToken, {
-            avatar: "data:image;base64," + result.base64,
-        })
-        await getPosts()
-        console.log(res.data.data.avatar.fileName)
-        appContext.setAvatar(res.data.data.avatar.fileName)
+          avatar: "data:image;base64," + result.base64,
+        });
+        await getPosts();
+        console.log(res.data.data.avatar.fileName);
+        appContext.setAvatar(res.data.data.avatar.fileName);
         Alert.alert("Thành công", "Đã thay đổi ảnh đại diện", [{ text: "OK" }]);
       } catch (e) {
         console.log(e);
@@ -448,53 +123,109 @@ export default function ProfileScreen({ navigation }) {
     <View style={styles.container}>
       <StatusBar
         backgroundColor="#00000000"
-        barStyle={iconColor == "white" ? "light-content" : "dark-content"}
+        barStyle={"light-content"}
         translucent={true}
       />
-      <Animated.View
-        style={{
-          position: "absolute",
-          height: 70,
-          backgroundColor: "#fff",
-          top: 0,
-          width: FULL_WIDTH,
-          opacity: opacityOnScroll,
-          zIndex: 2,
-          flexDirection: "row",
-          borderBottomColor: "#cdcdcd",
-          borderBottomWidth: 1,
-        }}
-      >
-        <View style={{ marginTop: 25, marginLeft: 60 }}>
-          <Avatar2
-            source={{ uri: BaseURL + appContext.avatar }}
-            size="sm"
-          ></Avatar2>
-        </View>
-
-        <Text
-          style={{
-            marginTop: 28,
-            marginLeft: 10,
-            fontWeight: "500",
-            fontSize: 20,
-          }}
-        >
-          {context.loginState.userName}
-        </Text>
-      </Animated.View>
+      <Image2
+        style={{ width: FULL_WIDTH, height: 280 }}
+        source={{ uri: BaseURL + appContext.coverImage }}
+        onPress={() => refCoverImageOption.current.open()}
+      ></Image2>
       <TouchableOpacity
         style={{ position: "absolute", top: 30, left: 10, zIndex: 2 }}
         onPress={() => navigation.goBack()}
       >
-        {iconColor == "white" ? <IconBack /> : <IconBackBlack />}
+        <IconBack />
       </TouchableOpacity>
-      <TouchableOpacity
-        style={{ position: "absolute", top: 25, right: 10, zIndex: 2 }}
-        onPress={() => navigation.navigate('ProfileOptionScreen')}
+      <Pressable
+        onPress={() => refAvatarImageOption.current.open()}
+        style={{ position: "absolute", left: 10, top: 190 }}
       >
-        {iconColor == "white" ? <IconOption /> : <IconOptionBlack />}
-      </TouchableOpacity>
+        <Avatar2
+          size={"20"}
+          source={{ uri: BaseURL + appContext.avatar }}
+          style={{ borderWidth: 2, borderColor: "#fff" }}
+        ></Avatar2>
+      </Pressable>
+
+      <View style={{ position:'absolute', top: 215, left: 100 }}>
+        <Text style={{ fontSize: 24, fontWeight: "500", color: '#fff' }}>
+          {context.loginState.userName}
+        </Text>
+        <View style={{ marginTop: 4 }}>
+          {appContext.decription && (
+            <Text style={{ fontSize: 16, color: "#fff" }}>
+              {appContext.decription}
+            </Text>
+          )}
+        </View>
+      </View>
+
+      <View style={{paddingLeft: 12, backgroundColor:'#fff', paddingRight: 12}}>
+          <View style={styles.info}>
+                <View style={styles.infoTitle}>
+                    <Text style={{fontSize:15}}>Giới tính</Text>
+                </View>
+                <View style={{flex:1}}>
+                    <Text style={{color:'#898989',fontSize: 15}}>Nam</Text>
+                </View>
+          </View>
+          <Divider/>
+          <View style={styles.info}>
+                <View style={styles.infoTitle}>
+                    <Text style={{fontSize:15}}>Ngày sinh</Text>
+                </View>
+                <View style={{flex:1}}>
+                    <Text style={{color:'#898989',fontSize: 15}}>27/05/1999</Text>
+                </View>
+          </View>
+          <Divider/>
+          <View style={styles.info}>
+                <View style={styles.infoTitle}>
+                    <Text style={{fontSize:15}}>Điện thoại</Text>
+                </View>
+                <View style={{flex:1}}>
+                    <Text style={{color:'#009aff', fontSize:15}}>0337888806</Text>
+                    <Text style={{color:'#898989',fontSize: 15, marginTop: 7}}>Số điện thoại của bạn chỉ hiện thị với bạn bè có số của bạn trong danh bạ</Text>
+                </View>
+          </View>
+      </View>
+      <TouchableHighlight
+              style={{
+                width: "90%",
+                marginTop: 10,
+                alignSelf: "center",
+                borderRadius: 20,
+              }}
+              activeOpacity={0.8}
+              underlayColor="#3f3f3f"
+              onPress={() => {}}
+            >
+              <LinearGradient
+                colors={["#0085ff", "#05adff"]}
+                start={[0, 1]}
+                end={[1, 0]}
+                style={{
+                  width: "100%",
+                  height: 40,
+                  alignSelf: "center",
+                  borderRadius: 20,
+                }}
+              >
+                <View
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flex: 1,
+                  }}
+                >
+                  <Text style={{ color: "#fff", fontWeight: "500", fontSize: 15 }}>
+                    Đổi thông tin
+                  </Text>
+                </View>
+              </LinearGradient>
+            </TouchableHighlight>
+
       <RBSheet
         ref={refCoverImageOption}
         closeOnDragDown={true}
@@ -620,7 +351,7 @@ export default function ProfileScreen({ navigation }) {
         }}
         swipeToCloseEnabled={true}
       />
-        <RBSheet
+      <RBSheet
         ref={refAvatarImageOption}
         closeOnDragDown={true}
         closeOnPressMask={true}
@@ -721,28 +452,6 @@ export default function ProfileScreen({ navigation }) {
           </TouchableHighlight>
         </View>
       </RBSheet>
-      <FlatList
-        scrollEventThrottle={16}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: offset } } }],
-          { useNativeDriver: false }
-        )}
-        keyboardShouldPersistTaps={"always"}
-        data={posts}
-        keyExtractor={(item, index) => index.toString()}
-        ListHeaderComponent={<ListHeader />}
-        renderItem={({ item }) => (
-          <View style={{ marginTop: 12 }}>
-            <Post
-              mode={"timeline"}
-              updateFunc={getPosts}
-              post={item}
-              navigation={navigation}
-            />
-          </View>
-        )}
-        style={{ flex: 1 }}
-      />
     </View>
   );
 }
@@ -867,4 +576,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "400",
   },
+  info: {
+    flexDirection: 'row',
+    paddingTop: 15,
+    paddingBottom: 15,
+  },
+  infoTitle: {
+    width: 120,
+  }
 });
