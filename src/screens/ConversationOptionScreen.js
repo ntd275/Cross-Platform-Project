@@ -42,7 +42,7 @@ export default function ConversationOptionScreen({ route, navigation }) {
                 chatContext.setNeedUpdateListChat(true);
 
 
-                console.log("conversation deleted");
+                // console.log("conversation deleted");
                 chatContext.outChatRoom();
                 navigation.pop(2);
                 appContext.displayMessage({
@@ -82,8 +82,56 @@ export default function ConversationOptionScreen({ route, navigation }) {
         }
     }
 
-    var confirmBlock = () => {
-        console.log("user blocked");
+
+    var confirmBlock = async() => {
+        try {
+            accessToken = context.loginState.accessToken;
+
+            const res = await Api.blockChat(accessToken, chatContext.curChatId, chatContext.curFriendId);
+            if (res.status == 200) {
+                console.log(res.data);
+                chatContext.setCurBlockers(res.data.newBlockers);
+                if(!chatContext.curChatId){
+                    chatContext.setCurChatId(res.data.chatId);
+                }
+            }
+            chatContext.setNeedUpdateListChat(true);
+            closeMenuBlock();
+        } catch (err) {
+            if (err.response && err.response.status == 401) {
+                console.log(err.response.data.message);
+                // setNotification("Không thể nhận diện");
+                // console.log(notification)
+                return;
+            }
+            console.log(err);
+            navigation.navigate("NoConnectionScreen", {
+                message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+            });
+        }
+    }
+
+    var unBlock = async() => {
+        try {
+            accessToken = context.loginState.accessToken;
+
+            const res = await Api.unBlockChat(accessToken, chatContext.curChatId);
+            if (res.status == 200) {
+                chatContext.setCurBlockers(res.data.newBlockers);
+            }
+            chatContext.setNeedUpdateListChat(true);
+        } catch (err) {
+            if (err.response && err.response.status == 401) {
+                console.log(err.response.data.message);
+                // setNotification("Không thể nhận diện");
+                // console.log(notification)
+                return;
+            }
+            console.log(err);
+            navigation.navigate("NoConnectionScreen", {
+                message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+            });
+        }
     }
 
     var closeMenuDelete = () => {
@@ -102,6 +150,26 @@ export default function ConversationOptionScreen({ route, navigation }) {
         setMenuBlockVisible(true);
     }
 
+
+
+    let blockOption;
+    if (!chatContext.curBlockers || chatContext.curBlockers.length == 0 || 
+        (chatContext.curBlockers.length > 0 && chatContext.curBlockers.indexOf(context.loginState.userId) == -1)) {
+        blockOption = <TouchableOpacity style={[styles.menuOption, { height: 60 }]} onPress={openMenuBlock}>
+            <IconMenuBan flex={1} style={{ marginTop: "auto", marginBottom: "auto" }} />
+            <View flex={10} style={styles.inMenuOption}>
+                <Text style={{ fontSize: 16, fontWeight: '400' }}>Chặn tin nhắn</Text>
+            </View>
+        </TouchableOpacity>
+
+    } else {
+        blockOption = <TouchableOpacity style={[styles.menuOption, { height: 60 }]} onPress={unBlock}>
+            <IconMenuBan flex={1} style={{ marginTop: "auto", marginBottom: "auto" }} />
+            <View flex={10} style={styles.inMenuOption}>
+                <Text style={{ fontSize: 16, fontWeight: '400' }}>Bỏ chặn tin nhắn</Text>
+            </View>
+        </TouchableOpacity>
+    }
 
     return (
         <View style={styles.container}>
@@ -156,14 +224,7 @@ export default function ConversationOptionScreen({ route, navigation }) {
                                 <Text style={{ fontSize: 16, fontWeight: '400' }}>Xoá lịch sử cuộc trò chuyện</Text>
                             </View>
                         </TouchableOpacity>
-
-                        <TouchableOpacity style={[styles.menuOption, { height: 60 }]} onPress={openMenuBlock}>
-                            <IconMenuBan flex={1} style={{ marginTop: "auto", marginBottom: "auto" }} />
-                            <View flex={10} style={styles.inMenuOption}>
-                                <Text style={{ fontSize: 16, fontWeight: '400' }}>Chặn {friend.username}</Text>
-                            </View>
-                        </TouchableOpacity>
-
+                        {blockOption}
                     </View>
                 </ScrollView>
                 <Modal
@@ -186,7 +247,6 @@ export default function ConversationOptionScreen({ route, navigation }) {
                         </View>
                     </View>
                 </Modal>
-
                 <Modal
                     isVisible={menuBlockVisible}
                     onBackdropPress={closeMenuBlock}
@@ -196,7 +256,7 @@ export default function ConversationOptionScreen({ route, navigation }) {
                 >
                     <View style={styles.menuStyle}>
                         <Text style={styles.menuTitle}>Chặn người này?</Text>
-                        <Text style={styles.menuDesription}>Bạn sẽ không thể nhắn tin và xem nhật ký của người này nữa</Text>
+                        <Text style={styles.menuDesription}>Bạn sẽ không thể nhắn tin với người này nữa người này nữa</Text>
                         <View style={styles.menuBottom}>
                             <TouchableOpacity flex={1} style={styles.menuCancelBtn} onPress={closeMenuBlock} >
                                 <Text style={styles.textCancel}>Không chặn</Text>
@@ -207,6 +267,7 @@ export default function ConversationOptionScreen({ route, navigation }) {
                         </View>
                     </View>
                 </Modal>
+
 
             </View>
         </View>

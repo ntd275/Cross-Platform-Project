@@ -235,7 +235,6 @@ export const Api = {
   },
 
   sendFriendRequest: (token, friendId) => {
-    // type = true (block) or false (unblock)
     return axios({
       method: "post",
       url: `${BaseURL}/friends/set-request-friend`,
@@ -251,7 +250,6 @@ export const Api = {
   },
 
   sendAcceptFriendRequest: (token, friendId) => {
-    // type = true (block) or false (unblock)
     return axios({
       method: "post",
       url: `${BaseURL}/friends/set-accept`,
@@ -268,7 +266,6 @@ export const Api = {
   },
 
   sendRejectFriendRequest: (token, friendId) => {
-    // type = true (block) or false (unblock)
     return axios({
       method: "post",
       url: `${BaseURL}/friends/set-accept`,
@@ -285,7 +282,6 @@ export const Api = {
   },
 
   sendCancelFriendRequest: (token, friendId) => {
-    // type = true (block) or false (unblock)
     return axios({
       method: "post",
       url: `${BaseURL}/friends/cancel-request`,
@@ -304,6 +300,37 @@ export const Api = {
       method: "get",
       url: `${BaseURL}/search/${key}`,
       headers: {
+        authorization: "a " + token,
+      },
+    });
+  },
+
+  blockChat: (token, chatId, friendId) => {
+    return axios({
+      method: "post",
+      url: `${BaseURL}/chats/block`,
+      data: {
+        friendId: friendId,
+        chatId: chatId,
+      },
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        authorization: "a " + token,
+      },
+    });
+  },
+
+  unBlockChat: (token, chatId) => {
+    return axios({
+      method: "post",
+      url: `${BaseURL}/chats/unblock`,
+      data: {
+        chatId: chatId,
+      },
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
         authorization: "a " + token,
       },
     });

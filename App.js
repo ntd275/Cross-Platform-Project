@@ -148,6 +148,7 @@ export default function App() {
   const [inChat, setInChat] = React.useState(false);
   const [needUpdateListChat, setNeedUpdateListChat] = React.useState(false);
   const [socket, setSocket] = React.useState(null);
+  const [curBlockers, setCurBlockers] = React.useState([]);
 
   if (!socket && loginState.userId) {
     const { io } = require("socket.io-client");
@@ -228,6 +229,7 @@ export default function App() {
     socket.disconnect();
     setSocket(null);
     setNeedUpdateListChat(false);
+    setCurBlockers([]);
   }
 
   var outChatRoom = () => {
@@ -252,7 +254,9 @@ export default function App() {
     needUpdateListChat,
     setNeedUpdateListChat,
     socket,
-    outChatRoom
+    outChatRoom,
+    setCurBlockers,
+    curBlockers,
   }
 
   return (

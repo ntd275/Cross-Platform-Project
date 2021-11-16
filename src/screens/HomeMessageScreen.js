@@ -114,10 +114,11 @@ export default function HomeMessageScreen({ navigation }) {
 
 
 
-  const pressChat = (chatId, friend, isread) => {
+  const pressChat = (chatId, friend, isread, blockers) => {
     chatContext.setCurChatId(chatId);
     chatContext.setCurFriendId(friend.id);
     chatContext.setInChat(true);
+    chatContext.setCurBlockers(blockers);
     if(!isread){
       chatContext.setNeedUpdateListChat(true);
     }
@@ -125,7 +126,7 @@ export default function HomeMessageScreen({ navigation }) {
     // console.log("go to chat screen");
   };
 
-  var Message = (userName, lastMessage, avatarURL, isread, chatId, userId, phonenumber) => {
+  var Message = (userName, lastMessage, avatarURL, isread, chatId, userId, phonenumber, blockers) => {
     let content = lastMessage.content;
     if(lastMessage.senderId == context.loginState.userId){
       content= "Bạn: " + content;
@@ -139,7 +140,7 @@ export default function HomeMessageScreen({ navigation }) {
             id: userId,
             phonenumber: phonenumber
           }
-          pressChat(chatId, friend, isread);
+          pressChat(chatId, friend, isread, blockers);
       }}
       >
         <View style={{ flexDirection: "row", alignItems: "center"}}>
@@ -175,7 +176,7 @@ export default function HomeMessageScreen({ navigation }) {
       chatList.push(
         <View key={i} style={{ marginTop: 12 }}>
           {Message(chats[i].friend.username, chats[i].lastMessage, BaseURL +  chats[i].friend.avatar.fileName, chats[i].seen,
-           chats[i].chatId, chats[i].friend._id, chats[i].friend.phonenumber)}
+          chats[i].chatId, chats[i].friend._id, chats[i].friend.phonenumber, chats[i].blockers)}
         </View>
       );
     }
