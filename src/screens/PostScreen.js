@@ -92,6 +92,7 @@ export default function PostScreen({ navigation, route }) {
             setIsLoaded(true);
             let comments = res.data.data;
             // console.log(comments);
+            comments = comments.filter(comment => {return comment.user;})
             setListComment(comments.map(
                 comment => ({
                     user: comment.user.username,
