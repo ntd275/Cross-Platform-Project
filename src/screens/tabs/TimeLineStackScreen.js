@@ -2,6 +2,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import TimeLineScreen from "../TimeLineScreen";
 import PostScreen from "../PostScreen";
+import SearchScreen from "../SearchScreen"
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import CreatePost from "../CreatePost";
 import EditPost from "../EditPost";
@@ -24,12 +25,15 @@ export default function TimeLineStackScreen({route, navigation}) {
       screenOptions={{
         headerShown: false,
       }}
+      
     >
       <TimeLineStack.Screen name="TimeLineScreen" component={TimeLineScreen} />
       <TimeLineStack.Screen name="PostScreen" component={PostScreen} />
       <TimeLineStack.Screen name="CreatePost" component={CreatePost} />
       <TimeLineStack.Screen name="EditPost" component={EditPost} />
       <TimeLineStack.Screen name="NoConnectionScreen" component={NoConnectionScreen}/>
+      <TimeLineStack.Screen name="SearchScreen" component={SearchScreen} options={{animation: 'none'}}/>
     </TimeLineStack.Navigator>
   );
 }
+  
