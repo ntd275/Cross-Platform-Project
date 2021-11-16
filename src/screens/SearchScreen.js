@@ -30,10 +30,10 @@ export default function SearchScreen({ navigation }){
   const limitRenderContact = 5;
   const [searchText, setsearchText] = useState("");
   const [people, setPeople] = useState([]);
+  const [friends, setFriends] = useState([]);
   const [messages, setMessages] = useState([]);
   const context = React.useContext(AuthContext);
   const chatContext = React.useContext(ChatContext);
-  const [needReload, setNeedReload] = useState(messages ? false : true);
   const [more, setMore] = useState(false);
   const updateSearchText = (searchText) => {
     updateRenderContact();
@@ -164,9 +164,10 @@ export default function SearchScreen({ navigation }){
         accessToken,
         searchText
       );
-      // console.log(searchedDatas.data.data);
+      // console.log(searchedDatas.data.data.friends);
       setPeople(searchedDatas.data.data.people);
       setMessages(searchedDatas.data.data.messages);
+      setFriends(searchedDatas.data.data.friends)
     } catch (e) {
       console.log(e);
     }
@@ -198,6 +199,16 @@ export default function SearchScreen({ navigation }){
       isFriend: false,
     });
   }
+  for (let i = 0; i < friends.length; i++) {
+    let avatarURL = BaseURL + friends[i].avatar.fileName;
+    let foundUserName = friends[i].username;
+    console.log(foundUserName)
+    foundContacts.push({
+      avatar: avatarURL,
+      foundUserName: foundUserName,
+      isFriend: true,
+    });
+  }
   let friendList = [];
   let nonFriendList = [];
   for (let i = 0; i < foundContacts.length; i++) {
@@ -208,6 +219,7 @@ export default function SearchScreen({ navigation }){
             userName={foundContacts[i].foundUserName}
             avatar={foundContacts[i].avatar}
             isfriend={foundContacts[i].isFriend}
+            searchText={searchText}
           ></Contact>
         </TouchableHighlight>
       );
@@ -321,22 +333,22 @@ export default function SearchScreen({ navigation }){
   };
   const RenderLimit = (props) => {
     let datas = props.data;
-    let cutFirendlist = [];
+    let cutlist = [];
     if (datas.length > limitRenderContact && more === false) {
       for (let i = 0; i < limitRenderContact; i++) {
-        cutFirendlist.push(datas[i]);
+        cutlist.push(datas[i]);
       }
       return (
         <View>
-          <View>{cutFirendlist}</View>
+          <View>{cutlist}</View>
           <RenderMore></RenderMore>
         </View>
       );
     } else {
-      cutFirendlist = datas;
+      cutlist = datas;
       return (
         <View>
-          <View>{cutFirendlist}</View>
+          <View>{cutlist}</View>
         </View>
       );
     }
