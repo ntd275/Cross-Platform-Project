@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useRef, useState, useEffect } from "react";
 import IconImage from "../../assets/ic_photo_grd.svg";
 import IconVideo from "../../assets/ic_video_solid_24.svg";
 import IconAlbum from "../../assets/ic_album.svg";
@@ -37,7 +37,7 @@ import IconVideoSolid from "../../assets/ic_video_solid_24_white.svg";
 import RBSheet from "react-native-raw-bottom-sheet";
 import ImageView from "react-native-image-viewing";
 import * as ImagePicker from "expo-image-picker";
-import { BaseURL, MALE, FEMALE } from "../utils/Constants";
+import { BaseURL, MALE, FEMALE, NO_GENDER } from "../utils/Constants";
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TimeUtility } from "../utils/TimeUtility"
@@ -92,10 +92,42 @@ export default function ProfileEditScreen({ navigation }) {
     const [isViewCoverImage, setIsViewCoverImage] = useState(false);
 
     var ListHeader = () => {
-        const [name, setName] = useState(context.loginState.userName.slice());
-        const [gender, setGender] = useState(MALE);
-        const [dob, setDob] = useState(new Date());
+        const [name, setName] = useState(null);
+        const [gender, setGender] = useState(null);
+        const [dob, setDob] = useState(null);
         const [showDate, setShowDate] = useState(false);
+
+        useEffect(() => {
+            setName(context.loginState.userName);
+            setGender(appContext.gender);
+            setDob(new Date(appContext.birthday));
+        }, []);
+    
+        const saveUser = async () => {
+            try {
+                if (name){
+                    let res = await Api.editUser("lol " + context.loginState.accessToken, {
+                        username: name,
+                        gender: gender,
+                        birthday: dob,
+                    });
+                    console.log(res.data.data);
+                    setName(res.data.data.username);
+                    setGender(res.data.data.gender);
+                    setDob(new Date(res.data.data.birthday));
+                    context.dispatch({type: 'CHANGEUSERNAME', username: res.data.data.username});
+                    appContext.setGender(res.data.data.gender);
+                    appContext.setBirthday(res.data.data.birthday);
+                    Alert.alert("Thành công", "Đã cập nhật thông tin", [{ text: "OK" }]);
+                } else {
+                    Alert.alert("Thất bại", "Vui lòng nhập đầy đủ họ tên", [{ text: "OK" }]);
+                }
+            } catch (err){
+                console.log(err)
+                navigation.navigate("NoConnectionScreen", {message: "Vui lòng kiểm tra kết nối internet và thử lại"})
+                return
+            }
+        };
 
         const onChangeDate = (event, selectedDate) => {
             const currentDate = selectedDate || dob;
@@ -138,21 +170,24 @@ export default function ProfileEditScreen({ navigation }) {
                     <Text style={styles.infoLabel}>Giới tính:</Text>
                     <View style={styles.inputInfo}>
                         <Picker
-                            selectedValue={gender}
+                            selectedValue={gender ? gender : NO_GENDER}
                             onValueChange={(itemValue, itemIndex) =>
                                 setGender(itemValue)
-                            }>
+                            }
+                        >
                             <Picker.Item style={styles.inputPicker}
                                 label="Nam" value={MALE} />
                             <Picker.Item style={styles.inputPicker}
                                 label="Nữ" value={FEMALE} />
+                            <Picker.Item style={styles.inputPicker}
+                                label="Chưa có" value={NO_GENDER} />
                         </Picker>
                     </View>
                     <Text style={styles.infoLabel}>Ngày sinh:</Text>
                     <View style={styles.inputInfo}>
                         <Pressable onPress={() => setShowDate(true)}>
                             <Text style={styles.inputPicker}>
-                                {TimeUtility.dateToDDMMYYYY(dob)}
+                                {dob ? TimeUtility.dateToDDMMYYYY(dob) : "Chưa có"}
                             </Text>
                         </Pressable>
                     </View>
@@ -160,7 +195,7 @@ export default function ProfileEditScreen({ navigation }) {
                         {showDate && (
                             <DateTimePicker
                                 testID="dateTimePicker"
-                                value={dob}
+                                value={dob ? dob : (new Date())}
                                 mode="date"
                                 display="default"
                                 onChange={onChangeDate}
@@ -171,6 +206,7 @@ export default function ProfileEditScreen({ navigation }) {
                         style={styles.wrapButton}
                         activeOpacity={0.8}
                         underlayColor="#3f3f3f"
+                        onPress={() => saveUser()}
                     >
                         <LinearGradient
                             colors={["#0085ff", "#05adff"]}
@@ -179,7 +215,7 @@ export default function ProfileEditScreen({ navigation }) {
                             style={styles.button}
                         >
                             <View style={styles.centerView} >
-                                <Text style={{color: '#fff', fontWeight: '500'}}>
+                                <Text style={{ color: '#fff', fontWeight: '500' }}>
                                     Lưu
                                 </Text>
                             </View>
@@ -279,7 +315,7 @@ export default function ProfileEditScreen({ navigation }) {
                 barStyle={iconColor == "white" ? "light-content" : "dark-content"}
                 translucent={true}
             /> */}
-            <View style={{zIndex: 3}}>
+            <View style={{ zIndex: 3 }}>
                 <HeaderBar text="Sửa thông tin cá nhân"
                     navigation={navigation} />
             </View>

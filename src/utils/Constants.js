@@ -5,8 +5,9 @@ export const REPORT_LUADAO = 2;
 export const REPORT_KHAC = 3;
 
 // genders:
-export const MALE = 0;
-export const FEMALE = 1;
+export const MALE = "male";
+export const FEMALE = "female";
+export const NO_GENDER = "secret";
 
 // files:
 export const BaseURL = "http://13.76.46.159:8000/files/"

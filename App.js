@@ -88,6 +88,18 @@ export default function App() {
     }
   }
 
+  const _setBirthday = (v) => {
+    if (v != birthday) {
+      setBirthday(v)
+    }
+  }
+
+  const _setGender = (v) => {
+    if (v != gender) {
+      setGender(v)
+    }
+  }
+
   const [keyBoardHeight, setKeyBoardHeight] = React.useState(0)
   const [avatar, setAvatar] = React.useState("avatar_2.png")
   const [phonenumber, setPhonenumber] = React.useState("")
@@ -95,6 +107,8 @@ export default function App() {
   const [blockedDiary, setBlockedDiary] = React.useState(new Array())
   const [coverImage, setCoverImage] = React.useState("defaul_cover_image.jpg")
   const [description, setDescription] = React.useState(undefined);
+  const [birthday, setBirthday] = React.useState(undefined);
+  const [gender, setGender] = React.useState(undefined);
   const [sound, setSound] = React.useState();
 
   async function playSound() {
@@ -120,6 +134,10 @@ export default function App() {
     setBlockedDiary: _setBlockedDiary,
     phonenumber,
     setPhonenumber: _setPhonenumber,
+    birthday,
+    setBirthday: _setBirthday,
+    gender,
+    setGender: _setGender,
   }
 
   const getMe = async () => {
@@ -132,6 +150,8 @@ export default function App() {
       _setBlockedInbox(res.data.data.blocked_inbox)
       _setBlockedDiary(res.data.data.blocked_diary)
       _setPhonenumber(res.data.data.phonenumber)
+      _setBirthday(res.data.data.birthday)
+      _setGender(res.data.data.gender)
     } catch (e) {
       console.log(e)
     }
