@@ -2,7 +2,6 @@ import React, { useContext, useRef, useState } from "react";
 import { SearchBar } from "react-native-elements";
 import { LinearGradient } from "expo-linear-gradient";
 import IconNotice from "../../assets/notifications-outline.svg";
-import IconBack from "../../assets/arrow-back-outline.svg";
 import IconSearch from "../../assets/search-outline.svg";
 import IconNewPost from "../../assets/ic_post_line_24.svg";
 import IconImage from "../../assets/ic_photo_grd.svg";
@@ -38,13 +37,6 @@ export default function TimeLineScreen({ navigation }) {
   const [firstLoad, setFirstLoad] = useState(true);
   const [isLoading, setIsLoading] = useState(false)
   const [posts, setPosts] = useState([]);
-
-  const updateSearch = (search) => {
-    setSearch(search);
-  };
-  const getSearchText = () => {
-    console.log(search);
-  };
   const context = React.useContext(AuthContext);
   const appContext = useContext(AppContext)
   const getAvatar = async () => {
@@ -68,14 +60,8 @@ export default function TimeLineScreen({ navigation }) {
       // console.log(accessToken)
       const res = await Api.getPosts(accessToken);
       let postList = res.data.data;
-      let newPostList = new Array();
-      for (let i = 0; i < postList.length; i++){
-        if (!appContext.blockedDiary.includes(postList[i].author._id)){
-            newPostList.push(postList[i]);
-        }
-      }
 
-      setPosts(newPostList.reverse());
+      setPosts(postList.reverse());
 
       if (firstLoad) {
         setFirstLoad(false);
@@ -270,7 +256,7 @@ export default function TimeLineScreen({ navigation }) {
           style={styles.header}
         >
           <View style={{ flexDirection: "row", marginTop: 28 }}>
-            <TouchableOpacity onPress={getPosts}>
+            <TouchableOpacity onPress={() => { navigation.navigate("SearchScreen") }}>
               <View style={{ flex: 1 }}>
                 <IconSearch style={styles.iconSearch} />
               </View>
@@ -279,11 +265,9 @@ export default function TimeLineScreen({ navigation }) {
             <View style={{ flex: 6 }}>
               <TextInput
                 style={styles.input}
-                onChangeText={updateSearch}
                 value={search}
-                // onTouchStart={()=>  alert("Hello...")}
-                onEndEditing={getSearchText}
-                placeholder="Tìm bạn bè, tin nhắn..."
+                onTouchStart={() => { navigation.navigate("SearchScreen")}}
+                placeholder="Tìm bạn bè, tin nhắn, ..."
                 placeholderTextColor="#fff"
               ></TextInput>
             </View>
@@ -332,7 +316,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 16,
     width: "100%",
-    marginTop: 4
+    marginTop: 4,
   },
   header: {
     width: "100%",
