@@ -280,7 +280,7 @@ export default function ProfileEditScreen({ navigation }) {
                 translucent={true}
             /> */}
             <View style={{zIndex: 3}}>
-                <HeaderBar text="Thông tin cá nhân"
+                <HeaderBar text="Sửa thông tin cá nhân"
                     navigation={navigation} />
             </View>
             <Animated.View

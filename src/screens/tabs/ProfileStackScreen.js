@@ -6,9 +6,11 @@ import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import ProfileScreen from '../ProfileScreen';
 import CreatePost from '../CreatePost';
 import PostScreen from '../PostScreen';
-import ChangePasswordScreen from '../ChangePasswordScreen'
-import ProfileOptionScreen from '../ProfileOptionScreen';
 import ProfileEditScreen from '../ProfileEditScreen';
+import ChangePasswordScreen from '../ChangePasswordScreen';
+import ViewProfileScreen from '../ViewProfileScreen';
+import ProfileOptionScreen from '../ProfileOptionScreen';
+import PersonalInformationScreen from '../PesonalInformationScreen';
 
 const ProfileStack = createNativeStackNavigator();
 
@@ -17,7 +19,9 @@ export default function ProfileStackScreen({route, navigation}){
         const routeName = getFocusedRouteNameFromRoute(route);
         const hideScreens = ["SettingScreen", "ProfileScreen",
             "CreatePost", "ChangePasswordScreen", "ProfileOptionScreen",
-            "ProfileEditScreen"];
+            "ProfileEditScreen", "ViewProfileScreen", 
+            "PersonalInformationScreen"];
+
         if (hideScreens.includes(routeName)){
             navigation.setOptions({tabBarStyle:{display: 'none'}});
         }else {
@@ -36,8 +40,10 @@ export default function ProfileStackScreen({route, navigation}){
         <ProfileStack.Screen name="CreatePost" component={CreatePost} />
         <ProfileStack.Screen name="PostScreen" component={PostScreen} />
         <ProfileStack.Screen name="ChangePasswordScreen" component={ChangePasswordScreen} />
-        <ProfileStack.Screen name="ProfileOptionScreen" component={ProfileOptionScreen} />
         <ProfileStack.Screen name="ProfileEditScreen" component={ProfileEditScreen} />
+        <ProfileStack.Screen name="ViewProfileScreen" component={ViewProfileScreen} />
+        <ProfileStack.Screen name="ProfileOptionScreen" component={ProfileOptionScreen} />
+        <ProfileStack.Screen name="PersonalInformationScreen" component={PersonalInformationScreen} />
       </ProfileStack.Navigator>
     )
 }

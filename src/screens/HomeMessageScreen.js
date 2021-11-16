@@ -122,7 +122,7 @@ export default function HomeMessageScreen({ navigation }) {
       chatContext.setNeedUpdateListChat(true);
     }
     navigation.navigate("ConversationScreen", {chatId: chatId, friend: friend, isread: isread});
-    console.log("go to chat screen");
+    // console.log("go to chat screen");
   };
 
   var Message = (userName, lastMessage, avatarURL, isread, chatId, userId, phonenumber) => {

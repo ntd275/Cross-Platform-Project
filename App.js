@@ -24,6 +24,7 @@ import FlashMessage from "react-native-flash-message";
 import { showMessage, hideMessage } from "react-native-flash-message";
 import { Api } from './src/api/Api'
 import { NativeBaseProvider } from 'native-base';
+import { Audio } from 'expo-av';
 
 
 const Tab = createBottomTabNavigator();
@@ -45,8 +46,6 @@ export default function App() {
     loginState,
     dispatch
   }
-
-
   const _setKeyBoardHeight = (h) => {
     if (h > 0) {
       setKeyBoardHeight(h)
@@ -95,7 +94,16 @@ export default function App() {
   const [blockedInbox, setBlockedInbox] = React.useState(new Array())
   const [blockedDiary, setBlockedDiary] = React.useState(new Array())
   const [coverImage, setCoverImage] = React.useState("defaul_cover_image.jpg")
-  const [description, setDescription] = React.useState(undefined)
+  const [description, setDescription] = React.useState(undefined);
+  const [sound, setSound] = React.useState();
+
+  async function playSound() {
+    const { sound } = await Audio.Sound.createAsync(
+      require('./assets/message_noti.mp3')
+    );
+    await sound.playAsync();
+  }
+
   const appContext = {
     keyBoardHeight,
     setKeyBoardHeight: _setKeyBoardHeight,
@@ -163,19 +171,18 @@ export default function App() {
         if (curChatId !== msg.chatId) {
           setCurChatId(msg.chatId);
         }
-      } else if (msg.senderId !== loginState.userId) {
+      } else if (msg.senderId != loginState.userId) {
+        playSound();
         let chatId = msg.chatId;
         let temp = listUnseens;
         let index = temp.indexOf(chatId);
         if (index == -1) {
           temp.push(chatId)
-          setListUnseens(temp);
         }
-        // console.log("here")
+        setListUnseens(temp);
         // console.log(listUnseens)
       }
       if (!needUpdateListChat) {
-        console.log("here")
         setNeedUpdateListChat(true);
       }
     });
@@ -223,7 +230,7 @@ export default function App() {
     setNeedUpdateListChat(false);
   }
 
-  var outChatRoom = ()=>{
+  var outChatRoom = () => {
     setCurFriendId(null);
     setCurChatId(null);
     setInChat(false);

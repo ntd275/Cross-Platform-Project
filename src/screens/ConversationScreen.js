@@ -43,8 +43,8 @@ function ChatInput({ scrollViewRef, isLoading, isSending, setIsSending }) {
             receiverId: chatContext.curFriendId,
             content: content
         });
-        if(!chatContext.needUpdateListChat){
-            
+        if (!chatContext.needUpdateListChat) {
+
             chatContext.setNeedUpdateListChat(true);
         }
 
@@ -101,13 +101,12 @@ export default function ConversationScreen({ route, navigation }) {
     const context = React.useContext(AuthContext);
     const chatContext = React.useContext(ChatContext);
     const friend = route.params.friend;
-    const [isFriend, setIsFriend] = useState(false);
-    const [showRecommend, setShowRecommend] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isSending, setIsSending] = useState(false);
     const [firstLoad, setFirstLoad] = useState(true);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState(null);
+    const [friendStatus, setFriendStatus] = useState("friend");
     let userId = context.loginState.userId;
 
     useEffect(() => {
@@ -130,7 +129,7 @@ export default function ConversationScreen({ route, navigation }) {
     }, []);
 
     const getListMessages = async () => {
-        
+
         if (isLoading) {
             return
         }
@@ -146,11 +145,17 @@ export default function ConversationScreen({ route, navigation }) {
                 return;
             }
             setMessages(listMessages);
-      
+
             if (firstLoad) {
                 setFirstLoad(false);
             }
             setIsLoading(false)
+
+            const res2 = await Api.getFriendStatus(accessToken, route.params.friend.id);
+            if (res2.status == 200) {
+                if(mounted.current == false) return;
+                setFriendStatus(res2.data.data.status);
+            }
         } catch (err) {
             if (err.response && err.response.status == 401) {
                 console.log(err.response.data.message);
@@ -168,7 +173,6 @@ export default function ConversationScreen({ route, navigation }) {
             });
         }
     }
-
 
     if (firstLoad && !isLoading) {
         if (route.params.chatId) {
@@ -198,9 +202,92 @@ export default function ConversationScreen({ route, navigation }) {
         navigation.navigate("ConversationOption", { friendInfo: friend })
     }
 
-    var requestFriend = () => {
-        console.log("sending friend request. ...")
-        setShowRecommend(false);
+    var requestFriend = async () => {
+        try {
+            accessToken = context.loginState.accessToken;
+
+            const res = await Api.sendFriendRequest(accessToken, route.params.friend.id);
+            if (res.status == 200) {
+                setFriendStatus(res.data.newStatus);
+            }
+        } catch (err) {
+            if (err.response && err.response.status == 401) {
+                console.log(err.response.data.message);
+                // setNotification("Không thể nhận diện");
+                // console.log(notification)
+                return;
+            }
+            console.log(err);
+            navigation.navigate("NoConnectionScreen", {
+                message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+            });
+        }
+    }
+
+    var cancelFriendRequest = async () => {
+        try {
+            accessToken = context.loginState.accessToken;
+
+            const res = await Api.sendCancelFriendRequest(accessToken, route.params.friend.id);
+            if (res.status == 200) {
+                setFriendStatus(res.data.newStatus);
+            }
+        } catch (err) {
+            if (err.response && err.response.status == 401) {
+                console.log(err.response.data.message);
+                // setNotification("Không thể nhận diện");
+                // console.log(notification)
+                return;
+            }
+            console.log(err);
+            navigation.navigate("NoConnectionScreen", {
+                message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+            });
+        }
+    }
+
+    var acceptFriendRequest = async () => {
+        try {
+            accessToken = context.loginState.accessToken;
+
+            const res = await Api.sendAcceptFriendRequest(accessToken, route.params.friend.id);
+            if (res.status == 200) {
+                setFriendStatus(res.data.newStatus);
+            }
+        } catch (err) {
+            if (err.response && err.response.status == 401) {
+                console.log(err.response.data.message);
+                // setNotification("Không thể nhận diện");
+                // console.log(notification)
+                return;
+            }
+            console.log(err);
+            navigation.navigate("NoConnectionScreen", {
+                message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+            });
+        }
+    }
+
+    var rejectFriendRequest = async () => {
+        try {
+            accessToken = context.loginState.accessToken;
+
+            const res = await Api.sendRejectFriendRequest(accessToken, route.params.friend.id);
+            if (res.status == 200) {
+                setFriendStatus(res.data.newStatus);
+            }
+        } catch (err) {
+            if (err.response && err.response.status == 401) {
+                console.log(err.response.data.message);
+                // setNotification("Không thể nhận diện");
+                // console.log(notification)
+                return;
+            }
+            console.log(err);
+            navigation.navigate("NoConnectionScreen", {
+                message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+            });
+        }
     }
 
     var DateTag = ({ date }) => {
@@ -253,7 +340,7 @@ export default function ConversationScreen({ route, navigation }) {
         return (
             <TouchableOpacity onPress={() => goToUserPage(friend)}>
                 <ExpoFastImage
-                    style={{ height: 28, width: 28, borderRadius: 28,  }}
+                    style={{ height: 28, width: 28, borderRadius: 28, }}
                     uri={friend.avatar}
                     cacheKey={friend.avatar.split(BaseURL)[1]}
                     resizeMode="contain"
@@ -307,14 +394,42 @@ export default function ConversationScreen({ route, navigation }) {
         console.log("Go to user's page!");
     }
 
-    var RecommendFriend = () => {
+    var FriendStatus = () => {
+        let result = <></>
+        if (friendStatus === "not friend") {
+            result =
+                <View style={styles.recommendFriend}>
+                    <TouchableOpacity style={{ flexDirection: "row", marginLeft: "auto", marginRight: "auto" }} onPress={requestFriend}>
+                        <IconAddFriend />
+                        <Text style={{ fontSize: 16, marginLeft: 6, paddingTop: 3 }}>Kết bạn</Text>
+                    </TouchableOpacity>
+                </View>
+        } else if (friendStatus === "sent") {
+            result =
+                <View style={[styles.recommendFriend, { backgroundColor: "#f9fafc" }]}>
+                    <Text style={{ fontSize: 16, marginLeft: "auto", marginRight: "auto", paddingTop: 3, opacity: 0.6 }}>Đã gửi yêu cầu kết bạn</Text>
+                    <TouchableOpacity style={{ right: 16, position: "absolute", top: 13 }} onPress={cancelFriendRequest}>
+                        <Text style={{ fontSize: 15, fontWeight: '400', color: "#ed4732" }}>Huỷ</Text>
+                    </TouchableOpacity>
+                </View>
+        } else if (friendStatus === "received") {
+            result =
+                <View style={[styles.recommendFriend, { backgroundColor: "#f9fafc" }]}>
+                    <Text style={{ fontSize: 16, marginLeft: 15, marginRight: "auto", paddingTop: 3, opacity: 0.6 }}>Bạn nhận được lời mời kết bạn</Text>
+                    <TouchableOpacity style={{ marginRight: 16, top: 3 }} onPress={acceptFriendRequest} >
+                        <Text style={{ fontSize: 15, fontWeight: '400', color: "#1476f8" }}>Đồng ý</Text>
+                    </TouchableOpacity>
+                    <View style={{ borderRightWidth: 1, right: 8, top: 3, height: 20, borderRightColor: "#d7d9da" }}></View>
+                    <TouchableOpacity style={{ marginRight: 12, paddingTop: 3 }} onPress={rejectFriendRequest}>
+                        <Text style={{ fontSize: 15, fontWeight: '400', color: "#ed4732" }}>Từ chối</Text>
+                    </TouchableOpacity>
+                </View>
+        }
+
         return (
-            <View style={styles.recommendFriend}>
-                <TouchableOpacity style={{ flexDirection: "row", alignSelf: "center", marginTop: 11 }} onPress={requestFriend}>
-                    <IconAddFriend />
-                    <Text style={{ fontSize: 16, marginLeft: 6, paddingTop: 3 }}>Kết bạn</Text>
-                </TouchableOpacity>
-            </View>
+            <>
+                {result}
+            </>
         );
     }
 
@@ -415,7 +530,7 @@ export default function ConversationScreen({ route, navigation }) {
                     </LinearGradient>
                 </Pressable>
             </View>
-            {(showRecommend && isFriend == false) ? RecommendFriend() : <></>}
+            <FriendStatus />
             <View flex={1}>
                 <ScrollView
                     style={styles.listMessage}
@@ -423,6 +538,7 @@ export default function ConversationScreen({ route, navigation }) {
                     ref={scrollViewRef}
                     onContentSizeChange={() => {
                         setTimeout(() => {
+                            if(mounted.current == false) return;
                             scrollViewRef.current.scrollToEnd({ animated: true })
                         }, 100)
                     }}
@@ -565,6 +681,10 @@ const styles = StyleSheet.create({
         height: 45,
         alignContent: "center",
         backgroundColor: "#fff",
+        borderBottomWidth: 1,
+        borderColor: "#d7d9da",
+        paddingTop: 10,
+        flexDirection: "row"
     },
     describeText: {
         fontSize: 14,
