@@ -2,10 +2,12 @@ import React from 'react';
 import { StyleSheet, Text, StatusBar, View, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import IconBack from '../../../assets/ic_nav_header_back.svg'
+import { Icon } from 'react-native-elements/dist/icons/Icon';
+import { left } from 'styled-system';
 
 const HeaderBar = (props) => {
     let goBackFunc = () => { props.navigation.goBack() };
-    if(props.goBackFunc){
+    if (props.goBackFunc){
         goBackFunc = props.goBackFunc;
     }
     return(
@@ -25,11 +27,24 @@ const HeaderBar = (props) => {
                 <View style={{ flex: 1, flexDirection: "row" }}>
                     <TouchableOpacity
                         style={styles.iconBackWrap}
-                        onPress={goBackFunc}
+                        onPress={() => goBackFunc()}
                     >
                         <IconBack style={styles.iconBack} />
                     </TouchableOpacity>
                     <Text style={styles.title} >{props.text}</Text>
+                    {props.moreButton &&
+                    <TouchableOpacity
+                        style={styles.iconMore}
+                        onPress={() => props.moreButton()}
+                    >
+                        <Icon
+                                name="options"
+                                type="simple-line-icon"
+                                color="#ffffff"
+                                size={20}
+                        />
+                    </TouchableOpacity>
+                    }
                 </View>
             </LinearGradient>
         </>
@@ -48,7 +63,7 @@ const styles = StyleSheet.create({
     },
     iconBackWrap: {
         width: 40,
-        position: "absolute"
+        position: "absolute",
     },
     title: {
         marginTop: 30,
@@ -56,6 +71,12 @@ const styles = StyleSheet.create({
         marginRight: 'auto',
         color: '#fff',
         fontSize: 18,
+    },
+    iconMore: {
+        width: 40,
+        position: "absolute",
+        right: 0,
+        top: "50%"
     },
 });
 
