@@ -17,6 +17,11 @@ export const loginReducer = (prevState, action) => {
                 userId: null,
                 isLoading: false,
             }
+        case 'CHANGEUSERNAME': 
+            return {
+                ...prevState,
+                userName: action.username,
+            }
     }
 }
 
