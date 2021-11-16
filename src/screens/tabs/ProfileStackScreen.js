@@ -11,6 +11,7 @@ import ChangePasswordScreen from '../ChangePasswordScreen';
 import ViewProfileScreen from '../ViewProfileScreen';
 import ProfileOptionScreen from '../ProfileOptionScreen';
 import PersonalInformationScreen from '../PesonalInformationScreen';
+import NoConnectionScreen from '../NoConnectionScreen';
 
 const ProfileStack = createNativeStackNavigator();
 
@@ -20,7 +21,7 @@ export default function ProfileStackScreen({route, navigation}){
         const hideScreens = ["SettingScreen", "ProfileScreen",
             "CreatePost", "ChangePasswordScreen", "ProfileOptionScreen",
             "ProfileEditScreen", "ViewProfileScreen", 
-            "PersonalInformationScreen"];
+            "PersonalInformationScreen", "NoConnectionScreen"];
 
         if (hideScreens.includes(routeName)){
             navigation.setOptions({tabBarStyle:{display: 'none'}});
@@ -44,6 +45,7 @@ export default function ProfileStackScreen({route, navigation}){
         <ProfileStack.Screen name="ViewProfileScreen" component={ViewProfileScreen} />
         <ProfileStack.Screen name="ProfileOptionScreen" component={ProfileOptionScreen} />
         <ProfileStack.Screen name="PersonalInformationScreen" component={PersonalInformationScreen} />
+        <ProfileStack.Screen name="NoConnectionScreen" component={NoConnectionScreen} />
       </ProfileStack.Navigator>
     )
 }
