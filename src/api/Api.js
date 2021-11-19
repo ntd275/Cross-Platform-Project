@@ -304,35 +304,4 @@ export const Api = {
       },
     });
   },
-
-  blockChat: (token, chatId, friendId) => {
-    return axios({
-      method: "post",
-      url: `${BaseURL}/chats/block`,
-      data: {
-        friendId: friendId,
-        chatId: chatId,
-      },
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        authorization: "a " + token,
-      },
-    });
-  },
-
-  unBlockChat: (token, chatId) => {
-    return axios({
-      method: "post",
-      url: `${BaseURL}/chats/unblock`,
-      data: {
-        chatId: chatId,
-      },
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        authorization: "a " + token,
-      },
-    });
-  },
 };

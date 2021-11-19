@@ -24,7 +24,6 @@ import FlashMessage from "react-native-flash-message";
 import { showMessage, hideMessage } from "react-native-flash-message";
 import { Api } from './src/api/Api'
 import { NativeBaseProvider } from 'native-base';
-import { Audio } from 'expo-av';
 
 
 const Tab = createBottomTabNavigator();
@@ -109,14 +108,6 @@ export default function App() {
   const [description, setDescription] = React.useState(undefined);
   const [birthday, setBirthday] = React.useState(undefined);
   const [gender, setGender] = React.useState(undefined);
-  const [sound, setSound] = React.useState();
-
-  async function playSound() {
-    const { sound } = await Audio.Sound.createAsync(
-      require('./assets/message_noti.mp3')
-    );
-    await sound.playAsync();
-  }
 
   const appContext = {
     keyBoardHeight,
@@ -182,32 +173,6 @@ export default function App() {
       }
     });
     setSocket(socket);
-
-    socket.on("message", (msg) => {
-      if ((msg.senderId == curFriendId || msg.receiverId == curFriendId) && inChat) {
-        socket.emit("seenMessage", {
-          token: loginState.accessToken,
-          chatId: msg.chatId
-        });
-        if (curChatId !== msg.chatId) {
-          setCurChatId(msg.chatId);
-        }
-      } else if (msg.senderId != loginState.userId) {
-        playSound();
-        let chatId = msg.chatId;
-        let temp = listUnseens;
-        let index = temp.indexOf(chatId);
-        if (index == -1) {
-          temp.push(chatId)
-        }
-        setListUnseens(temp);
-        // console.log(listUnseens)
-      }
-      if (!needUpdateListChat) {
-        setNeedUpdateListChat(true);
-      }
-    });
-
   }
 
   const getListChats = async () => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ScrollView, Image, StyleSheet, KeyboardAvoidingView, TextInput, Pressable, Text, View, StatusBar, Button, ImageBackground, TouchableHighlight, TouchableOpacity, Keyboard } from 'react-native';
+import { ScrollView, Image, Alert, StyleSheet, KeyboardAvoidingView, TextInput, Pressable, Text, View, StatusBar, Button, ImageBackground, TouchableHighlight, TouchableOpacity, Keyboard } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import IconBack from '../../assets/ic_nav_header_back.svg'
 import { TextField } from 'rn-material-ui-textfield';
@@ -19,7 +19,6 @@ import { TextUtility } from '../utils/TextUtility'
 import ExpoFastImage from 'expo-fast-image';
 import { setStatusBarNetworkActivityIndicatorVisible } from 'expo-status-bar';
 
-
 const BaseURL = "http://13.76.46.159:8000/files/"
 
 function ChatInput({ scrollViewRef, isLoading, isSending, setIsSending }) {
@@ -31,11 +30,16 @@ function ChatInput({ scrollViewRef, isLoading, isSending, setIsSending }) {
         if (isSending || isLoading) {
             return;
         }
-        let content = messageContent
-        setTimeout(() => {
+        if (chatContext.curBlockers && chatContext.curBlockers.length > 0 && chatContext.curBlockers.indexOf(chatContext.curFriendId) !== -1) {
             setMessageContent("");
-        }, 100);
-
+            Keyboard.dismiss();
+            setTimeout(() => {
+                Alert.alert("Thông báo", "Bạn không thể gửi tin nhắn cho người này vì đã bị chặn.", [{ text: "OK" }]);
+            }, 550)
+            return;
+        }
+        let content = messageContent
+        setMessageContent("");
         setIsSending(true);
         chatContext.socket.emit("chatmessage", {
             token: context.loginState.accessToken,
@@ -111,7 +115,7 @@ export default function ConversationScreen({ route, navigation }) {
 
     useEffect(() => {
         mounted.current = true;
-        const listener = (msg) => {
+        const messageListener = (msg) => {
             if (mounted.current === false) {
                 return;
             }
@@ -121,9 +125,9 @@ export default function ConversationScreen({ route, navigation }) {
             }
         }
 
-        chatContext.socket.on("message", listener)
+        chatContext.socket.on("message", messageListener)
         return () => {
-            chatContext.socket.removeListener("message", listener)
+            chatContext.socket.removeListener("message", messageListener)
             mounted.current = false;
         };
     }, []);
@@ -153,7 +157,7 @@ export default function ConversationScreen({ route, navigation }) {
 
             const res2 = await Api.getFriendStatus(accessToken, route.params.friend.id);
             if (res2.status == 200) {
-                if(mounted.current == false) return;
+                if (mounted.current == false) return;
                 setFriendStatus(res2.data.data.status);
             }
         } catch (err) {
@@ -394,10 +398,29 @@ export default function ConversationScreen({ route, navigation }) {
         console.log("Go to user's page!");
     }
 
+    var unBlock = async () => {
+        if (chatContext.curBlockers && chatContext.curBlockers.length > 0) {
+            let newBlockers = chatContext.curBlockers;
+            let index = newBlockers.indexOf(context.loginState.userId);
+            if (index !== -1) {
+                newBlockers.splice(index, 1);
+            }
+            chatContext.setCurBlockers(newBlockers);
+        }
+
+        chatContext.socket.emit("blockers", {
+            token: context.loginState.accessToken,
+            chatId: chatContext.curChatId ? chatContext.curChatId : null,
+            receiverId: chatContext.curFriendId,
+            type: "unblock"
+        });
+
+    }
+
     var FriendStatus = () => {
-        let result = <></>
+        let status = <></>
         if (friendStatus === "not friend") {
-            result =
+            status =
                 <View style={styles.recommendFriend}>
                     <TouchableOpacity style={{ flexDirection: "row", marginLeft: "auto", marginRight: "auto" }} onPress={requestFriend}>
                         <IconAddFriend />
@@ -405,17 +428,17 @@ export default function ConversationScreen({ route, navigation }) {
                     </TouchableOpacity>
                 </View>
         } else if (friendStatus === "sent") {
-            result =
+            status =
                 <View style={[styles.recommendFriend, { backgroundColor: "#f9fafc" }]}>
-                    <Text style={{ fontSize: 16, marginLeft: "auto", marginRight: "auto", paddingTop: 3, opacity: 0.6 }}>Đã gửi yêu cầu kết bạn</Text>
+                    <Text style={{ fontSize: 16, marginLeft: "auto", marginRight: "auto", paddingTop: 3, opacity: 0.9 }}>Đã gửi yêu cầu kết bạn</Text>
                     <TouchableOpacity style={{ right: 16, position: "absolute", top: 13 }} onPress={cancelFriendRequest}>
                         <Text style={{ fontSize: 15, fontWeight: '400', color: "#ed4732" }}>Huỷ</Text>
                     </TouchableOpacity>
                 </View>
         } else if (friendStatus === "received") {
-            result =
+            status =
                 <View style={[styles.recommendFriend, { backgroundColor: "#f9fafc" }]}>
-                    <Text style={{ fontSize: 16, marginLeft: 15, marginRight: "auto", paddingTop: 3, opacity: 0.6 }}>Bạn nhận được lời mời kết bạn</Text>
+                    <Text style={{ fontSize: 16, marginLeft: 15, marginRight: "auto", paddingTop: 3, opacity: 0.9 }}>Bạn nhận được lời mời kết bạn</Text>
                     <TouchableOpacity style={{ marginRight: 16, top: 3 }} onPress={acceptFriendRequest} >
                         <Text style={{ fontSize: 15, fontWeight: '400', color: "#1476f8" }}>Đồng ý</Text>
                     </TouchableOpacity>
@@ -426,9 +449,18 @@ export default function ConversationScreen({ route, navigation }) {
                 </View>
         }
 
+        if (chatContext.curBlockers && chatContext.curBlockers.length > 0 && chatContext.curBlockers.indexOf(context.loginState.userId) !== -1) {
+            status = <View style={[styles.recommendFriend, { backgroundColor: "#f8fafc", paddingTop: 6 }]}>
+                <Text style={{ fontSize: 14, width: "70%", marginLeft: 10, marginRight: "auto", height: 45 }}>Bạn đã chặn người này. Người này sẽ không thể trả lời tin nhắn của bạn.</Text>
+                <TouchableOpacity style={{ right: 6, top: 1, backgroundColor: "#e8f4f8", height: 30, width: 86, borderRadius: 20 }} onPress={unBlock}>
+                    <Text style={{ fontSize: 16, fontWeight: '500', color: "#3491fc", top: 5, alignSelf: "center", marginRight: 1 }}>Bỏ chặn</Text>
+                </TouchableOpacity>
+            </View>
+        }
+
         return (
             <>
-                {result}
+                {status}
             </>
         );
     }
@@ -538,7 +570,7 @@ export default function ConversationScreen({ route, navigation }) {
                     ref={scrollViewRef}
                     onContentSizeChange={() => {
                         setTimeout(() => {
-                            if(mounted.current == false) return;
+                            if (mounted.current == false) return;
                             scrollViewRef.current.scrollToEnd({ animated: true })
                         }, 100)
                     }}

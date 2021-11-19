@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   StyleSheet,
   ScrollView,
@@ -22,10 +22,12 @@ import IconAdd from "../../assets/add-outline.svg";
 import { Api } from '../api/Api'
 import { TimeUtility } from "../utils/TimeUtility";
 import { useIsFocused } from '@react-navigation/native';
+import { Audio } from 'expo-av';
 
 const BaseURL = "http://13.76.46.159:8000/files/"
 
 export default function HomeMessageScreen({ navigation }) {
+  const mounted = useRef(false);
   const isFocused = useIsFocused();
   const scrollViewRef = useRef(null);
   const context = React.useContext(AuthContext);
@@ -37,6 +39,68 @@ export default function HomeMessageScreen({ navigation }) {
   // if(firstLoad){
   //   chatContext.setGetListChats(getListChats);
   // }
+
+  async function playSound() {
+    const { sound } = await Audio.Sound.createAsync(
+      require('../../assets/message_noti.mp3')
+    );
+    await sound.playAsync();
+  }
+
+  useEffect(() => {
+    mounted.current = true;
+    const messageListener = (msg) => {
+      if (mounted.current === false) {
+        return;
+      }
+      // console.log("msg: "+ msg)
+      if (msg.chatId == chatContext.curChatId || msg.receiverId == chatContext.curFriendId || msg.senderId == chatContext.curFriendId) {
+        chatContext.socket.emit("seenMessage", {
+          token: context.loginState.accessToken,
+          chatId: msg.chatId
+        });
+        if (chatContext.curChatId !== msg.chatId) {
+          chatContext.setCurChatId(msg.chatId);
+        }
+      } else if (msg.senderId != context.loginState.userId) {
+        playSound();
+        let chatId = msg.chatId;
+        let temp = chatContext.listUnseens;
+        let index = temp.indexOf(chatId);
+        if (index == -1) {
+          temp.push(chatId)
+        }
+        chatContext.setListUnseens(temp);
+      }
+      if (!chatContext.needUpdateListChat) {
+        chatContext.setNeedUpdateListChat(true);
+      }
+    }
+
+    blockersListener = (msg) => {
+      if ((msg.senderId == chatContext.curFriendId || msg.receiverId == chatContext.curFriendId || msg.chatId == chatContext.curChatId) && chatContext.inChat) {
+        if(msg.data){
+          chatContext.setCurBlockers(msg.data.blockers);
+          if (chatContext.curChatId !== msg.data.chatId) {
+            chatContext.setCurChatId(msg.data.chatId);
+          }
+        }
+      }
+      if (!chatContext.needUpdateListChat) {
+        chatContext.setNeedUpdateListChat(true);
+      }
+    };
+
+    chatContext.socket.removeListener("message", messageListener)
+    chatContext.socket.removeListener("blockers", blockersListener);
+    chatContext.socket.on("message", messageListener)
+    chatContext.socket.on("blockers", blockersListener)
+    return () => {
+      chatContext.socket.removeListener("message", messageListener)
+      chatContext.socket.removeListener("blockers", blockersListener);
+      mounted.current = false;
+    };
+  }, [chatContext.curChatId, chatContext.curFriendId]);
 
   const updateSearch = (search) => {
     setSearch(search);
@@ -53,17 +117,17 @@ export default function HomeMessageScreen({ navigation }) {
 
       const res = await Api.getChats(accessToken);
       let listChats = res.data.data;
-      listChats.sort((chata, chatb)=>{
+      listChats.sort((chata, chatb) => {
         return new Date(chata.lastMessage.time).getTime() < new Date(chatb.lastMessage.time).getTime();
       })
       let listChatId = [];
       let listUnseens = chatContext.listUnseens;
-      for(let i=0; i< listChats.length; i++){
-        if(!listChats[i].seen){
+      for (let i = 0; i < listChats.length; i++) {
+        if (!listChats[i].seen) {
           listChatId.push(listChats[i].chatId);
-        }else{
+        } else {
           let index = listUnseens.indexOf(listChats[i].chatId);
-          if(index !== -1){
+          if (index !== -1) {
             listUnseens.splice(index, 1);
           }
         }
@@ -86,7 +150,7 @@ export default function HomeMessageScreen({ navigation }) {
         closeLoading()
       }
 
-      if(chatContext.needUpdateListChat){
+      if (chatContext.needUpdateListChat) {
         chatContext.setNeedUpdateListChat(false);
         // scrollViewRef.current.scrollTo({x: 0, y: 0, animated: true})
       }
@@ -108,32 +172,32 @@ export default function HomeMessageScreen({ navigation }) {
     }
   };
 
-  if(!firstLoad && !isLoading && chatContext.needUpdateListChat && isFocused){
+  if (!firstLoad && !isLoading && chatContext.needUpdateListChat && isFocused) {
     getListChats();
   }
 
 
 
   const pressChat = (chatId, friend, isread, blockers) => {
-    chatContext.setCurChatId(chatId);
     chatContext.setCurFriendId(friend.id);
+    chatContext.setCurChatId(chatId);
     chatContext.setInChat(true);
     chatContext.setCurBlockers(blockers);
-    if(!isread){
+    if (!isread) {
       chatContext.setNeedUpdateListChat(true);
     }
-    navigation.navigate("ConversationScreen", {chatId: chatId, friend: friend, isread: isread});
+    navigation.navigate("ConversationScreen", { chatId: chatId, friend: friend, isread: isread });
     // console.log("go to chat screen");
   };
 
   var Message = (userName, lastMessage, avatarURL, isread, chatId, userId, phonenumber, blockers) => {
     let content = lastMessage.content;
-    if(lastMessage.senderId == context.loginState.userId){
-      content= "Bạn: " + content;
+    if (lastMessage.senderId == context.loginState.userId) {
+      content = "Bạn: " + content;
     }
     return (
-      <TouchableOpacity 
-      onPress={()=>{
+      <TouchableOpacity
+        onPress={() => {
           let friend = {
             username: userName,
             avatar: avatarURL,
@@ -141,9 +205,9 @@ export default function HomeMessageScreen({ navigation }) {
             phonenumber: phonenumber
           }
           pressChat(chatId, friend, isread, blockers);
-      }}
+        }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center"}}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           <View style={styles.avatars}>
             <Avatar
               rounded
@@ -153,16 +217,16 @@ export default function HomeMessageScreen({ navigation }) {
               }}
             />
           </View>
-          <View style={{ marginLeft: 12, width: "80%", borderBottomColor: "#ebeceb",borderBottomWidth: 1, marginTop: 12, paddingBottom: 16 }}>
+          <View style={{ marginLeft: 12, width: "80%", borderBottomColor: "#ebeceb", borderBottomWidth: 1, marginTop: 12, paddingBottom: 16 }}>
             <View style={{ flexDirection: "row" }}>
               <View>
-                <Text style={{ fontSize: 17, fontWeight:  isread? '500': '700', paddingBottom: 6 }}>{userName}</Text>
+                <Text style={{ fontSize: 17, fontWeight: isread ? '500' : '700', paddingBottom: 6 }}>{userName}</Text>
               </View>
               <View style={{ marginLeft: "auto", marginRight: 10 }}>
-                <Text style={{ textAlign: "right", opacity: isread ? 0.5 : 1, fontSize: 13, fontWeight:  isread? '400': '500', }}>{TimeUtility.getTimeStr(new Date(lastMessage.time))} </Text>
+                <Text style={{ textAlign: "right", opacity: isread ? 0.5 : 1, fontSize: 13, fontWeight: isread ? '400' : '500', }}>{TimeUtility.getTimeStr(new Date(lastMessage.time))} </Text>
               </View>
             </View >
-            <Text style={{ opacity: isread ? 0.5 : 1, fontSize: 15, maxWidth: "74%", fontWeight:  isread? '400': '500',}} numberOfLines={1}>{content}</Text>
+            <Text style={{ opacity: isread ? 0.5 : 1, fontSize: 15, maxWidth: "74%", fontWeight: isread ? '400' : '500', }} numberOfLines={1}>{content}</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -175,8 +239,8 @@ export default function HomeMessageScreen({ navigation }) {
     for (let i = 0; i < chats.length; i++) {
       chatList.push(
         <View key={i} style={{ marginTop: 12 }}>
-          {Message(chats[i].friend.username, chats[i].lastMessage, BaseURL +  chats[i].friend.avatar.fileName, chats[i].seen,
-          chats[i].chatId, chats[i].friend._id, chats[i].friend.phonenumber, chats[i].blockers)}
+          {Message(chats[i].friend.username, chats[i].lastMessage, BaseURL + chats[i].friend.avatar.fileName, chats[i].seen,
+            chats[i].chatId, chats[i].friend._id, chats[i].friend.phonenumber, chats[i].blockers)}
         </View>
       );
     }
@@ -234,10 +298,10 @@ export default function HomeMessageScreen({ navigation }) {
 
   var LoadingHeader = () => {
     return (
-      <Animated.View style={{ height: opacity.current, overflow:"hidden"}} >
+      <Animated.View style={{ height: opacity.current, overflow: "hidden" }} >
         <Image
           source={require("../../assets/loading.gif")}
-          style={{ alignSelf: "center", marginTop: 10}}
+          style={{ alignSelf: "center", marginTop: 10 }}
         />
         <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
       </Animated.View>
@@ -295,12 +359,12 @@ export default function HomeMessageScreen({ navigation }) {
         </View>
         <ScrollView
           onScrollEndDrag={handleScrollDrag}
-          style={{minHeight: '100%', backgroundColor: "#fff"}}
+          style={{ minHeight: '100%', backgroundColor: "#fff" }}
           ref={scrollViewRef}
         >
           {NotiHeader()}
           {chatList}
-          <View style={{height:194}}></View>
+          <View style={{ height: 194 }}></View>
         </ScrollView>
       </View>
     </View>

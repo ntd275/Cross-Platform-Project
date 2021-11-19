@@ -83,55 +83,25 @@ export default function ConversationOptionScreen({ route, navigation }) {
     }
 
 
-    var confirmBlock = async() => {
-        try {
-            accessToken = context.loginState.accessToken;
-
-            const res = await Api.blockChat(accessToken, chatContext.curChatId, chatContext.curFriendId);
-            if (res.status == 200) {
-                console.log(res.data);
-                chatContext.setCurBlockers(res.data.newBlockers);
-                if(!chatContext.curChatId){
-                    chatContext.setCurChatId(res.data.chatId);
-                }
-            }
-            chatContext.setNeedUpdateListChat(true);
-            closeMenuBlock();
-        } catch (err) {
-            if (err.response && err.response.status == 401) {
-                console.log(err.response.data.message);
-                // setNotification("Không thể nhận diện");
-                // console.log(notification)
-                return;
-            }
-            console.log(err);
-            navigation.navigate("NoConnectionScreen", {
-                message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+    var confirmBlock = async () => {
+        closeMenuBlock();
+        setTimeout(()=>{
+            chatContext.socket.emit("blockers", {
+                token: context.loginState.accessToken,
+                chatId: chatContext.curChatId ? chatContext.curChatId : null,
+                receiverId: chatContext.curFriendId,
+                type: "block"
             });
-        }
+        }, 125)
     }
 
-    var unBlock = async() => {
-        try {
-            accessToken = context.loginState.accessToken;
-
-            const res = await Api.unBlockChat(accessToken, chatContext.curChatId);
-            if (res.status == 200) {
-                chatContext.setCurBlockers(res.data.newBlockers);
-            }
-            chatContext.setNeedUpdateListChat(true);
-        } catch (err) {
-            if (err.response && err.response.status == 401) {
-                console.log(err.response.data.message);
-                // setNotification("Không thể nhận diện");
-                // console.log(notification)
-                return;
-            }
-            console.log(err);
-            navigation.navigate("NoConnectionScreen", {
-                message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
-            });
-        }
+    var unBlock = async () => {
+        chatContext.socket.emit("blockers", {
+            token: context.loginState.accessToken,
+            chatId: chatContext.curChatId ? chatContext.curChatId : null,
+            receiverId: chatContext.curFriendId,
+            type: "unblock"
+        });
     }
 
     var closeMenuDelete = () => {
@@ -153,7 +123,7 @@ export default function ConversationOptionScreen({ route, navigation }) {
 
 
     let blockOption;
-    if (!chatContext.curBlockers || chatContext.curBlockers.length == 0 || 
+    if (!chatContext.curBlockers || chatContext.curBlockers.length == 0 ||
         (chatContext.curBlockers.length > 0 && chatContext.curBlockers.indexOf(context.loginState.userId) == -1)) {
         blockOption = <TouchableOpacity style={[styles.menuOption, { height: 60 }]} onPress={openMenuBlock}>
             <IconMenuBan flex={1} style={{ marginTop: "auto", marginBottom: "auto" }} />
