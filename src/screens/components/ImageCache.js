@@ -70,7 +70,7 @@ export const ImageCache = (props) => {
   return (
     <>
       {imgUri ? (
-        <Image source={{ uri: imgUri }} style={style} />
+        <Image source={{ uri: imgUri }} {...rest} />
       ) : (
         <View
           style={{alignItems: "center", justifyContent: "center" }}
