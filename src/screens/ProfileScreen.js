@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import IconImage from "../../assets/ic_photo_grd.svg";
 import IconVideo from "../../assets/ic_video_solid_24.svg";
 import IconAlbum from "../../assets/ic_album.svg";
@@ -22,6 +22,7 @@ import {
   Dimensions,
   StatusBar,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useKeyboard } from "./components/useKeyboard";
 import AppContext from "../components/context/AppContext";
@@ -37,56 +38,29 @@ import IconVideoSolid from "../../assets/ic_video_solid_24_white.svg";
 import RBSheet from "react-native-raw-bottom-sheet";
 import ImageView from "react-native-image-viewing";
 import * as ImagePicker from "expo-image-picker";
+import { BaseURL } from "../utils/Constants";
 
-const BaseURL = "http://13.76.46.159:8000/files/";
 const FULL_WIDTH = Dimensions.get("window").width;
 
 export default function ProfileScreen({ navigation }) {
-  const [needReload, setNeedReload] = useState(true);
   const [firstLoad, setFirstLoad] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [posts, setPosts] = useState([]);
 
-  const context = React.useContext(AuthContext);
+  const authContext = React.useContext(AuthContext);
   const appContext = useContext(AppContext);
-  const getAvatar = async () => {
-    try {
-      const accessToken = "lol " + context.loginState.accessToken;
-      let user = await Api.getMe(accessToken);
-      //console.log(user.data)
-      appContext.setAvatar(user.data.data.avatar.fileName);
-      appContext.setCoverImage(user.data.data.cover_image.fileName);
-    } catch (e) {
-      console.log(e);
-    }
-  };
+
   const getPosts = async () => {
-    if (isLoading) {
-      return;
-    }
     setIsLoading(true);
     try {
-      accessToken = context.loginState.accessToken;
-      accessToken = "lol " + accessToken;
-      // console.log(accessToken)
+      accessToken = authContext.loginState.accessToken;
       const res = await Api.getPostsById(
         accessToken,
-        context.loginState.userId
+        authContext.loginState.userId
       );
       let postList = res.data.data;
-
-      setPosts(postList.reverse());
-
-      if (firstLoad) {
-        setFirstLoad(false);
-      }
-      if (needReload) {
-        setNeedReload(false);
-      }
+      appContext.setPostsInProfile(postList.reverse());
+      setFirstLoad(false);
       setIsLoading(false);
-      if (!firstLoad) {
-        closeLoading();
-      }
     } catch (err) {
       if (err.response && err.response.status == 401) {
         console.log(err.response.data.message);
@@ -100,64 +74,35 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
-  let opacity = useRef(new Animated.Value(0));
-
-  let closeLoading = () => {
-    opacity.current.setValue(100);
-    Animated.timing(opacity.current, {
-      toValue: 0,
-      duration: 500,
-      easing: Easing.ease,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  if (needReload && !isLoading) {
-    getAvatar();
+  useEffect(()=>{
     getPosts();
-  }
+    appContext.updateUserInfo();
+  },[])
 
-  var NotiHeader = () => {
-    if (needReload && firstLoad) {
+  const NotiHeader = () => {
+    if (isLoading && firstLoad) {
       return (
         <View style={{ marginTop: 10 }}>
           <Text style={styles.describeText}>
             Đang tải dữ liệu, chờ chút thôi ...
           </Text>
-          <Image
-            source={require("../../assets/loading.gif")}
-            style={{ alignSelf: "center" }}
-          />
+          <ActivityIndicator />
         </View>
       );
     }
-    if (posts.length == 0) {
+    if (appContext.postsInProfile.length == 0) {
       return (
         <View style={{ marginTop: 10 }}>
           <Text style={styles.describeText}>Chưa có bài đăng nào</Text>
         </View>
       );
     }
-
     return <></>;
   };
 
   const keyBoardHeight = useKeyboard();
   const inputRef = useRef();
   const mode = useRef("image");
-  var LoadingHeader = () => {
-    return (
-      <Animated.View style={{ height: opacity.current }}>
-        <Image
-          source={require("../../assets/loading.gif")}
-          style={{ alignSelf: "center", marginTop: 10 }}
-        />
-        <Text style={styles.describeText}>
-          Đang tải dữ liệu, chờ chút thôi ...
-        </Text>
-      </Animated.View>
-    );
-  };
 
   const refCoverImageOption = useRef();
   const [isViewCoverImage, setIsViewCoverImage] = useState(false);
@@ -165,7 +110,6 @@ export default function ProfileScreen({ navigation }) {
   var ListHeader = () => {
     return (
       <>
-        {LoadingHeader()}
         <View style={{ position: "relative" }}>
           <Image2
             style={{ width: FULL_WIDTH, height: 200 }}
@@ -174,7 +118,7 @@ export default function ProfileScreen({ navigation }) {
           ></Image2>
           <View style={{ alignItems: "center", backgroundColor: "#fff" }}>
             <Text style={{ fontSize: 26, fontWeight: "500", marginTop: 50 }}>
-              {context.loginState.userName}
+              {appContext.userName}
             </Text>
             <Pressable style={{ marginTop: 4 }}>
               {appContext.decription ? (
@@ -480,7 +424,7 @@ export default function ProfileScreen({ navigation }) {
             fontSize: 20,
           }}
         >
-          {context.loginState.userName}
+          {appContext.userName}
         </Text>
       </Animated.View>
       <TouchableOpacity
@@ -722,6 +666,7 @@ export default function ProfileScreen({ navigation }) {
           </TouchableHighlight>
         </View>
       </RBSheet>
+
       <FlatList
         scrollEventThrottle={16}
         onScroll={Animated.event(
@@ -729,16 +674,16 @@ export default function ProfileScreen({ navigation }) {
           { useNativeDriver: false }
         )}
         keyboardShouldPersistTaps={"always"}
-        data={posts}
+        data={appContext.postsInProfile}
         keyExtractor={(item, index) => index.toString()}
         ListHeaderComponent={<ListHeader />}
         renderItem={({ item }) => (
           <View style={{ marginTop: 12 }}>
             <Post
               mode={"timeline"}
-              updateFunc={getPosts}
               post={item}
               navigation={navigation}
+              from="profile"
             />
           </View>
         )}

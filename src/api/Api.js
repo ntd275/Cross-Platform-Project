@@ -2,6 +2,8 @@ import axios from "axios";
 
 const BaseURL = "http://13.76.46.159:8000/api/v1";
 
+const fomartToken = (token) => "LOL " + token; 
+
 export const Api = {
   login: (phonenumber, password) => {
     return axios.post(`${BaseURL}/users/login`, {
@@ -28,7 +30,7 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
       maxContentLength: 100000000,
       maxBodyLength: 1000000000,
@@ -47,7 +49,7 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
       maxContentLength: 100000000,
       maxBodyLength: 1000000000,
@@ -61,7 +63,7 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
       maxContentLength: 100000000,
       maxBodyLength: 1000000000,
@@ -79,7 +81,7 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
       maxContentLength: 100000000,
       maxBodyLength: 1000000000,
@@ -96,7 +98,7 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
       maxContentLength: 100000000,
       maxBodyLength: 1000000000,
@@ -105,14 +107,14 @@ export const Api = {
   getPosts: (token) => {
     return axios.get(`${BaseURL}/posts/list`, {
       headers: {
-        authorization: token,
+        authorization: fomartToken(token),
       },
     });
   },
   getMe: (token) => {
     return axios.get(`${BaseURL}/users/show`, {
       headers: {
-        authorization: token,
+        authorization: fomartToken(token),
       },
     });
   },
@@ -130,7 +132,7 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
     });
   },
@@ -142,7 +144,7 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
     });
   },
@@ -153,14 +155,14 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
     });
   },
   getPostsById: (token, id) => {
     return axios.get(`${BaseURL}/posts/list?userId=${id}`, {
       headers: {
-        authorization: token,
+        authorization: fomartToken(token),
       },
     });
   },
@@ -189,7 +191,7 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
     });
   },
@@ -205,7 +207,7 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
     });
   },
@@ -217,7 +219,7 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
     });
   },
@@ -229,7 +231,7 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
     });
   },
@@ -244,7 +246,7 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
     });
   },
@@ -260,7 +262,7 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
     });
   },
@@ -276,7 +278,7 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
     });
   },
@@ -291,16 +293,17 @@ export const Api = {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
     });
   },
+
   searchFriendAndMessage: (token, key) => {
     return axios({
       method: "get",
       url: `${BaseURL}/search/${key}`,
       headers: {
-        authorization: "a " + token,
+        authorization: fomartToken(token),
       },
     });
   },

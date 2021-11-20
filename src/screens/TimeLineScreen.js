@@ -1,5 +1,4 @@
-import React, { useContext, useRef, useState } from "react";
-import { SearchBar } from "react-native-elements";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import IconNotice from "../../assets/notifications-outline.svg";
 import IconSearch from "../../assets/search-outline.svg";
@@ -8,79 +7,56 @@ import IconImage from "../../assets/ic_photo_grd.svg";
 import IconVideo from "../../assets/ic_video_solid_24.svg";
 import IconAlbum from "../../assets/ic_album.svg";
 import { Avatar } from "react-native-elements";
-import Post from "./components/Post"
-import { Api } from '../api/Api'
-import AuthContext from '../components/context/AuthContext';
+import Post from "./components/Post";
+import { Api } from "../api/Api";
+import AuthContext from "../components/context/AuthContext";
 import {
   StatusBar,
   StyleSheet,
   Text,
   View,
   Image,
-  ScrollView,
   TextInput,
   TouchableOpacity,
   TouchableHighlight,
   Pressable,
   FlatList,
-  Animated,
-  Easing
+  RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { useKeyboard } from "./components/useKeyboard";
 import AppContext from "../components/context/AppContext";
 
-const BaseURL = "http://13.76.46.159:8000/files/"
+const BaseURL = "http://13.76.46.159:8000/files/";
 
 export default function TimeLineScreen({ navigation }) {
   const [search, setSearch] = useState("");
-  const [needReload, setNeedReload] = useState(true);
+
   const [firstLoad, setFirstLoad] = useState(true);
-  const [isLoading, setIsLoading] = useState(false)
-  const [posts, setPosts] = useState([]);
-  const context = React.useContext(AuthContext);
-  const appContext = useContext(AppContext)
-  const getAvatar = async () => {
-    try {
-      accessToken = "lol " + context.loginState.accessToken
-      let user = await Api.getMe(accessToken)
-      //console.log(user.data)
-      appContext.setAvatar(user.data.data.avatar.fileName)
-    } catch (e) {
-      console.log(e)
-    }
-  }
+  const authContext = React.useContext(AuthContext);
+  const appContext = useContext(AppContext);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(()=>{
+    getPosts();
+    appContext.updateUserInfo();
+  },[])
+
   const getPosts = async () => {
-    if (isLoading) {
-      return
-    }
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      accessToken = context.loginState.accessToken;
-      accessToken = "lol " + accessToken
-      // console.log(accessToken)
+      accessToken = authContext.loginState.accessToken;
       const res = await Api.getPosts(accessToken);
       let postList = res.data.data;
+      appContext.setPostsInTimeLine(postList.reverse());
 
-      setPosts(postList.reverse());
-
-      if (firstLoad) {
-        setFirstLoad(false);
-      }
-      if (needReload) {
-        setNeedReload(false);
-      }
-      setIsLoading(false)
-      if (!firstLoad) {
-        closeLoading()
-      }
-      // console.log(postList)
-
+      setFirstLoad(false);
+      setIsLoading(false);
     } catch (err) {
       if (err.response && err.response.status == 401) {
         console.log(err.response.data.message);
-        // setNotification("Không thể nhận diện");
-        // console.log(notification)
-        setIsLoading(false)
+        setIsLoading(false);
         return;
       }
       console.log(err);
@@ -90,95 +66,43 @@ export default function TimeLineScreen({ navigation }) {
     }
   };
 
-  let opacity = useRef(new Animated.Value(0))
-
-  let openLoading = () => {
-    opacity.current.setValue(100)
+  const refreshPosts = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      getPosts(),
+      appContext.updateUserInfo()
+    ]);
+    setRefreshing(false);
   }
 
-  let closeLoading = () => {
-    opacity.current.setValue(100)
-    Animated.timing(opacity.current, {
-      toValue: 0,
-      duration: 500,
-      easing: Easing.ease,
-      useNativeDriver: false
-    }).start();
-  }
-
-  if (needReload && !isLoading) {
-    getAvatar();
-    getPosts();
-  }
-
-  var handleScrollDrag = function (event) {
-    if (event.nativeEvent.contentOffset.y < -80 && !needReload) {
-      openLoading()
-      setNeedReload(true)
-    }
-  }
-
-  var NotiHeader = () => {
-    if (needReload && firstLoad) {
+  const NotiHeader = () => {
+    if (isLoading && firstLoad) {
       return (
         <View style={{ marginTop: 10 }}>
-          <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
-          <Image
-            source={require("../../assets/loading.gif")}
-            style={{ alignSelf: "center" }}
-          />
+          <Text style={styles.describeText}>
+            Đang tải dữ liệu, chờ chút thôi ...
+          </Text>
+          <ActivityIndicator />
         </View>
       );
     }
-    if (posts.length == 0) {
+    if (appContext.postsInTimeLine.length == 0) {
       return (
         <View style={{ marginTop: 10 }}>
           <Text style={styles.describeText}>Chưa có bài đăng nào</Text>
         </View>
       );
     }
+    return <></>;
+  };
 
-    return (
-      <></>
-    );
-  }
-
-  var ScreenBody = () => {
-    let postList = [];
-    for (let i = 0; i < posts.length; i++) {
-      postList.push(
-        <View key={i} style={{ marginTop: 12 }}>
-          <Post mode={"timeline"} updateFunc={getPosts} post={posts[i]} navigation={navigation} />
-        </View>
-      );
-    }
-
-    return (
-      <>
-        {postList}
-      </>
-    );
-  }
-
-  const keyBoardHeight = useKeyboard()
-  const inputRef = useRef()
-  const mode = useRef('image')
-  var LoadingHeader = () => {
-    return (
-      <Animated.View style={{ height: opacity.current }} >
-        <Image
-          source={require("../../assets/loading.gif")}
-          style={{ alignSelf: "center", marginTop: 10 }}
-        />
-        <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
-      </Animated.View>
-    );
-  }
+  const keyBoardHeight = useKeyboard();
+  const inputRef = useRef();
+  const mode = useRef("image");
 
   var ListHeader = () => {
     return (
       <>
-        {LoadingHeader()}
         <View style={styles.story}>
           <Text
             style={{
@@ -213,29 +137,64 @@ export default function TimeLineScreen({ navigation }) {
               // onTouchStart={()=>  alert("Hello...")}
               placeholder="Hôm nay bạn thế nào?"
               placeholderTextColor="#dedede"
-              onFocus={() => { inputRef.current.blur(); navigation.navigate("CreatePost", { mode: mode.current }); }}
-              onBlur={() => { appContext.setKeyBoardHeight(keyBoardHeight) }}
+              onFocus={() => {
+                inputRef.current.blur();
+                navigation.navigate("CreatePost", { mode: mode.current });
+              }}
+              onBlur={() => {
+                appContext.setKeyBoardHeight(keyBoardHeight);
+              }}
               ref={inputRef}
-            >
-            </TextInput>
+            ></TextInput>
           </View>
         </View>
         <View style={styles.mediaArea}>
-          <Pressable style={styles.mediaPost} onPress={() => { mode.current = 'image', inputRef.current.focus() }}>
+          <Pressable
+            style={styles.mediaPost}
+            onPress={() => {
+              (mode.current = "image"), inputRef.current.focus();
+            }}
+          >
             <IconImage style={styles.iconImage} />
-            <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
+            <Text
+              style={{
+                marginLeft: 5,
+                marginRight: "auto",
+                fontWeight: "600",
+                fontSize: 13,
+              }}
+            >
               Đăng ảnh
             </Text>
           </Pressable>
-          <Pressable style={styles.mediaPost} onPress={() => { mode.current = 'video', inputRef.current.focus() }}>
+          <Pressable
+            style={styles.mediaPost}
+            onPress={() => {
+              (mode.current = "video"), inputRef.current.focus();
+            }}
+          >
             <IconVideo style={styles.iconVideo} />
-            <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
+            <Text
+              style={{
+                marginLeft: 5,
+                marginRight: "auto",
+                fontWeight: "600",
+                fontSize: 13,
+              }}
+            >
               Đăng video
             </Text>
           </Pressable>
           <View style={styles.mediaPost}>
             <IconAlbum style={styles.iconAlbum} />
-            <Text style={{ marginLeft: 5, marginRight: "auto", fontWeight: '600', fontSize: 13 }}>
+            <Text
+              style={{
+                marginLeft: 5,
+                marginRight: "auto",
+                fontWeight: "600",
+                fontSize: 13,
+              }}
+            >
               Tạo album
             </Text>
           </View>
@@ -243,11 +202,15 @@ export default function TimeLineScreen({ navigation }) {
         <NotiHeader />
       </>
     );
-  }
-
+  };
 
   return (
     <View style={styles.container}>
+      <StatusBar
+        backgroundColor="#00000000"
+        barStyle="light-content"
+        translucent={true}
+      />
       <View>
         <LinearGradient
           colors={["#0085ff", "#05adff"]}
@@ -256,7 +219,11 @@ export default function TimeLineScreen({ navigation }) {
           style={styles.header}
         >
           <View style={{ flexDirection: "row", marginTop: 28 }}>
-            <TouchableOpacity onPress={() => { navigation.navigate("SearchScreen") }}>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("SearchScreen");
+              }}
+            >
               <View style={{ flex: 1 }}>
                 <IconSearch style={styles.iconSearch} />
               </View>
@@ -266,14 +233,13 @@ export default function TimeLineScreen({ navigation }) {
               <TextInput
                 style={styles.input}
                 value={search}
-                onTouchStart={() => { navigation.navigate("SearchScreen")}}
+                onTouchStart={() => {
+                  navigation.navigate("SearchScreen");
+                }}
                 placeholder="Tìm bạn bè, tin nhắn, ..."
                 placeholderTextColor="#fff"
               ></TextInput>
             </View>
-            {/* <View>
-              <IconBack style={styles.iconBack} />
-            </View> */}
             <View style={{ flex: 1 }}>
               <IconNewPost style={styles.iconNewPost} />
             </View>
@@ -281,26 +247,28 @@ export default function TimeLineScreen({ navigation }) {
               <IconNotice style={styles.iconNotice} />
             </View>
           </View>
-          <StatusBar
-            backgroundColor="#00000000"
-            barStyle="light-content"
-            translucent={true}
-          />
         </LinearGradient>
       </View>
 
       <FlatList
-        keyboardShouldPersistTaps={'always'}
-        onScrollEndDrag={handleScrollDrag}
-        data={posts}
+        keyboardShouldPersistTaps={"always"}
+        data={appContext.postsInTimeLine}
         keyExtractor={(item, index) => index.toString()}
         ListHeaderComponent={<ListHeader />}
         renderItem={({ item }) => (
           <View style={{ marginTop: 12 }}>
-            <Post mode={"timeline"} updateFunc={getPosts} post={item} navigation={navigation} />
+            <Post
+              mode={"timeline"}
+              post={item}
+              navigation={navigation}
+              from="timeline"
+            />
           </View>
         )}
         style={{ marginBottom: 74 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={refreshPosts} />
+        }
       />
     </View>
   );
@@ -309,7 +277,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#f6f6f6",
     minHeight: "100%",
-    flexDirection: "column"
+    flexDirection: "column",
   },
   input: {
     color: "white",
@@ -335,7 +303,7 @@ const styles = StyleSheet.create({
     marginLeft: 18,
     marginTop: 10,
     marginBottom: 10,
-    marginRight:9
+    marginRight: 9,
   },
 
   storyImage: {
@@ -367,7 +335,7 @@ const styles = StyleSheet.create({
     color: "white",
     marginLeft: "auto",
     marginRight: 8,
-    marginTop: 2
+    marginTop: 2,
   },
   iconNewPost: {
     width: 24,
@@ -375,7 +343,7 @@ const styles = StyleSheet.create({
     color: "black",
     marginLeft: "auto",
     marginRight: 12,
-    marginTop: 2
+    marginTop: 2,
   },
   iconBack: {
     width: 20,
@@ -387,21 +355,19 @@ const styles = StyleSheet.create({
     height: 24,
     color: "white",
     marginLeft: 10,
-    marginTop: 2
+    marginTop: 2,
   },
   iconImage: {
     width: 20,
     height: 20,
     color: "green",
     marginLeft: "auto",
-
   },
   iconVideo: {
     width: 20,
     height: 20,
     color: "red",
     marginLeft: "auto",
-
   },
   iconAlbum: {
     width: 20,
@@ -416,6 +382,6 @@ const styles = StyleSheet.create({
     color: "#778993",
     marginTop: 12,
     marginBottom: 12,
-    textAlign: "center"
-  }
+    textAlign: "center",
+  },
 });
