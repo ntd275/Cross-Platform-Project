@@ -26,8 +26,137 @@ import {
 } from "react-native";
 import { useKeyboard } from "./components/useKeyboard";
 import AppContext from "../components/context/AppContext";
+import { AvatarReactElementCache, ImageCache } from "./components/ImageCache";
+import { BaseURL } from "../utils/Constants";
 
-const BaseURL = "http://13.76.46.159:8000/files/";
+const ListHeader = ({navigation, isLoading, firstLoad}) => {
+  const appContext = useContext(AppContext);
+  const NotiHeader = () => {
+    if (isLoading && firstLoad) {
+      return (
+        <View style={{ marginTop: 10 }}>
+          <Text style={styles.describeText}>
+            Đang tải dữ liệu, chờ chút thôi ...
+          </Text>
+          <ActivityIndicator />
+        </View>
+      );
+    }
+    if (appContext.postsInTimeLine.length == 0) {
+      return (
+        <View style={{ marginTop: 10 }}>
+          <Text style={styles.describeText}>Chưa có bài đăng nào</Text>
+        </View>
+      );
+    }
+    return <></>;
+  };
+
+  const keyBoardHeight = useKeyboard();
+  const inputRef = useRef();
+  const mode = useRef("image");
+  return (
+    <>
+      <View style={styles.story}>
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "bold",
+            marginLeft: 10,
+            marginTop: 20,
+          }}
+        >
+          Khoảnh khắc
+        </Text>
+        <View>
+          <Image
+            style={styles.storyImage}
+            source={require("../../assets/sticker_07.gif")}
+          ></Image>
+        </View>
+      </View>
+      <View style={styles.createPostArea}>
+        <View style={styles.avatar}>
+          <AvatarReactElementCache
+            rounded
+            size="medium"
+            source={{
+              uri: BaseURL + appContext.avatar,
+            }}
+          />
+        </View>
+        <View style={{ marginTop: 25, marginLeft: 10 }}>
+          <TextInput
+            style={{ color: "black", fontSize: 18 }}
+            // onTouchStart={()=>  alert("Hello...")}
+            placeholder="Hôm nay bạn thế nào?"
+            placeholderTextColor="#dedede"
+            onFocus={() => {
+              inputRef.current.blur();
+              navigation.navigate("CreatePost", { mode: mode.current });
+            }}
+            onBlur={() => {
+              appContext.setKeyBoardHeight(keyBoardHeight);
+            }}
+            ref={inputRef}
+          ></TextInput>
+        </View>
+      </View>
+      <View style={styles.mediaArea}>
+        <Pressable
+          style={styles.mediaPost}
+          onPress={() => {
+            (mode.current = "image"), inputRef.current.focus();
+          }}
+        >
+          <IconImage style={styles.iconImage} />
+          <Text
+            style={{
+              marginLeft: 5,
+              marginRight: "auto",
+              fontWeight: "600",
+              fontSize: 13,
+            }}
+          >
+            Đăng ảnh
+          </Text>
+        </Pressable>
+        <Pressable
+          style={styles.mediaPost}
+          onPress={() => {
+            (mode.current = "video"), inputRef.current.focus();
+          }}
+        >
+          <IconVideo style={styles.iconVideo} />
+          <Text
+            style={{
+              marginLeft: 5,
+              marginRight: "auto",
+              fontWeight: "600",
+              fontSize: 13,
+            }}
+          >
+            Đăng video
+          </Text>
+        </Pressable>
+        <View style={styles.mediaPost}>
+          <IconAlbum style={styles.iconAlbum} />
+          <Text
+            style={{
+              marginLeft: 5,
+              marginRight: "auto",
+              fontWeight: "600",
+              fontSize: 13,
+            }}
+          >
+            Tạo album
+          </Text>
+        </View>
+      </View>
+      <NotiHeader />
+    </>
+  );
+};
 
 export default function TimeLineScreen({ navigation }) {
   const [search, setSearch] = useState("");
@@ -74,135 +203,6 @@ export default function TimeLineScreen({ navigation }) {
     ]);
     setRefreshing(false);
   }
-
-  const NotiHeader = () => {
-    if (isLoading && firstLoad) {
-      return (
-        <View style={{ marginTop: 10 }}>
-          <Text style={styles.describeText}>
-            Đang tải dữ liệu, chờ chút thôi ...
-          </Text>
-          <ActivityIndicator />
-        </View>
-      );
-    }
-    if (appContext.postsInTimeLine.length == 0) {
-      return (
-        <View style={{ marginTop: 10 }}>
-          <Text style={styles.describeText}>Chưa có bài đăng nào</Text>
-        </View>
-      );
-    }
-    return <></>;
-  };
-
-  const keyBoardHeight = useKeyboard();
-  const inputRef = useRef();
-  const mode = useRef("image");
-
-  var ListHeader = () => {
-    return (
-      <>
-        <View style={styles.story}>
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "bold",
-              marginLeft: 10,
-              marginTop: 20,
-            }}
-          >
-            Khoảnh khắc
-          </Text>
-          <View>
-            <Image
-              style={styles.storyImage}
-              source={require("../../assets/sticker_07.gif")}
-            ></Image>
-          </View>
-        </View>
-        <View style={styles.createPostArea}>
-          <View style={styles.avatar}>
-            <Avatar
-              rounded
-              size="medium"
-              source={{
-                uri: BaseURL + appContext.avatar,
-              }}
-            />
-          </View>
-          <View style={{ marginTop: 25, marginLeft: 10 }}>
-            <TextInput
-              style={{ color: "black", fontSize: 18 }}
-              // onTouchStart={()=>  alert("Hello...")}
-              placeholder="Hôm nay bạn thế nào?"
-              placeholderTextColor="#dedede"
-              onFocus={() => {
-                inputRef.current.blur();
-                navigation.navigate("CreatePost", { mode: mode.current });
-              }}
-              onBlur={() => {
-                appContext.setKeyBoardHeight(keyBoardHeight);
-              }}
-              ref={inputRef}
-            ></TextInput>
-          </View>
-        </View>
-        <View style={styles.mediaArea}>
-          <Pressable
-            style={styles.mediaPost}
-            onPress={() => {
-              (mode.current = "image"), inputRef.current.focus();
-            }}
-          >
-            <IconImage style={styles.iconImage} />
-            <Text
-              style={{
-                marginLeft: 5,
-                marginRight: "auto",
-                fontWeight: "600",
-                fontSize: 13,
-              }}
-            >
-              Đăng ảnh
-            </Text>
-          </Pressable>
-          <Pressable
-            style={styles.mediaPost}
-            onPress={() => {
-              (mode.current = "video"), inputRef.current.focus();
-            }}
-          >
-            <IconVideo style={styles.iconVideo} />
-            <Text
-              style={{
-                marginLeft: 5,
-                marginRight: "auto",
-                fontWeight: "600",
-                fontSize: 13,
-              }}
-            >
-              Đăng video
-            </Text>
-          </Pressable>
-          <View style={styles.mediaPost}>
-            <IconAlbum style={styles.iconAlbum} />
-            <Text
-              style={{
-                marginLeft: 5,
-                marginRight: "auto",
-                fontWeight: "600",
-                fontSize: 13,
-              }}
-            >
-              Tạo album
-            </Text>
-          </View>
-        </View>
-        <NotiHeader />
-      </>
-    );
-  };
 
   return (
     <View style={styles.container}>
@@ -254,7 +254,7 @@ export default function TimeLineScreen({ navigation }) {
         keyboardShouldPersistTaps={"always"}
         data={appContext.postsInTimeLine}
         keyExtractor={(item, index) => index.toString()}
-        ListHeaderComponent={<ListHeader />}
+        ListHeaderComponent={<ListHeader isLoading={isLoading} navigation={navigation} firstLoad ={firstLoad} />}
         renderItem={({ item }) => (
           <View style={{ marginTop: 12 }}>
             <Post

@@ -22,6 +22,7 @@ import IconSearch from "../../assets/ic_searchbox.svg";
 import { Avatar } from "native-base";
 import { BaseURL } from "../utils/Constants";
 import AppContext from "../components/context/AppContext";
+import { AvatarNativeBaseCache } from "./components/ImageCache";
 
 export default function HomeProfileScreen({ navigation }) {
   const appContext = useContext(AppContext);
@@ -75,10 +76,10 @@ export default function HomeProfileScreen({ navigation }) {
           onPress={()=>{navigation.navigate('ProfileScreen')}}
         >
           
-            <Avatar
+            <AvatarNativeBaseCache
               source={{ uri: BaseURL + appContext.avatar }}
               size={'lg'}
-            ></Avatar>
+            />
             <View style={{marginLeft: 20}}>
               <Text style={{fontSize:18}}>{authContext.loginState.userName}</Text>
               <Text style={{color:"#767676", marginTop:5, fontSize:16}}>Xem trang cá nhân</Text>

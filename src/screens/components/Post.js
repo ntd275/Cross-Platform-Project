@@ -40,6 +40,7 @@ import AuthContext from "../../components/context/AuthContext";
 import AppContext from "../../components/context/AppContext";
 import { TextUtility } from "../../utils/TextUtility";
 import { TimeUtility } from "../../utils/TimeUtility";
+import { AvatarReactElementCache, ImageReactElementCache } from "./ImageCache";
 
 const BaseURL = myConst.BaseURL;
 
@@ -96,8 +97,8 @@ export default function Post(props) {
         for (let i = 1; i < renderImages.length; i++) {
           additionImages.push(
             <View key={i}>
-              <Image
-                source={[renderImages[i]]}
+              <ImageReactElementCache
+                source={renderImages[i]}
                 style={{ height: imageHeight, resizeMode: "cover" }}
                 onPress={() => {
                   setImageIndex(i);
@@ -260,8 +261,6 @@ export default function Post(props) {
     refRBSheet.current.close();
   };
 
-
-
   const sendReport = async (reason, details) => {
     try {
       let accessToken = context.loginState.accessToken;
@@ -320,7 +319,7 @@ export default function Post(props) {
         <View>
           <View style={styles.postHeader}>
             <View style={styles.posterAvatar}>
-              <Avatar
+              <AvatarReactElementCache
                 size={42}
                 rounded
                 onPress={() => goToUserPage()}

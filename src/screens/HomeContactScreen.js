@@ -28,6 +28,7 @@ import { useLinkProps } from "@react-navigation/native";
 import VideoIcon from "../../assets/ic_video_line_24.svg";
 import CallIcon from "../../assets/ic_call_line_24.svg";
 import { Avatar } from "native-base";
+import { AvatarNativeBaseCache } from "./components/ImageCache";
 
 const Friend = (props) => {
   return (
@@ -38,7 +39,7 @@ const Friend = (props) => {
       underlayColor="#05adff22"
     >
       <View style={{ flexDirection: "row" }}>
-        <Avatar size="12" source={{ uri: props.img }} />
+        <AvatarNativeBaseCache size="12" source={{ uri: props.img }} />
         <Text
           style={{
             alignSelf: "center",

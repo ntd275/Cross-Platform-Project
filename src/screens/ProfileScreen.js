@@ -39,6 +39,7 @@ import RBSheet from "react-native-raw-bottom-sheet";
 import ImageView from "react-native-image-viewing";
 import * as ImagePicker from "expo-image-picker";
 import { BaseURL } from "../utils/Constants";
+import { AvatarNativeBaseCache, AvatarReactElementCache, ImageReactElementCache } from "./components/ImageCache";
 
 const FULL_WIDTH = Dimensions.get("window").width;
 
@@ -111,11 +112,11 @@ export default function ProfileScreen({ navigation }) {
     return (
       <>
         <View style={{ position: "relative" }}>
-          <Image2
+          <ImageReactElementCache
             style={{ width: FULL_WIDTH, height: 200 }}
             source={{ uri: BaseURL + appContext.coverImage }}
             onPress={() => refCoverImageOption.current.open()}
-          ></Image2>
+          />
           <View style={{ alignItems: "center", backgroundColor: "#fff" }}>
             <Text style={{ fontSize: 26, fontWeight: "500", marginTop: 50 }}>
               {appContext.userName}
@@ -138,11 +139,11 @@ export default function ProfileScreen({ navigation }) {
             </Pressable>
           </View>
           <Pressable onPress={()=> refAvatarImageOption.current.open()} style={{ position: "absolute", alignSelf: "center", top: 120 }}>
-            <Avatar2
+            <AvatarNativeBaseCache
               size={"2xl"}
               source={{ uri: BaseURL + appContext.avatar }}
               style={{ borderWidth: 2, borderColor: "#fff" }}
-            ></Avatar2>
+            />
           </Pressable>
         </View>
         <ScrollView
@@ -224,7 +225,7 @@ export default function ProfileScreen({ navigation }) {
         </ScrollView>
         <View style={styles.createPostArea}>
           <View style={styles.avatar}>
-            <Avatar
+            <AvatarReactElementCache
               rounded
               size="medium"
               source={{
@@ -410,10 +411,10 @@ export default function ProfileScreen({ navigation }) {
         }}
       >
         <View style={{ marginTop: 25, marginLeft: 60 }}>
-          <Avatar2
+          <AvatarNativeBaseCache
             source={{ uri: BaseURL + appContext.avatar }}
             size="sm"
-          ></Avatar2>
+          />
         </View>
 
         <Text
