@@ -26,9 +26,10 @@
     "expo-permissions": "~12.1.1",
     "expo-screen-orientation": "~3.3.0",
     "expo-status-bar": "~1.0.4",
+    "i": "^0.3.7",
     "install": "^0.13.0",
     "native-base": "^3.2.1",
-    "npm": "^8.1.0",
+    "npm": "^8.1.4",
     "react": "16.8.6",
     "react-dom": "16.13.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-42.0.0.tar.gz",
@@ -39,6 +40,8 @@
     "react-native-material-textfield": "git+https://github.com/n4kz/react-native-material-textfield.git",
     "react-native-modal": "^13.0.0",
     "react-native-paper": "^4.9.2",
+    "react-native-popover-view": "^4.1.0",
+    "react-native-popup-menu": "^0.15.11",
     "react-native-raw-bottom-sheet": "^2.2.0",
     "react-native-safe-area-context": "3.2.0",
     "react-native-screens": "~3.4.0",
@@ -50,7 +53,8 @@
     "socket.io-client": "^4.3.2",
     "styled-components": "^5.3.3",
     "styled-system": "^5.1.5",
-    "unimodules-permissions-interface": "^6.1.0"
+    "unimodules-permissions-interface": "^6.1.0",
+    "uninstall": "0.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0"

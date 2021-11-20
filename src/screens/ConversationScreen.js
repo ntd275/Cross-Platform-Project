@@ -13,11 +13,23 @@ import IconPhoto from '../../assets/icn_csc_menu_sticker_n.svg'
 import IconOption from '../../assets/ic_list1_line_24.svg'
 import IconContact from '../../assets/icn_csc_parsephone_contact.svg'
 import IconAddFriend from '../../assets/ic_adduser_line_24.svg'
+import IconRecallMessage from '../../assets/icn_csc_menu_recall_n.svg'
 import { color } from 'react-native-elements/dist/helpers';
 import { TimeUtility } from '../utils/TimeUtility'
 import { TextUtility } from '../utils/TextUtility'
 import ExpoFastImage from 'expo-fast-image';
 import { setStatusBarNetworkActivityIndicatorVisible } from 'expo-status-bar';
+import { MenuProvider } from 'react-native-popup-menu';
+import {
+    Menu,
+    MenuOptions,
+    MenuOption,
+    MenuTrigger,
+    renderers,
+} from 'react-native-popup-menu';
+import { paddingLeft } from 'styled-system';
+
+const { Popover } = renderers;
 
 const BaseURL = "http://13.76.46.159:8000/files/"
 
@@ -112,6 +124,8 @@ export default function ConversationScreen({ route, navigation }) {
     const [newMessage, setNewMessage] = useState(null);
     const [friendStatus, setFriendStatus] = useState("friend");
     let userId = context.loginState.userId;
+    const touchable = useRef();
+    const [selectedIndex, setSelectedIndex] = useState(-1);
 
     useEffect(() => {
         mounted.current = true;
@@ -353,7 +367,19 @@ export default function ConversationScreen({ route, navigation }) {
         );
     };
 
-    var UserMessage = ({ message, isShowTime }) => {
+    var recallMessage = (index) => {
+        console.log("recall message index: "+ index);
+
+        // chatContext.socket.emit("blockers", {
+        //     token: context.loginState.accessToken,
+        //     chatId: chatContext.curChatId ? chatContext.curChatId : null,
+        //     receiverId: chatContext.curFriendId,
+        //     type: "unblock"
+        // });
+
+    }
+
+    var UserMessage = ({ message, isShowTime, index }) => {
         const [phoneInfo, setPhoneInfo] = useState(null);
         let [phoneNumber, TextUI] = TextUtility.detectThenFormatPhoneAndURL(message.content)
         if (phoneNumber) {
@@ -368,9 +394,29 @@ export default function ConversationScreen({ route, navigation }) {
         }
         return (
             <View style={styles.userMessage}>
-                {TextUI}
-                {userTag}
-                {isShowTime ? <HourTag date={new Date(message.time)} /> : <></>}
+                <Menu renderer={Popover}
+                    rendererProps={{ placement: 'top', anchorStyle: StyleSheet.create({ marginTop: 3 }) }}
+                >
+                    <MenuTrigger triggerOnLongPress={true} customStyles={{ TriggerTouchableComponent: TouchableHighlight, triggerTouchable: { style: { borderRadius: 8 } } }}
+                    >
+                        {TextUI}
+                        {userTag}
+                        {isShowTime ? <HourTag date={new Date(message.time)} /> : <></>}
+                    </MenuTrigger>
+                    <MenuOptions placement="top" customStyles={{
+                        optionsWrapper: StyleSheet.create({ width: 110, paddingTop: 3, paddingLeft: 4, height: 80 }),
+                        optionsContainer: StyleSheet.create({ marginTop: -70 })
+                    }}>
+                        <View style={{ width: 60 }}>
+                            <MenuOption onSelect={() => recallMessage(index)} >
+                                <View>
+                                    <IconRecallMessage style={{ marginLeft: 3, marginBottom: 4 }} />
+                                    <Text style={{ fontSize: 14 }}>Thu hồi</Text>
+                                </View>
+                            </MenuOption>
+                        </View>
+                    </MenuOptions>
+                </Menu>
             </View>
         );
     }
@@ -507,7 +553,9 @@ export default function ConversationScreen({ route, navigation }) {
                 isShowTime = true;
             }
             if (curSender == userId) {
-                list.push(<UserMessage key={i} message={messages[i]} isShowTime={isShowTime} />);
+                list.push(
+                    <UserMessage key={i} message={messages[i]} isShowTime={isShowTime} index = {i} />
+                );
             } else {
                 let isShowAvatar = false;
                 if (!prevSender || prevSender != curSender) {
@@ -564,21 +612,23 @@ export default function ConversationScreen({ route, navigation }) {
             </View>
             <FriendStatus />
             <View flex={1}>
-                <ScrollView
-                    style={styles.listMessage}
-                    scrollEnabled={true}
-                    ref={scrollViewRef}
-                    onContentSizeChange={() => {
-                        setTimeout(() => {
-                            if (mounted.current == false) return;
-                            scrollViewRef.current.scrollToEnd({ animated: true })
-                        }, 100)
-                    }}
+                <MenuProvider>
+                    <ScrollView
+                        style={styles.listMessage}
+                        scrollEnabled={true}
+                        ref={scrollViewRef}
+                        onContentSizeChange={() => {
+                            setTimeout(() => {
+                                if (mounted.current == false) return;
+                                scrollViewRef.current.scrollToEnd({ animated: true })
+                            }, 100)
+                        }}
 
-                >
-                    <NotiHeader />
-                    {!firstLoad && !isLoading ? <ListMessage /> : <></>}
-                </ScrollView>
+                    >
+                        <NotiHeader />
+                        {!firstLoad && !isLoading ? <ListMessage /> : <></>}
+                    </ScrollView>
+                </MenuProvider>
             </View>
             <KeyboardAvoidingView style={styles.inputContainer} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
                 <ChatInput scrollViewRef={scrollViewRef} isLoading={isLoading} isSending={isSending} setIsSending={setIsSending} />
