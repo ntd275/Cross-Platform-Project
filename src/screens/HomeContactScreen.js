@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useLayoutEffect } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -29,6 +29,7 @@ import VideoIcon from "../../assets/ic_video_line_24.svg";
 import CallIcon from "../../assets/ic_call_line_24.svg";
 import { Avatar } from "native-base";
 import { AvatarNativeBaseCache } from "./components/ImageCache";
+import { BaseURL } from "../utils/Constants";
 
 const Friend = (props) => {
   return (
@@ -83,7 +84,7 @@ const ListFr1 = (props) => {
   let tmp = [];
   const data = props.listFr;
   for (let i = 0; i < data.length; i++) {
-    tmp.push(<Friend key={i} name={data[i].name} img={data[i].img} />);
+    tmp.push(<Friend key={i} name={data[i].username} img={BaseURL + data[i].avatar.fileName} />);
   }
   return (
     <View>
@@ -134,10 +135,12 @@ const ListDanhBa = (props) => {
   }
 
   myArr.forEach(function (val) {
-    val.name = val.name.trim();
+    // console.log(myArr);
+    // console.log(val);
+    val.username = val.username.trim();
   });
 
-  myArr.sort((a, b) => a.name > b.name);
+  myArr.sort((a, b) => a.username > b.username);
   let a = [];
   let b = [];
   let c = [];
@@ -167,7 +170,7 @@ const ListDanhBa = (props) => {
   let other = [];
 
   for (var i = 0; i < myArr.length; i++) {
-    let tmp = removeVietnameseTones(myArr[i].name.toLowerCase())[0];
+    let tmp = removeVietnameseTones(myArr[i].username.toLowerCase())[0];
     if (tmp == "a") {
       a.push(myArr[i]);
       continue;
@@ -307,6 +310,7 @@ const ListDanhBa = (props) => {
 };
 
 export default function HomeContactScreen({ navigation }) {
+  const context = React.useContext(AuthContext);
   const test = [
     {
       name: "Nguyen Van Nam",
@@ -317,61 +321,79 @@ export default function HomeContactScreen({ navigation }) {
       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
     },
   ];
-  const listFriend = [
-    {
-      name: "Phan ",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
-    {
-      name: "tùng Dương",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
-    {
-      name: "qê Na",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
-    {
-      name: "Thùy Trang",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
-    {
-      name: "Thùy Trang",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
-    {
-      name: "Tùng Dương",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
-    {
-      name: "Lê Na",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
-    {
-      name: "Thùy Trang",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
-    {
-      name: "**Thùy Trang",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
-    {
-      name: "Tùng Dương",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
-    {
-      name: "Lê Na",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
-    {
-      name: "La Phu",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
+  const [listFriend, setListFriend] = useState([]);
 
-    {
-      name: "Ta Trang",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
-  ];
+  const getListFriends = async () => {
+    try {
+        const accessToken = context.loginState.accessToken;
+        let friends = await Api.getListFriends(accessToken, null);
+        // console.log(friends.data.data.friends);
+        // console.log(typeof friends.data.data.friends);
+        setListFriend(Object.values(friends.data.data.friends));
+    } catch (e) {
+        console.log(e);
+        navigation.navigate("NoConnectionScreen", {message: "Vui lòng kiểm tra kết nối internet và thử lại"});
+    }
+  };
+
+  useLayoutEffect(() => {
+    getListFriends();
+  }, []);
+//   const listFriend = [
+//     {
+//       name: "Phan ",
+//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
+//     },
+//     {
+//       name: "tùng Dương",
+//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
+//     },
+//     {
+//       name: "qê Na",
+//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
+//     },
+//     {
+//       name: "Thùy Trang",
+//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
+//     },
+//     {
+//       name: "Thùy Trang",
+//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
+//     },
+//     {
+//       name: "Tùng Dương",
+//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
+//     },
+//     {
+//       name: "Lê Na",
+//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
+//     },
+//     {
+//       name: "Thùy Trang",
+//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
+//     },
+//     {
+//       name: "**Thùy Trang",
+//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
+//     },
+//     {
+//       name: "Tùng Dương",
+//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
+//     },
+//     {
+//       name: "Lê Na",
+//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
+//     },
+//     {
+//       name: "La Phu",
+//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
+//     },
+
+//     {
+//       name: "Ta Trang",
+//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
+//     },
+//   ];
   return (
     <View style={styles.container}>
       <StatusBar

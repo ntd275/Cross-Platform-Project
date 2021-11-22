@@ -298,6 +298,21 @@ export const Api = {
     });
   },
 
+  getListFriends: (token, userId) => {
+    return axios({
+      method: "post",
+      url: `${BaseURL}/friends/list`,
+      data: {
+        user_id: userId,
+      },
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        authorization: fomartToken(token),
+      },
+    });
+  },
+
   searchFriendAndMessage: (token, key) => {
     return axios({
       method: "get",

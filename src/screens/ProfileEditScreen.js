@@ -55,9 +55,9 @@ export default function ProfileEditScreen({ navigation }) {
 
     const getInfo = async () => {
         try {
-            const accessToken = "lol " + context.loginState.accessToken;
+            const accessToken = context.loginState.accessToken;
             let user = await Api.getMe(accessToken);
-            //console.log(user.data)
+            console.log(user.data)
             appContext.setAvatar(user.data.data.avatar.fileName);
             appContext.setCoverImage(user.data.data.cover_image.fileName);
         } catch (e) {
@@ -98,6 +98,8 @@ export default function ProfileEditScreen({ navigation }) {
         const [showDate, setShowDate] = useState(false);
 
         useEffect(() => {
+            // console.log(appContext);
+            appContext.updateUserInfo();
             setName(context.loginState.userName);
             setGender(appContext.gender);
             setDob(new Date(appContext.birthday));

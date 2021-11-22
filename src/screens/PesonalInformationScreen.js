@@ -34,7 +34,7 @@ export default function PersonalInformationScreen({ navigation }) {
   const appContext = useContext(AppContext);
   const getAvatar = async () => {
     try {
-      const accessToken = "lol " + context.loginState.accessToken;
+      const accessToken = context.loginState.accessToken;
       let user = await Api.getMe(accessToken);
       //console.log(user.data)
       appContext.setAvatar(user.data.data.avatar.fileName);

@@ -237,6 +237,7 @@ export default function PostScreen({ navigation, route }) {
           try {
             accessToken = authContext.loginState.accessToken;
             const res = await Api.getPosts(accessToken);
+            // console.log(res);
             let postList = res.data.data;
             appContext.setPostsInTimeLine(postList.reverse());
           } catch (err) {
