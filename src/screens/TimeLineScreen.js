@@ -182,8 +182,8 @@ export default function TimeLineScreen({ navigation }) {
       appContext.setPostsInTimeLine(postList.reverse());
 
       setFirstLoad(false);
-      setIsLoading(false);
       appContext.setNeedUpdateTimeline(false);
+      setIsLoading(false);
     } catch (err) {
       if (err.response && err.response.status == 401) {
         console.log(err.response.data.message);
@@ -210,7 +210,7 @@ export default function TimeLineScreen({ navigation }) {
 
   if (isFocused && appContext.needUpdateTimeline && !isLoading){
     setIsLoading(true)
-    console.log("update timeline")
+    // console.log("update timeline")
     refreshPosts();
   }
 
