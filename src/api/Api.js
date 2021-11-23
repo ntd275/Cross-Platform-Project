@@ -307,4 +307,16 @@ export const Api = {
       },
     });
   },
+  setPostLike:(postID, token) =>{
+    return axios({
+      method: "post",
+      url: `${BaseURL}/postLike/action/${postID}`,
+      params:{
+        postId: postID
+      },
+      headers: {
+        authorization: fomartToken(token),
+      },
+    })
+  }
 };
