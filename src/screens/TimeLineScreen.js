@@ -28,6 +28,7 @@ import { useKeyboard } from "./components/useKeyboard";
 import AppContext from "../components/context/AppContext";
 import { AvatarReactElementCache, ImageCache } from "./components/ImageCache";
 import { BaseURL } from "../utils/Constants";
+import { useIsFocused } from '@react-navigation/native';
 
 const ListHeader = ({navigation, isLoading, firstLoad}) => {
   const appContext = useContext(AppContext);
@@ -182,6 +183,7 @@ export default function TimeLineScreen({ navigation }) {
 
       setFirstLoad(false);
       setIsLoading(false);
+      appContext.setNeedUpdateTimeline(false);
     } catch (err) {
       if (err.response && err.response.status == 401) {
         console.log(err.response.data.message);
@@ -202,6 +204,14 @@ export default function TimeLineScreen({ navigation }) {
       appContext.updateUserInfo()
     ]);
     setRefreshing(false);
+  }
+
+  const isFocused = useIsFocused();
+
+  if (isFocused && appContext.needUpdateTimeline && !isLoading){
+    setIsLoading(true)
+    console.log("update timeline")
+    refreshPosts();
   }
 
   return (

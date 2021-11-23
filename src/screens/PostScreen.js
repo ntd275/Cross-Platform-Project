@@ -66,13 +66,6 @@ export default function PostScreen({ navigation, route }) {
       mounted.current = false;
     };
   }, []);
-    useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      setNeedUpdateParent(true)
-        // goBackFunc()
-    });
-    return unsubscribe;
-  }, [navigation]);
 
   const appContext = useContext(AppContext);
   const authContext = React.useContext(AuthContext);
@@ -174,6 +167,7 @@ export default function PostScreen({ navigation, route }) {
             mode="comment"
             post={route.params.post}
             navigation={navigation}
+            from={route.params.from}
           ></Post>
         </View>
         {describe}
@@ -240,48 +234,13 @@ export default function PostScreen({ navigation, route }) {
 
   var goBackFunc = () => {
     if (needUpdateParent) {
-      const update = async (from) => {
-        if (from == "timeline") {
-          try {
-            accessToken = authContext.loginState.accessToken;
-            const res = await Api.getPosts(accessToken);
-            // console.log(res);
-            let postList = res.data.data;
-            appContext.setPostsInTimeLine(postList.reverse());
-          } catch (err) {
-            if (err.response && err.response.status == 401) {
-              console.log(err.response.data.message);
-              return;
-            }
-            console.log(err);
-            navigation.navigate("NoConnectionScreen", {
-              message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
-            });
-          }
+        if (route.params.from == "timeline") {
+          appContext.setNeedUpdateTimeline(true);
         }
 
-        if (from == "profile") {
-          try {
-            accessToken = authContext.loginState.accessToken;
-            const res = await Api.getPostsById(
-              accessToken,
-              authContext.loginState.userId
-            );
-            let postList = res.data.data;
-            appContext.setPostsInProfile(postList.reverse());
-          } catch (err) {
-            if (err.response && err.response.status == 401) {
-              console.log(err.response.data.message);
-              return;
-            }
-            console.log(err);
-            navigation.navigate("NoConnectionScreen", {
-              message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
-            });
-          }
+        if (route.params.from == "profile") {
+          appContext.setNeedUpdateProfile(true);
         }
-      };
-      update(route.params.from);
     }
     navigation.goBack();
   };

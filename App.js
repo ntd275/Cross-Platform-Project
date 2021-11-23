@@ -58,6 +58,8 @@ export default function App() {
   const [gender, setGender] = React.useState(undefined);
   const [postsInTimeLine, setPostsInTimeLine] = React.useState([]);
   const [postsInProfile, setPostsInProfile] = React.useState([]);
+  const [needUpdateTimeline, setNeedUpdateTimeline] = React.useState(false);
+  const [needUpdateProfile, setNeedUpdateProfile] = React.useState(false);
 
   const getMe = async () => {
     try {
@@ -158,6 +160,12 @@ export default function App() {
 
     postsInProfile,
     setPostsInProfile,
+
+    needUpdateTimeline,
+    setNeedUpdateTimeline,
+
+    needUpdateProfile,
+    setNeedUpdateProfile,
 
   };
 

@@ -54,28 +54,6 @@ const Friend = (props) => {
     </TouchableHighlight>
   );
 };
-//////////////////
-const ListFr = (props) => {
-  if (props.listFr.length == 0) {
-    return (
-      <Text
-        style={{
-          marginBottom: 10,
-          marginLeft: 63,
-        }}
-      >
-        (Không có)
-      </Text>
-    );
-  }
-  let tmp = [];
-  let data = props.listFr;
-  for (let i = 0; i < data.length; i++) {
-    tmp.push(<Friend key={i} name={data[i].name} img={data[i].img} />);
-  }
-
-  return <ScrollView>{tmp}</ScrollView>;
-};
 
 const ListFr1 = (props) => {
   if (props.listFr.length == 0) {
@@ -311,23 +289,13 @@ const ListDanhBa = (props) => {
 
 export default function HomeContactScreen({ navigation }) {
   const context = React.useContext(AuthContext);
-  const test = [
-    {
-      name: "Nguyen Van Nam",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
-    {
-      name: "Xuân Hạ Thu Đông",
-      img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-    },
-  ];
   const [listFriend, setListFriend] = useState([]);
 
   const getListFriends = async () => {
     try {
         const accessToken = context.loginState.accessToken;
         let friends = await Api.getListFriends(accessToken, null);
-        // console.log(friends.data.data.friends);
+        console.log(friends.data.data.friends);
         // console.log(typeof friends.data.data.friends);
         setListFriend(Object.values(friends.data.data.friends));
     } catch (e) {
@@ -339,61 +307,7 @@ export default function HomeContactScreen({ navigation }) {
   useLayoutEffect(() => {
     getListFriends();
   }, []);
-//   const listFriend = [
-//     {
-//       name: "Phan ",
-//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-//     },
-//     {
-//       name: "tùng Dương",
-//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-//     },
-//     {
-//       name: "qê Na",
-//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-//     },
-//     {
-//       name: "Thùy Trang",
-//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-//     },
-//     {
-//       name: "Thùy Trang",
-//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-//     },
-//     {
-//       name: "Tùng Dương",
-//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-//     },
-//     {
-//       name: "Lê Na",
-//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-//     },
-//     {
-//       name: "Thùy Trang",
-//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-//     },
-//     {
-//       name: "**Thùy Trang",
-//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-//     },
-//     {
-//       name: "Tùng Dương",
-//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-//     },
-//     {
-//       name: "Lê Na",
-//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-//     },
-//     {
-//       name: "La Phu",
-//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-//     },
 
-//     {
-//       name: "Ta Trang",
-//       img: "https://www.iptc.org/wp-content/uploads/2018/05/avatar-anonymous-300x300.png",
-//     },
-//   ];
   return (
     <View style={styles.container}>
       <StatusBar

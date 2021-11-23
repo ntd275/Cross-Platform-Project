@@ -47,11 +47,11 @@ export default function Post(props) {
   const [visible, setIsVisible] = useState(false);
   const [blockModalVisible, setBlockModalVisible] = useState(false);
   const [imageIndex, setImageIndex] = useState(1);
-  const [images, setImages] = useState(props.post.images);
-  const [videos, setVideos] = useState(props.post.videos);
+  const images = props.post.images;
+  const videos = props.post.videos;
   const [numLike, setNumLike] = useState(props.post.like.length);
   const [isLike, setIsLike] = useState(props.post.isLike);
-  const [postTime, setPostTime] = useState(new Date(props.post.createdAt));
+  const postTime = new Date(props.post.createdAt);
 
   const context = useContext(AuthContext);
   const appContext = useContext(AppContext);
@@ -81,17 +81,21 @@ export default function Post(props) {
       }
       setIsLike(allUserIDLike.includes(userID));
       setNumLike(usersLike.like.length);
+
+      if (props.from.includes("postscreen")) {
+        if(props.from.includes("timeline")){
+          appContext.setNeedUpdateTimeline(true);
+        }
+        if(props.from.includes("profile")){
+          appContext.setNeedUpdateProfile(true);
+        }
+      }
+
     } catch (e) {
       console.log(e);
     }
   };
-//   useEffect(() => {
-//     const unsubscribe = props.navigation.addListener("focus", () => {
-//         setNumLike(numLike)
-//         setPostLike(isLike)
-//     });
-//     return unsubscribe;
-//   }, [props.navigation]);
+
   let iconLikeStatus = isLike ? IconLike : IconUnLike;
 
   let renderImages = [];
@@ -192,10 +196,11 @@ export default function Post(props) {
     Keyboard.dismiss();
     if (props.mode !== "comment") {
       if (videos.length > 0) video.current.pauseAsync();
+      props.post.like.length = numLike;
       props.navigation.navigate("PostScreen", {
         postId: props.post._id,
-        post: props.post,
-        from: props.from,
+        post: {...props.post, isLike, like: props.post.like},
+        from: "postscreen " + props.from,
       });
     }
   };
