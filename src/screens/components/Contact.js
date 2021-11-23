@@ -7,8 +7,9 @@ export default function Contact(props) {
   const [avatarURL, setavatarURL] = useState(props.avatar);
   const [isFriend, setisFriend] = useState(props.isfriend);
   const [searchedText, setSearchedText] = useState(props.searchText);
+  const navigation = props.navigation
   const pressChat = () => {
-    console.log("go to chat screen");
+    navigation.navigate("ProfileScreen")
   };
   const index = [...userName.matchAll(new RegExp(searchedText, "gi"))].map(
     (a) => a.index

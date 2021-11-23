@@ -231,6 +231,7 @@ export default function SearchScreen({ navigation }){
             avatar={foundContacts[i].avatar}
             isfriend={foundContacts[i].isFriend}
             searchText={searchText}
+            navigation = {navigation}
           ></Contact>
         </TouchableHighlight>
       );

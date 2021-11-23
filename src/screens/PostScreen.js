@@ -66,6 +66,13 @@ export default function PostScreen({ navigation, route }) {
       mounted.current = false;
     };
   }, []);
+    useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      setNeedUpdateParent(true)
+        // goBackFunc()
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const appContext = useContext(AppContext);
   const authContext = React.useContext(AuthContext);
