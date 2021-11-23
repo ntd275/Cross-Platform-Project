@@ -267,7 +267,7 @@ export default function App() {
       <FlashMessage
         ref={flashMessage}
         position="top"
-        titleStyle={{ fontSize: 16, marginLeft: 12, marginTop: 1 }}
+        titleStyle={{ fontSize: 17, marginLeft: 6, marginTop: 2}}
       />
       <AuthContext.Provider value={authContext}>
         <AppContext.Provider value={appContext}>

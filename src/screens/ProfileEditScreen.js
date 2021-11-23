@@ -55,9 +55,9 @@ export default function ProfileEditScreen({ navigation }) {
 
     const getInfo = async () => {
         try {
-            const accessToken = "lol " + context.loginState.accessToken;
+            const accessToken = context.loginState.accessToken;
             let user = await Api.getMe(accessToken);
-            //console.log(user.data)
+            console.log(user.data)
             appContext.setAvatar(user.data.data.avatar.fileName);
             appContext.setCoverImage(user.data.data.cover_image.fileName);
         } catch (e) {
@@ -98,6 +98,8 @@ export default function ProfileEditScreen({ navigation }) {
         const [showDate, setShowDate] = useState(false);
 
         useEffect(() => {
+            // console.log(appContext);
+            appContext.updateUserInfo();
             setName(context.loginState.userName);
             setGender(appContext.gender);
             setDob(new Date(appContext.birthday));
@@ -118,9 +120,28 @@ export default function ProfileEditScreen({ navigation }) {
                     context.dispatch({type: 'CHANGEUSERNAME', username: res.data.data.username});
                     appContext.setGender(res.data.data.gender);
                     appContext.setBirthday(res.data.data.birthday);
-                    Alert.alert("Thành công", "Đã cập nhật thông tin", [{ text: "OK" }]);
+                    appContext.displayMessage({
+                        message: "Đã cập nhật thông tin",
+                        type: "default",
+                        style: { width: 195, marginBottom: 200 },
+                        titleStyle: {fontSize: 14},
+                        duration: 1900,
+                        icon:"success",
+                        position: "center",
+                        backgroundColor: "#262626",
+                    });
+                    // Alert.alert("Thành công", "Đã cập nhật thông tin", [{ text: "OK" }]);
                 } else {
-                    Alert.alert("Thất bại", "Vui lòng nhập đầy đủ họ tên", [{ text: "OK" }]);
+                    appContext.displayMessage({
+                        message: "Vui lòng nhập đầy đủ họ tên",
+                        type: "default",
+                        style: { width: 195, marginBottom: 200 },
+                        titleStyle: { fontSize: 14 },
+                        duration: 1900,
+                        position: "center",
+                        backgroundColor: "#262626",
+                    });
+                    // Alert.alert("Thất bại", "Vui lòng nhập đầy đủ họ tên", [{ text: "OK" }]);
                 }
             } catch (err){
                 console.log(err)
