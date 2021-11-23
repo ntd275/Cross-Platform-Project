@@ -53,6 +53,11 @@ export default function Post(props) {
   const [isLike, setIsLike] = useState(props.post.isLike);
   const postTime = new Date(props.post.createdAt);
 
+  useEffect(()=>{
+    setNumLike(props.post.like.length);
+    setIsLike(props.post.isLike);
+  }, [props.post])
+
   const context = useContext(AuthContext);
   const appContext = useContext(AppContext);
 

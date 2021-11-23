@@ -92,13 +92,22 @@ export default function HomeMessageScreen({ navigation }) {
       }
     };
 
+    recallMessageListener = (msg) => {
+      if (!chatContext.needUpdateListChat) {
+        chatContext.setNeedUpdateListChat(true);
+      }
+    };
+
     chatContext.socket.removeListener("message", messageListener)
     chatContext.socket.removeListener("blockers", blockersListener);
+    chatContext.socket.removeListener("recallmessage", recallMessageListener)
     chatContext.socket.on("message", messageListener)
     chatContext.socket.on("blockers", blockersListener)
+    chatContext.socket.on("recallmessage", recallMessageListener)
     return () => {
       chatContext.socket.removeListener("message", messageListener)
       chatContext.socket.removeListener("blockers", blockersListener);
+      chatContext.socket.removeListener("recallmessage", recallMessageListener)
       mounted.current = false;
     };
   }, [chatContext.curChatId, chatContext.curFriendId]);

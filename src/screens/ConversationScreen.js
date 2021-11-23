@@ -122,6 +122,7 @@ export default function ConversationScreen({ route, navigation }) {
     const [firstLoad, setFirstLoad] = useState(true);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState(null);
+    const [recallMessages, setRecallMessages] = useState([]);
     const [friendStatus, setFriendStatus] = useState("friend");
     let userId = context.loginState.userId;
     const touchable = useRef();
@@ -145,6 +146,29 @@ export default function ConversationScreen({ route, navigation }) {
             mounted.current = false;
         };
     }, []);
+
+    useEffect(() => {
+        mounted.current = true;
+        const recallMessageListener = (msg) => {
+            if (mounted.current === false) {
+                return;
+            }
+            // console.log("msg: "+ msg)
+            if (msg.chatId == chatContext.curChatId || msg.receiverId == chatContext.curFriendId || msg.senderId == chatContext.curFriendId) {
+                let temp = recallMessages;
+                temp.push(msg.data)
+                console.log(temp)
+                setRecallMessages(temp);
+            }
+        }
+
+        chatContext.socket.removeListener("recallmessage", recallMessageListener)
+        chatContext.socket.on("recallmessage", recallMessageListener)
+        return () => {
+            chatContext.socket.removeListener("recallmessage", recallMessageListener)
+            mounted.current = false;
+        };
+    }, [recallMessages]);
 
     const getListMessages = async () => {
 
@@ -213,6 +237,24 @@ export default function ConversationScreen({ route, navigation }) {
             // Keyboard.dismiss();
             setIsSending(false);
         }
+    }
+
+    if (!isLoading && recallMessages.length > 0) {
+        let needUpdate = false;
+        let temp = messages;
+        let curIndex = 0;
+        for(let i = 0; i < temp.length; i++){
+            if(temp[i]._id == recallMessages[curIndex]._id){
+                if(!temp[i].isRecall){
+                    temp[i] = recallMessages[curIndex];
+                    console.log('here')
+                    needUpdate = true;
+                }
+                curIndex ++;
+                if(curIndex >= recallMessages.length) break;
+            }
+        }
+        if(needUpdate) setMessages(temp);
     }
 
     var goToOption = () => {
@@ -369,14 +411,12 @@ export default function ConversationScreen({ route, navigation }) {
 
     var recallMessage = (index) => {
         console.log("recall message index: "+ index);
-
-        // chatContext.socket.emit("blockers", {
-        //     token: context.loginState.accessToken,
-        //     chatId: chatContext.curChatId ? chatContext.curChatId : null,
-        //     receiverId: chatContext.curFriendId,
-        //     type: "unblock"
-        // });
-
+        chatContext.socket.emit("recallmessage", {
+            token: context.loginState.accessToken,
+            chatId: chatContext.curChatId ? chatContext.curChatId : null,
+            receiverId: chatContext.curFriendId,
+            index: index
+        });
     }
 
     var UserMessage = ({ message, isShowTime, index }) => {
