@@ -10,7 +10,8 @@ import {
   Easing,
   Image,
   Text,
-  StatusBar
+  StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { Avatar } from "react-native-elements";
 import AuthContext from "../components/context/AuthContext";
@@ -79,7 +80,7 @@ export default function HomeMessageScreen({ navigation }) {
 
     blockersListener = (msg) => {
       if ((msg.senderId == chatContext.curFriendId || msg.receiverId == chatContext.curFriendId || msg.chatId == chatContext.curChatId) && chatContext.inChat) {
-        if(msg.data){
+        if (msg.data) {
           chatContext.setCurBlockers(msg.data.blockers);
           if (chatContext.curChatId !== msg.data.chatId) {
             chatContext.setCurChatId(msg.data.chatId);
@@ -276,10 +277,6 @@ export default function HomeMessageScreen({ navigation }) {
       return (
         <View style={{ marginTop: 10 }}>
           <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
-          <Image
-            source={require("../../assets/loading.gif")}
-            style={{ alignSelf: "center" }}
-          />
         </View>
       );
     }
@@ -299,17 +296,14 @@ export default function HomeMessageScreen({ navigation }) {
   var LoadingHeader = () => {
     return (
       <Animated.View style={{ height: opacity.current, overflow: "hidden" }} >
-        <Image
-          source={require("../../assets/loading.gif")}
-          style={{ alignSelf: "center", marginTop: 10 }}
-        />
+        <ActivityIndicator  size="large" style={{marginTop: 14}}/>
         <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
       </Animated.View>
     );
   }
 
   var handleScrollDrag = function (event) {
-    if (event.nativeEvent.contentOffset.y < -80 && !needReload && !isLoading) {
+    if (event.nativeEvent.contentOffset.y < -57 && !needReload && !isLoading) {
       openLoading()
       setNeedReload(true)
     }
@@ -416,7 +410,7 @@ const styles = StyleSheet.create({
     paddingRight: 16,
     color: "#778993",
     marginTop: 12,
-    marginBottom: 12,
+    marginBottom: 4,
     textAlign: "center"
   },
   avatars: {

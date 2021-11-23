@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ScrollView, Image, Alert, StyleSheet, KeyboardAvoidingView, TextInput, Pressable, Text, View, StatusBar, Button, ImageBackground, TouchableHighlight, TouchableOpacity, Keyboard } from 'react-native';
+import { ScrollView, Image, Alert, StyleSheet, KeyboardAvoidingView, ActivityIndicator, TextInput, Pressable, Text, View, StatusBar, Button, ImageBackground, TouchableHighlight, TouchableOpacity, Keyboard } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import IconBack from '../../assets/ic_nav_header_back.svg'
 import { TextField } from 'rn-material-ui-textfield';
@@ -517,10 +517,7 @@ export default function ConversationScreen({ route, navigation }) {
             return (
                 <View style={{ marginTop: 10 }}>
                     <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
-                    <Image
-                        source={require("../../assets/loading.gif")}
-                        style={{ alignSelf: "center" }}
-                    />
+                    <ActivityIndicator  size="large"/>
                 </View>
             );
         }
