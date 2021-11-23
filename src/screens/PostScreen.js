@@ -29,6 +29,7 @@ import { Api } from "../api/Api.js";
 import { TimeUtility } from "../utils/TimeUtility.js";
 import AppContext from "../components/context/AppContext";
 import { BaseURL } from "../utils/Constants";
+import { Dimensions } from 'react-native';
 
 const renderItem = ({ item }) => (
   <Pressable
@@ -87,7 +88,7 @@ export default function PostScreen({ navigation, route }) {
       appContext.displayMessage({
         message: "Đã gửi bình luận",
         type: "info",
-        style: { marginLeft: "auto" },
+        style: { paddingLeft: Dimensions.get("window").width/2 - 80, paddingBottom: 8, paddingTop: 24},
         icon: "success",
         position: "top",
         duration: 1600,
