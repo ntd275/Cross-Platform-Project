@@ -234,11 +234,11 @@ export default function PostScreen({ navigation, route }) {
 
   var goBackFunc = () => {
     if (needUpdateParent) {
-        if (route.params.from == "timeline") {
+        if (route.params.from.includes("timeline")) {
           appContext.setNeedUpdateTimeline(true);
         }
 
-        if (route.params.from == "profile") {
+        if (route.params.from.includes("profile")) {
           appContext.setNeedUpdateProfile(true);
         }
     }
