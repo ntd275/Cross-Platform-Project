@@ -9,6 +9,7 @@ import {
   Button,
   ImageBackground,
   TouchableHighlight,
+  TextInput,
   TouchableOpacity,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -27,40 +28,53 @@ import { AvatarNativeBaseCache } from "./components/ImageCache";
 export default function HomeProfileScreen({ navigation }) {
   const appContext = useContext(AppContext);
   const authContext = useContext(AuthContext);
-  return (
-    <View style={styles.container}>
-      <View>
-        <StatusBar
-          backgroundColor="#00000000"
-          barStyle="light-content"
-          translucent={true}
-        />
+  const [search, setSearch] = useState("");
 
+  return (
+    <View>
+      <StatusBar
+        backgroundColor="#00000000"
+        barStyle="light-content"
+        translucent={true}
+      />
+      <View>
         <LinearGradient
           colors={["#0085ff", "#05adff"]}
           start={[0, 1]}
           end={[1, 0]}
           style={styles.header}
         >
-          <View style={{ flex: 1, flexDirection: "row" }}>
+          <View style={{ flexDirection: "row", marginTop: 28 }}>
             <TouchableOpacity
-              activeOpacity={1}
-              style={styles.searchWrap}
-              onPress={() => {}}
-            >
-              <View style={{ flex: 1, flexDirection: "row" }}>
-                <IconSearch style={styles.iconSearch} />
-                <Text style={styles.placeHold}>Tìm bạn bè, tin nhắn...</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.iconSettingWrap}
               onPress={() => {
-                navigation.navigate("SettingScreen");
+                navigation.navigate("SearchScreen");
               }}
             >
-              <SettingIcon style={styles.iconSetting} />
+              <View style={{ flex: 1 }}>
+                <IconSearch style={styles.iconSearch} />
+              </View>
             </TouchableOpacity>
+
+            <View style={{ flex: 6 }}>
+              <TextInput
+                style={styles.input}
+                value={search}
+                onTouchStart={() => {
+                  navigation.navigate("SearchScreen");
+                }}
+                placeholder="Tìm bạn bè, tin nhắn, ..."
+                placeholderTextColor="#fff"
+              ></TextInput>
+            </View>
+            <View style={{ flex: 1 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate("SettingScreen");
+                }}
+              >
+                <SettingIcon style={styles.iconSetting} />
+              </TouchableOpacity>
+            </View>
           </View>
         </LinearGradient>
       </View>
@@ -70,20 +84,25 @@ export default function HomeProfileScreen({ navigation }) {
             backgroundColor: "#fff",
             flexDirection: "row",
             height: 80,
-            alignItems:'center',
+            alignItems: "center",
             paddingLeft: 20,
           }}
-          onPress={()=>{navigation.navigate('ProfileScreen')}}
+          onPress={() => {
+            navigation.navigate("ProfileScreen");
+          }}
         >
-          
-            <AvatarNativeBaseCache
-              source={{ uri: BaseURL + appContext.avatar }}
-              size={'lg'}
-            />
-            <View style={{marginLeft: 20}}>
-              <Text style={{fontSize:18}}>{authContext.loginState.userName}</Text>
-              <Text style={{color:"#767676", marginTop:5, fontSize:16}}>Xem trang cá nhân</Text>
-            </View>
+          <AvatarNativeBaseCache
+            source={{ uri: BaseURL + appContext.avatar }}
+            size={"lg"}
+          />
+          <View style={{ marginLeft: 20 }}>
+            <Text style={{ fontSize: 18 }}>
+              {authContext.loginState.userName}
+            </Text>
+            <Text style={{ color: "#767676", marginTop: 5, fontSize: 16 }}>
+              Xem trang cá nhân
+            </Text>
+          </View>
         </Pressable>
       </ScrollView>
     </View>
@@ -95,13 +114,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f6f6f6",
   },
+  input: {
+    color: "white",
+    fontSize: 16,
+    marginLeft: 16,
+    width: "100%",
+    marginTop: 4,
+  },
   header: {
     width: "100%",
     color: "#fff",
     height: 62,
   },
   iconSearch: {
-    marginTop: 32,
+    width: 24,
+    height: 24,
+    color: "white",
+    marginLeft: 10,
+    marginTop: 2,
   },
   searchWrap: {
     position: "absolute",
@@ -119,6 +149,11 @@ const styles = StyleSheet.create({
     right: 0,
   },
   iconSetting: {
-    marginTop: 28,
+    width: 24,
+    height: 24,
+    color: "black",
+    marginLeft: "auto",
+    marginRight: 12,
+    marginTop: 2,
   },
 });

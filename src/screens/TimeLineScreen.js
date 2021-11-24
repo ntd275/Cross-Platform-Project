@@ -28,9 +28,9 @@ import { useKeyboard } from "./components/useKeyboard";
 import AppContext from "../components/context/AppContext";
 import { AvatarReactElementCache, ImageCache } from "./components/ImageCache";
 import { BaseURL } from "../utils/Constants";
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused } from "@react-navigation/native";
 
-const ListHeader = ({navigation, isLoading, firstLoad}) => {
+const ListHeader = ({ navigation, isLoading, firstLoad }) => {
   const appContext = useContext(AppContext);
   const NotiHeader = () => {
     if (isLoading && firstLoad) {
@@ -168,10 +168,10 @@ export default function TimeLineScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(()=>{
+  useEffect(() => {
     getPosts();
     appContext.updateUserInfo();
-  },[])
+  }, []);
 
   const getPosts = async () => {
     setIsLoading(true);
@@ -199,23 +199,20 @@ export default function TimeLineScreen({ navigation }) {
 
   const refreshPosts = async () => {
     setRefreshing(true);
-    await Promise.all([
-      getPosts(),
-      appContext.updateUserInfo()
-    ]);
+    await Promise.all([getPosts(), appContext.updateUserInfo()]);
     setRefreshing(false);
-  }
+  };
 
   const isFocused = useIsFocused();
 
-  if (isFocused && appContext.needUpdateTimeline && !isLoading){
-    setIsLoading(true)
+  if (isFocused && appContext.needUpdateTimeline && !isLoading) {
+    setIsLoading(true);
     // console.log("update timeline")
     refreshPosts();
   }
 
   return (
-    <View style={styles.container}>
+    <View>
       <StatusBar
         backgroundColor="#00000000"
         barStyle="light-content"
@@ -264,7 +261,13 @@ export default function TimeLineScreen({ navigation }) {
         keyboardShouldPersistTaps={"always"}
         data={appContext.postsInTimeLine}
         keyExtractor={(item, index) => index.toString()}
-        ListHeaderComponent={<ListHeader isLoading={isLoading} navigation={navigation} firstLoad ={firstLoad} />}
+        ListHeaderComponent={
+          <ListHeader
+            isLoading={isLoading}
+            navigation={navigation}
+            firstLoad={firstLoad}
+          />
+        }
         renderItem={({ item }) => (
           <View style={{ marginTop: 12 }}>
             <Post

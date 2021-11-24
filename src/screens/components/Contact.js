@@ -2,14 +2,47 @@ import React, { useState } from "react";
 import { Avatar } from "react-native-elements";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import IconCall from "../../../assets/call-outline.svg";
+import { Api } from "../../api/Api";
+import AuthContext from "../../components/context/AuthContext";
 export default function Contact(props) {
-  const [userName, setuserName] = useState(props.userName);
-  const [avatarURL, setavatarURL] = useState(props.avatar);
+  const BaseURL = "http://13.76.46.159:8000/files/";
+  const [userName, setuserName] = useState(props.data.username);
+  const [avatarURL, setavatarURL] = useState(
+    BaseURL + props.data.avatar.fileName
+  );
+  const [friendId, setFriendId] = useState(props.data._id);
   const [isFriend, setisFriend] = useState(props.isfriend);
   const [searchedText, setSearchedText] = useState(props.searchText);
-  const navigation = props.navigation
+  const navigation = props.navigation;
+  const [friendStatus, setFriendStatus] = useState(props.data.friendStatus);
+  const context = React.useContext(AuthContext);
+  // console.log(props.data);
   const pressChat = () => {
-    navigation.navigate("ProfileScreen")
+    navigation.navigate("ProfileScreen");
+  };
+  const GetFridendStatus = () => {
+    if (friendStatus === "not friend") {
+      return "Kết Bạn";
+    }
+    if (friendStatus === "sent") {
+      return "Đã gửi";
+    }
+    if (friendStatus === "recieved") {
+      return "Chấp nhận";
+    }
+    return "";
+  };
+  const SenRequestFriend = async () => {
+    try {
+      let accessToken = context.loginState.accessToken;
+      console.log(friendId);
+      results = await Api.sendFriendRequest(accessToken, friendId);
+      let newFriendStatus = results.data.newStatus;
+      setFriendStatus(newFriendStatus);
+      // console.log(results);
+    } catch (e) {
+      console.log(e);
+    }
   };
   const index = [...userName.matchAll(new RegExp(searchedText, "gi"))].map(
     (a) => a.index
@@ -41,11 +74,9 @@ export default function Contact(props) {
         >
           <Text
             style={{ textAlign: "center", color: "blue" }}
-            onPress={() => {
-              setisFriend(true);
-            }}
+            onPress={SenRequestFriend}
           >
-            Kết bạn
+            {GetFridendStatus()}
           </Text>
         </View>
       );

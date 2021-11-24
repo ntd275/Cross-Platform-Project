@@ -20,12 +20,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import IconSearch from "../../assets/search-outline.svg";
 import IconQR from "../../assets/ic_scan_qr_footer.svg";
 import IconAdd from "../../assets/add-outline.svg";
-import { Api } from '../api/Api'
+import { Api } from "../api/Api";
 import { TimeUtility } from "../utils/TimeUtility";
-import { useIsFocused } from '@react-navigation/native';
-import { Audio } from 'expo-av';
+import { useIsFocused } from "@react-navigation/native";
+import { Audio } from "expo-av";
 
-const BaseURL = "http://13.76.46.159:8000/files/"
+const BaseURL = "http://13.76.46.159:8000/files/";
 
 export default function HomeMessageScreen({ navigation }) {
   const mounted = useRef(false);
@@ -34,8 +34,12 @@ export default function HomeMessageScreen({ navigation }) {
   const context = React.useContext(AuthContext);
   const chatContext = React.useContext(ChatContext);
   const [search, setSearch] = useState("");
-  const [needReload, setNeedReload] = useState(chatContext.listChats ? false : true);
-  const [firstLoad, setFirstLoad] = useState(chatContext.listChats ? false : true);
+  const [needReload, setNeedReload] = useState(
+    chatContext.listChats ? false : true
+  );
+  const [firstLoad, setFirstLoad] = useState(
+    chatContext.listChats ? false : true
+  );
   const [isLoading, setIsLoading] = useState(false);
   // if(firstLoad){
   //   chatContext.setGetListChats(getListChats);
@@ -43,7 +47,7 @@ export default function HomeMessageScreen({ navigation }) {
 
   async function playSound() {
     const { sound } = await Audio.Sound.createAsync(
-      require('../../assets/message_noti.mp3')
+      require("../../assets/message_noti.mp3")
     );
     await sound.playAsync();
   }
@@ -55,10 +59,14 @@ export default function HomeMessageScreen({ navigation }) {
         return;
       }
       // console.log("msg: "+ msg)
-      if (msg.chatId == chatContext.curChatId || msg.receiverId == chatContext.curFriendId || msg.senderId == chatContext.curFriendId) {
+      if (
+        msg.chatId == chatContext.curChatId ||
+        msg.receiverId == chatContext.curFriendId ||
+        msg.senderId == chatContext.curFriendId
+      ) {
         chatContext.socket.emit("seenMessage", {
           token: context.loginState.accessToken,
-          chatId: msg.chatId
+          chatId: msg.chatId,
         });
         if (chatContext.curChatId !== msg.chatId) {
           chatContext.setCurChatId(msg.chatId);
@@ -69,17 +77,22 @@ export default function HomeMessageScreen({ navigation }) {
         let temp = chatContext.listUnseens;
         let index = temp.indexOf(chatId);
         if (index == -1) {
-          temp.push(chatId)
+          temp.push(chatId);
         }
         chatContext.setListUnseens(temp);
       }
       if (!chatContext.needUpdateListChat) {
         chatContext.setNeedUpdateListChat(true);
       }
-    }
+    };
 
     blockersListener = (msg) => {
-      if ((msg.senderId == chatContext.curFriendId || msg.receiverId == chatContext.curFriendId || msg.chatId == chatContext.curChatId) && chatContext.inChat) {
+      if (
+        (msg.senderId == chatContext.curFriendId ||
+          msg.receiverId == chatContext.curFriendId ||
+          msg.chatId == chatContext.curChatId) &&
+        chatContext.inChat
+      ) {
         if (msg.data) {
           chatContext.setCurBlockers(msg.data.blockers);
           if (chatContext.curChatId !== msg.data.chatId) {
@@ -98,16 +111,16 @@ export default function HomeMessageScreen({ navigation }) {
       }
     };
 
-    chatContext.socket.removeListener("message", messageListener)
+    chatContext.socket.removeListener("message", messageListener);
     chatContext.socket.removeListener("blockers", blockersListener);
-    chatContext.socket.removeListener("recallmessage", recallMessageListener)
-    chatContext.socket.on("message", messageListener)
-    chatContext.socket.on("blockers", blockersListener)
-    chatContext.socket.on("recallmessage", recallMessageListener)
+    chatContext.socket.removeListener("recallmessage", recallMessageListener);
+    chatContext.socket.on("message", messageListener);
+    chatContext.socket.on("blockers", blockersListener);
+    chatContext.socket.on("recallmessage", recallMessageListener);
     return () => {
-      chatContext.socket.removeListener("message", messageListener)
+      chatContext.socket.removeListener("message", messageListener);
       chatContext.socket.removeListener("blockers", blockersListener);
-      chatContext.socket.removeListener("recallmessage", recallMessageListener)
+      chatContext.socket.removeListener("recallmessage", recallMessageListener);
       mounted.current = false;
     };
   }, [chatContext.curChatId, chatContext.curFriendId]);
@@ -118,18 +131,21 @@ export default function HomeMessageScreen({ navigation }) {
 
   const getListChats = async () => {
     if (isLoading) {
-      return
+      return;
     }
     // console.log("called")
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       accessToken = context.loginState.accessToken;
 
       const res = await Api.getChats(accessToken);
       let listChats = res.data.data;
       listChats.sort((chata, chatb) => {
-        return new Date(chata.lastMessage.time).getTime() < new Date(chatb.lastMessage.time).getTime();
-      })
+        return (
+          new Date(chata.lastMessage.time).getTime() <
+          new Date(chatb.lastMessage.time).getTime()
+        );
+      });
       let listChatId = [];
       let listUnseens = chatContext.listUnseens;
       for (let i = 0; i < listChats.length; i++) {
@@ -157,7 +173,7 @@ export default function HomeMessageScreen({ navigation }) {
       }
 
       if (!firstLoad && !chatContext.needUpdateListChat) {
-        closeLoading()
+        closeLoading();
       }
 
       if (chatContext.needUpdateListChat) {
@@ -165,14 +181,13 @@ export default function HomeMessageScreen({ navigation }) {
         // scrollViewRef.current.scrollTo({x: 0, y: 0, animated: true})
       }
 
-      setIsLoading(false)
-
+      setIsLoading(false);
     } catch (err) {
       if (err.response && err.response.status == 401) {
         console.log(err.response.data.message);
         // setNotification("Không thể nhận diện");
         // console.log(notification)
-        setIsLoading(false)
+        setIsLoading(false);
         return;
       }
       console.log(err);
@@ -186,8 +201,6 @@ export default function HomeMessageScreen({ navigation }) {
     getListChats();
   }
 
-
-
   const pressChat = (chatId, friend, isread, blockers) => {
     chatContext.setCurFriendId(friend.id);
     chatContext.setCurChatId(chatId);
@@ -196,11 +209,24 @@ export default function HomeMessageScreen({ navigation }) {
     if (!isread) {
       chatContext.setNeedUpdateListChat(true);
     }
-    navigation.navigate("ConversationScreen", { chatId: chatId, friend: friend, isread: isread });
+    navigation.navigate("ConversationScreen", {
+      chatId: chatId,
+      friend: friend,
+      isread: isread,
+    });
     // console.log("go to chat screen");
   };
 
-  var Message = (userName, lastMessage, avatarURL, isread, chatId, userId, phonenumber, blockers) => {
+  var Message = (
+    userName,
+    lastMessage,
+    avatarURL,
+    isread,
+    chatId,
+    userId,
+    phonenumber,
+    blockers
+  ) => {
     let content = lastMessage.content;
     if (lastMessage.senderId == context.loginState.userId) {
       content = "Bạn: " + content;
@@ -212,8 +238,8 @@ export default function HomeMessageScreen({ navigation }) {
             username: userName,
             avatar: avatarURL,
             id: userId,
-            phonenumber: phonenumber
-          }
+            phonenumber: phonenumber,
+          };
           pressChat(chatId, friend, isread, blockers);
         }}
       >
@@ -227,21 +253,57 @@ export default function HomeMessageScreen({ navigation }) {
               }}
             />
           </View>
-          <View style={{ marginLeft: 12, width: "80%", borderBottomColor: "#ebeceb", borderBottomWidth: 1, marginTop: 12, paddingBottom: 16 }}>
+          <View
+            style={{
+              marginLeft: 12,
+              width: "80%",
+              borderBottomColor: "#ebeceb",
+              borderBottomWidth: 1,
+              marginTop: 12,
+              paddingBottom: 16,
+            }}
+          >
             <View style={{ flexDirection: "row" }}>
               <View>
-                <Text style={{ fontSize: 17, fontWeight: isread ? '500' : '700', paddingBottom: 6 }}>{userName}</Text>
+                <Text
+                  style={{
+                    fontSize: 17,
+                    fontWeight: isread ? "500" : "700",
+                    paddingBottom: 6,
+                  }}
+                >
+                  {userName}
+                </Text>
               </View>
               <View style={{ marginLeft: "auto", marginRight: 10 }}>
-                <Text style={{ textAlign: "right", opacity: isread ? 0.5 : 1, fontSize: 13, fontWeight: isread ? '400' : '500', }}>{TimeUtility.getTimeStr(new Date(lastMessage.time))} </Text>
+                <Text
+                  style={{
+                    textAlign: "right",
+                    opacity: isread ? 0.5 : 1,
+                    fontSize: 13,
+                    fontWeight: isread ? "400" : "500",
+                  }}
+                >
+                  {TimeUtility.getTimeStr(new Date(lastMessage.time))}{" "}
+                </Text>
               </View>
-            </View >
-            <Text style={{ opacity: isread ? 0.5 : 1, fontSize: 15, maxWidth: "74%", fontWeight: isread ? '400' : '500', }} numberOfLines={1}>{content}</Text>
+            </View>
+            <Text
+              style={{
+                opacity: isread ? 0.5 : 1,
+                fontSize: 15,
+                maxWidth: "74%",
+                fontWeight: isread ? "400" : "500",
+              }}
+              numberOfLines={1}
+            >
+              {content}
+            </Text>
           </View>
         </View>
       </TouchableOpacity>
     );
-  }
+  };
 
   let chats = chatContext.listChats;
   let chatList = [];
@@ -249,33 +311,40 @@ export default function HomeMessageScreen({ navigation }) {
     for (let i = 0; i < chats.length; i++) {
       chatList.push(
         <View key={i} style={{ marginTop: 12 }}>
-          {Message(chats[i].friend.username, chats[i].lastMessage, BaseURL + chats[i].friend.avatar.fileName, chats[i].seen,
-            chats[i].chatId, chats[i].friend._id, chats[i].friend.phonenumber, chats[i].blockers)}
+          {Message(
+            chats[i].friend.username,
+            chats[i].lastMessage,
+            BaseURL + chats[i].friend.avatar.fileName,
+            chats[i].seen,
+            chats[i].chatId,
+            chats[i].friend._id,
+            chats[i].friend.phonenumber,
+            chats[i].blockers
+          )}
         </View>
       );
     }
   }
 
-
-  let opacity = useRef(new Animated.Value(0))
+  let opacity = useRef(new Animated.Value(0));
 
   let openLoading = () => {
-    opacity.current.setValue(100)
-  }
+    opacity.current.setValue(100);
+  };
 
   const getSearchText = () => {
     console.log(search);
   };
 
   let closeLoading = () => {
-    opacity.current.setValue(100)
+    opacity.current.setValue(100);
     Animated.timing(opacity.current, {
       toValue: 0,
       duration: 500,
       easing: Easing.ease,
-      useNativeDriver: false
+      useNativeDriver: false,
     }).start();
-  }
+  };
 
   if (needReload && !isLoading) {
     getListChats();
@@ -285,7 +354,9 @@ export default function HomeMessageScreen({ navigation }) {
     if (needReload && firstLoad) {
       return (
         <View style={{ marginTop: 10 }}>
-          <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
+          <Text style={styles.describeText}>
+            Đang tải dữ liệu, chờ chút thôi ...
+          </Text>
         </View>
       );
     }
@@ -297,26 +368,26 @@ export default function HomeMessageScreen({ navigation }) {
       );
     }
 
-    return (
-      <></>
-    );
-  }
+    return <></>;
+  };
 
   var LoadingHeader = () => {
     return (
-      <Animated.View style={{ height: opacity.current, overflow: "hidden" }} >
-        <ActivityIndicator  size="large" style={{marginTop: 14}}/>
-        <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
+      <Animated.View style={{ height: opacity.current, overflow: "hidden" }}>
+        <ActivityIndicator size="large" style={{ marginTop: 14 }} />
+        <Text style={styles.describeText}>
+          Đang tải dữ liệu, chờ chút thôi ...
+        </Text>
       </Animated.View>
     );
-  }
+  };
 
   var handleScrollDrag = function (event) {
     if (event.nativeEvent.contentOffset.y < -57 && !needReload && !isLoading) {
-      openLoading()
-      setNeedReload(true)
+      openLoading();
+      setNeedReload(true);
     }
-  }
+  };
 
   return (
     <View style={styles.container}>
@@ -328,7 +399,11 @@ export default function HomeMessageScreen({ navigation }) {
           style={styles.header}
         >
           <View style={{ flexDirection: "row", marginTop: 28 }}>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("SearchScreen");
+              }}
+            >
               <View style={{ flex: 1 }}>
                 <IconSearch style={styles.iconSearch} />
               </View>
@@ -337,9 +412,10 @@ export default function HomeMessageScreen({ navigation }) {
             <View style={{ flex: 6 }}>
               <TextInput
                 style={styles.input}
-                onChangeText={updateSearch}
                 value={search}
-                onEndEditing={getSearchText}
+                onTouchStart={() => {
+                  navigation.navigate("SearchScreen");
+                }}
                 placeholder="Tìm bạn bè, tin nhắn..."
                 placeholderTextColor="#fff"
               ></TextInput>
@@ -357,12 +433,10 @@ export default function HomeMessageScreen({ navigation }) {
             translucent={true}
           />
         </LinearGradient>
-        <View>
-          {LoadingHeader()}
-        </View>
+        <View>{LoadingHeader()}</View>
         <ScrollView
           onScrollEndDrag={handleScrollDrag}
-          style={{ minHeight: '100%', backgroundColor: "#fff" }}
+          style={{ minHeight: "100%", backgroundColor: "#fff" }}
           ref={scrollViewRef}
         >
           {NotiHeader()}
@@ -420,7 +494,7 @@ const styles = StyleSheet.create({
     color: "#778993",
     marginTop: 12,
     marginBottom: 4,
-    textAlign: "center"
+    textAlign: "center",
   },
   avatars: {
     marginLeft: 12,

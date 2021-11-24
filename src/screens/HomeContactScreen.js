@@ -62,7 +62,13 @@ const ListFr1 = (props) => {
   let tmp = [];
   const data = props.listFr;
   for (let i = 0; i < data.length; i++) {
-    tmp.push(<Friend key={i} name={data[i].username} img={BaseURL + data[i].avatar.fileName} />);
+    tmp.push(
+      <Friend
+        key={i}
+        name={data[i].username}
+        img={BaseURL + data[i].avatar.fileName}
+      />
+    );
   }
   return (
     <View>
@@ -293,14 +299,16 @@ export default function HomeContactScreen({ navigation }) {
 
   const getListFriends = async () => {
     try {
-        const accessToken = context.loginState.accessToken;
-        let friends = await Api.getListFriends(accessToken, null);
-        console.log(friends.data.data.friends);
-        // console.log(typeof friends.data.data.friends);
-        setListFriend(Object.values(friends.data.data.friends));
+      const accessToken = context.loginState.accessToken;
+      let friends = await Api.getListFriends(accessToken, null);
+      console.log(friends.data.data.friends);
+      // console.log(typeof friends.data.data.friends);
+      setListFriend(Object.values(friends.data.data.friends));
     } catch (e) {
-        console.log(e);
-        navigation.navigate("NoConnectionScreen", {message: "Vui lòng kiểm tra kết nối internet và thử lại"});
+      console.log(e);
+      navigation.navigate("NoConnectionScreen", {
+        message: "Vui lòng kiểm tra kết nối internet và thử lại",
+      });
     }
   };
 
@@ -323,7 +331,11 @@ export default function HomeContactScreen({ navigation }) {
         style={styles.header}
       >
         <View style={{ flexDirection: "row", marginTop: 28 }}>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("SearchScreen");
+            }}
+          >
             <View style={{ flex: 1 }}>
               <IconSearch style={styles.iconSearch} />
             </View>
@@ -332,12 +344,15 @@ export default function HomeContactScreen({ navigation }) {
           <View style={{ flex: 6 }}>
             <TextInput
               style={styles.input}
+              onTouchStart={() => {
+                navigation.navigate("SearchScreen");
+              }}
               placeholder="Tìm bạn bè, tin nhắn..."
               placeholderTextColor="#fff"
             ></TextInput>
           </View>
-          <View style={{marginLeft : 'auto',marginRight: 15, marginTop:2 }}>
-            <AddFriendIcon style={{height: 28, width: 28,}}/>
+          <View style={{ marginLeft: "auto", marginRight: 15, marginTop: 2 }}>
+            <AddFriendIcon style={{ height: 28, width: 28 }} />
           </View>
         </View>
       </LinearGradient>

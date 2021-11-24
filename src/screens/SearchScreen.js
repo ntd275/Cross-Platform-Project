@@ -25,8 +25,9 @@ import {
   Animated,
   Easing,
 } from "react-native";
-const BaseURL = "http://13.76.46.159:8000/files/";
-export default function SearchScreen({ navigation }){
+
+export default function SearchScreen({ navigation }) {
+  const BaseURL = "http://13.76.46.159:8000/files/";
   const limitRenderContact = 5;
   const [searchText, setsearchText] = useState("");
   const [people, setPeople] = useState([]);
@@ -164,10 +165,14 @@ export default function SearchScreen({ navigation }){
         accessToken,
         searchText
       );
-      // console.log(searchedDatas.data.data.friends);
+      // console.log(searchedDatas.data.data);
       setPeople(searchedDatas.data.data.people);
       setMessages(searchedDatas.data.data.messages);
-      setFriends(searchedDatas.data.data.friends)
+      setFriends(searchedDatas.data.data.friends);
+      console.log("+++++++");
+      console.log(searchedDatas.data);
+      console.log("-------");
+      // console.log(people);
     } catch (e) {
       console.log(e);
     }
@@ -181,61 +186,33 @@ export default function SearchScreen({ navigation }){
     );
   }
 
-  // let foundContacts = [
-  //   {
-  //     avatar:
-  //       "https://scontent.fhan2-4.fna.fbcdn.net/v/t1.6435-9/133090782_1371551809851101_5019511807721447445_n.jpg?_nc_cat=100&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=bCAO7C_sS4EAX_qyJiC&tn=3oiMvUeJSpvhduTu&_nc_ht=scontent.fhan2-4.fna&oh=48243902ce00139fbac561642e71d76a&oe=61994089",
-  //     foundUserName: "Tiểu Mai",
-  //     isFriend: true,
-  //   },
-  // ];
-  let foundContacts = [];
-  for (let i = 0; i < people.length; i++) {
-    let avatarURL = BaseURL + people[i].avatar.fileName;
-    let foundUserName = people[i].username;
-    foundContacts.push({
-      avatar: avatarURL,
-      foundUserName: foundUserName,
-      isFriend: false,
-    });
-  }
-  for (let i = 0; i < friends.length; i++) {
-    let avatarURL = BaseURL + friends[i].avatar.fileName;
-    let foundUserName = friends[i].username;
-    console.log(foundUserName)
-    foundContacts.push({
-      avatar: avatarURL,
-      foundUserName: foundUserName,
-      isFriend: true,
-    });
-  }
   let friendList = [];
   let nonFriendList = [];
-  for (let i = 0; i < foundContacts.length; i++) {
-    if (foundContacts[i].isFriend) {
-      friendList.push(
-        <TouchableHighlight key={i} style={{ marginTop: 12 }}>
-          <Contact
-            userName={foundContacts[i].foundUserName}
-            avatar={foundContacts[i].avatar}
-            isfriend={foundContacts[i].isFriend}
-            searchText={searchText}
-          ></Contact>
-        </TouchableHighlight>
-      );
-    } else {
-      nonFriendList.push(
-        <TouchableHighlight key={i} style={{ marginTop: 12 }}>
-          <Contact
-            userName={foundContacts[i].foundUserName}
-            avatar={foundContacts[i].avatar}
-            isfriend={foundContacts[i].isFriend}
-            searchText={searchText}
-            navigation = {navigation}
-          ></Contact>
-        </TouchableHighlight>
-      );
-    }
+  for (let i = 0; i < people.length; i++) {
+    nonFriendList.push(
+      <TouchableHighlight key={i} style={{ marginTop: 12 }}>
+        <Contact
+          data={people[i]}
+          isfriend={false}
+          searchText={searchText}
+          navigation={navigation}
+        ></Contact>
+      </TouchableHighlight>
+    );
+  }
+
+  for (let i = 0; i < friends.length; i++) {
+    // friends[i].friendStatus = "friend";
+    friendList.push(
+      <TouchableHighlight key={i} style={{ marginTop: 12 }}>
+        <Contact
+          data={friends[i]}
+          isfriend={true}
+          searchText={searchText}
+          navigation={navigation}
+        ></Contact>
+      </TouchableHighlight>
+    );
   }
 
   const [isRenderMessage, setisRenderMessage] = useState(false);
@@ -274,7 +251,7 @@ export default function SearchScreen({ navigation }){
                 }}
                 onPress={updateRenderContact}
               >
-                LIÊN HỆ ({foundContacts.length})
+                LIÊN HỆ ({friendList.length + nonFriendList.length})
               </Text>
             </Pressable>
           </View>
@@ -424,7 +401,7 @@ export default function SearchScreen({ navigation }){
                 value={searchText}
                 onChangeText={updateSearchText}
                 onEndEditing={getSearch}
-                autoFocus = {true}
+                autoFocus={true}
                 placeholder="Tìm bạn bè, tin nhắn, ..."
                 placeholderTextColor="#dedede"
               ></TextInput>
@@ -439,7 +416,7 @@ export default function SearchScreen({ navigation }){
       </ScrollView>
     </View>
   );
-};
+}
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#f6f6f6",
