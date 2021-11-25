@@ -180,8 +180,12 @@ export default function ConversationScreen({ route, navigation }) {
             let res;
             if(route.params.chatId){
                 res = await Api.getMessages(accessToken, route.params.chatId);
+                chatContext.setCurBlockers(res.data.blockers);
+               
             }else{
-                res = await Api.getMessages(accessToken, route.params.chatId);
+                res = await Api.getMessagesByFriendId(accessToken, route.params.friend.id);
+                chatContext.setCurChatId(res.data.chatId);
+                chatContext.setCurBlockers(res.data.blockers);
             }
             if(!chatContext.needUpdateListChat){
                 chatContext.setNeedUpdateListChat(true);
