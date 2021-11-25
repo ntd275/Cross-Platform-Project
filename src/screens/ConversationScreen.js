@@ -20,6 +20,7 @@ import { TextUtility } from '../utils/TextUtility'
 import ExpoFastImage from 'expo-fast-image';
 import { setStatusBarNetworkActivityIndicatorVisible } from 'expo-status-bar';
 import { MenuProvider } from 'react-native-popup-menu';
+import { AvatarReactElementCache, ImageCache } from "./components/ImageCache";
 import {
     Menu,
     MenuOptions,
@@ -32,6 +33,7 @@ import { paddingLeft } from 'styled-system';
 const { Popover } = renderers;
 
 const BaseURL = "http://13.76.46.159:8000/files/"
+var timeOut = null;
 
 function ChatInput({ scrollViewRef, isLoading, isSending, setIsSending }) {
     const context = React.useContext(AuthContext);
@@ -59,11 +61,7 @@ function ChatInput({ scrollViewRef, isLoading, isSending, setIsSending }) {
             receiverId: chatContext.curFriendId,
             content: content
         });
-        if (!chatContext.needUpdateListChat) {
-
-            chatContext.setNeedUpdateListChat(true);
-        }
-
+        chatContext.setNeedUpdateListChat(true);
     };
 
     return (
@@ -112,7 +110,7 @@ function ChatInput({ scrollViewRef, isLoading, isSending, setIsSending }) {
 export default function ConversationScreen({ route, navigation }) {
     const mounted = useRef(false);
     const scrollViewRef = useRef(null);
-
+    const userInfos = useRef({});
 
     const context = React.useContext(AuthContext);
     const chatContext = React.useContext(ChatContext);
@@ -125,8 +123,11 @@ export default function ConversationScreen({ route, navigation }) {
     const [recallMessages, setRecallMessages] = useState([]);
     const [friendStatus, setFriendStatus] = useState("friend");
     let userId = context.loginState.userId;
-    const touchable = useRef();
-    const [selectedIndex, setSelectedIndex] = useState(-1);
+    const [needRefresh, setNeedRefresh] = useState(false);
+
+    if (needRefresh) {
+        setNeedRefresh(false);
+    }
 
     useEffect(() => {
         mounted.current = true;
@@ -155,10 +156,7 @@ export default function ConversationScreen({ route, navigation }) {
             }
             // console.log("msg: "+ msg)
             if (msg.chatId == chatContext.curChatId || msg.receiverId == chatContext.curFriendId || msg.senderId == chatContext.curFriendId) {
-                let temp = recallMessages;
-                temp.push(msg.data)
-                console.log(temp)
-                setRecallMessages(temp);
+                setRecallMessages([...recallMessages, msg.data]);
             }
         }
 
@@ -243,18 +241,19 @@ export default function ConversationScreen({ route, navigation }) {
         let needUpdate = false;
         let temp = messages;
         let curIndex = 0;
-        for(let i = 0; i < temp.length; i++){
-            if(temp[i]._id == recallMessages[curIndex]._id){
-                if(!temp[i].isRecall){
+        for (let i = 0; i < temp.length; i++) {
+            if (temp[i]._id == recallMessages[curIndex]._id) {
+                if (!temp[i].isRecall) {
                     temp[i] = recallMessages[curIndex];
-                    console.log('here')
                     needUpdate = true;
                 }
-                curIndex ++;
-                if(curIndex >= recallMessages.length) break;
+                curIndex++;
+                if (curIndex >= recallMessages.length) break;
             }
         }
-        if(needUpdate) setMessages(temp);
+        if (needUpdate) {
+            setMessages(temp);
+        }
     }
 
     var goToOption = () => {
@@ -376,20 +375,85 @@ export default function ConversationScreen({ route, navigation }) {
         );
     }
 
-    var UserTag = ({ userInfo }) => {
+    var UserTag = ({ phoneNumber }) => {
+        const getUserInfo = async (phoneNumber) => {
+            try {
+                accessToken = context.loginState.accessToken;
+                const res = await Api.getUserByPhone(accessToken, phoneNumber);
+                if (res.status == 200) {
+                    if (mounted.current) {
+                        userInfos.current["" + phoneNumber] = {...res.data.data, searched: true};
+                        if (!needRefresh) {
+                            setNeedRefresh(true)
+                        }
+                    }
+                }
+            } catch (err) {
+                if (err.response && (err.response.status == 401)) {
+                    console.log(err.response.data.message);
+                    // setNotification("Không thể nhận diện");
+                    // console.log(notification)
+                    return;
+                }
+
+                if (err.response && (err.response.status == 404)) {
+                    if (mounted.current) {
+                        userInfos.current["" + phoneNumber] = {searched: true};
+                        if (!needRefresh) {
+                            setNeedRefresh(true)
+                        }
+                    }
+                    return;
+                }
+
+                console.log(err);
+                navigation.navigate("NoConnectionScreen", {
+                    message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+                });
+            }
+        }
+
+        useEffect(() => {
+            if (!userInfos.current[phoneNumber]) {
+                userInfos.current["" + phoneNumber] = phoneNumber;
+                getUserInfo(phoneNumber);
+            }
+        }, [])
+
+
+        if(!userInfos.current[phoneNumber] || !userInfos.current[phoneNumber].searched){
+            return <TouchableOpacity style={styles.userInfo}>
+            <ExpoFastImage
+                style={{ height: 48, width: 48, borderRadius: 28, }}
+                uri={BaseURL + "avatar_2.png"}
+                cacheKey={"avatar_2.png"}
+                resizeMode="contain"
+            />
+            <View>
+                <Text style={{fontSize: 17, marginLeft: 8, opacity: 0.6}}>Đang tìm kiếm...</Text>
+                <View style={{ marginTop: 6, marginLeft: 8, flexDirection: "row" }}>
+                    <IconContact />
+                    <Text style={styles.userPhone}>{phoneNumber}</Text>
+                </View>
+            </View>
+        </TouchableOpacity>
+        }else if (!userInfos.current[phoneNumber]._id) {
+            return <></>
+        }
+
         return (
-            <TouchableOpacity style={styles.userInfo} onPress={() => goToUserPage(userInfo)}>
-                <Avatar
-                    size={48}
-                    rounded
-                    activeOpacity={0.8}
-                    source={{ uri: friend.avatar }}
+            <TouchableOpacity style={styles.userInfo} onPress={() => goToUserPage(userInfos.current[phoneNumber])}>
+                <ExpoFastImage
+                    style={{ height: 48, width: 48, borderRadius: 28, }}
+                    uri={BaseURL + userInfos.current[phoneNumber].avatar.fileName}
+                    cacheKey={userInfos.current[phoneNumber].avatar.fileName}
+                    resizeMode="contain"
                 />
                 <View>
-                    <Text style={styles.username}>{userInfo.username}</Text>
+                    <Text style={styles.username}>{userInfos.current[phoneNumber].username}</Text>
                     <View style={{ marginTop: 6, marginLeft: 8, flexDirection: "row" }}>
                         <IconContact />
-                        <Text style={styles.userPhone}>{userInfo.phonenumber}</Text>
+                        <Text style={styles.userPhone}>{userInfos.current[phoneNumber].phonenumber}</Text>
                     </View>
                 </View>
             </TouchableOpacity>
@@ -410,7 +474,7 @@ export default function ConversationScreen({ route, navigation }) {
     };
 
     var recallMessage = (index) => {
-        console.log("recall message index: "+ index);
+        console.log("recall message index: " + index);
         chatContext.socket.emit("recallmessage", {
             token: context.loginState.accessToken,
             chatId: chatContext.curChatId ? chatContext.curChatId : null,
@@ -420,43 +484,48 @@ export default function ConversationScreen({ route, navigation }) {
     }
 
     var UserMessage = ({ message, isShowTime, index }) => {
-        const [phoneInfo, setPhoneInfo] = useState(null);
         let [phoneNumber, TextUI] = TextUtility.detectThenFormatPhoneAndURL(message.content)
-        if (phoneNumber) {
-            console.log("getting imformation about: " + phoneNumber);
-            if (!phoneInfo) {
-                setPhoneInfo(friend);
-            }
-        }
         let userTag = <></>;
-        if (phoneInfo) {
-            userTag = <UserTag userInfo={phoneInfo} />;
+        if (phoneNumber) {
+            userTag = <UserTag phoneNumber={phoneNumber} />;
+        }
+        let content = <></>
+        if (!message.isRecall) {
+            content = <Menu renderer={Popover}
+                rendererProps={{ placement: 'top', anchorStyle: StyleSheet.create({ marginTop: 3 }) }}
+            >
+                <MenuTrigger triggerOnLongPress={true} customStyles={{ TriggerTouchableComponent: TouchableHighlight, triggerTouchable: { style: { borderRadius: 8 } } }}
+                >
+                    {TextUI}
+                    {userTag}
+                    {isShowTime ? <HourTag date={new Date(message.time)} /> : <></>}
+                </MenuTrigger>
+                <MenuOptions placement="top" customStyles={{
+                    optionsWrapper: StyleSheet.create({ width: 110, paddingTop: 3, paddingLeft: 4, height: 80 }),
+                    optionsContainer: StyleSheet.create({ marginTop: -70 })
+                }}>
+                    <View style={{ width: 60 }}>
+                        <MenuOption onSelect={() => recallMessage(index)} >
+                            <View>
+                                <IconRecallMessage style={{ marginLeft: 3, marginBottom: 4 }} />
+                                <Text style={{ fontSize: 14 }}>Thu hồi</Text>
+                            </View>
+                        </MenuOption>
+                    </View>
+                </MenuOptions>
+            </Menu>
+        } else {
+            content = <>
+                <View style={{ opacity: 0.38 }}>
+                    {TextUI}
+                    {userTag}
+                </View>
+                {isShowTime ? <HourTag date={new Date(message.time)} /> : <></>}
+            </>
         }
         return (
             <View style={styles.userMessage}>
-                <Menu renderer={Popover}
-                    rendererProps={{ placement: 'top', anchorStyle: StyleSheet.create({ marginTop: 3 }) }}
-                >
-                    <MenuTrigger triggerOnLongPress={true} customStyles={{ TriggerTouchableComponent: TouchableHighlight, triggerTouchable: { style: { borderRadius: 8 } } }}
-                    >
-                        {TextUI}
-                        {userTag}
-                        {isShowTime ? <HourTag date={new Date(message.time)} /> : <></>}
-                    </MenuTrigger>
-                    <MenuOptions placement="top" customStyles={{
-                        optionsWrapper: StyleSheet.create({ width: 110, paddingTop: 3, paddingLeft: 4, height: 80 }),
-                        optionsContainer: StyleSheet.create({ marginTop: -70 })
-                    }}>
-                        <View style={{ width: 60 }}>
-                            <MenuOption onSelect={() => recallMessage(index)} >
-                                <View>
-                                    <IconRecallMessage style={{ marginLeft: 3, marginBottom: 4 }} />
-                                    <Text style={{ fontSize: 14 }}>Thu hồi</Text>
-                                </View>
-                            </MenuOption>
-                        </View>
-                    </MenuOptions>
-                </Menu>
+                {content}
             </View>
         );
     }
@@ -468,12 +537,18 @@ export default function ConversationScreen({ route, navigation }) {
             messageStyle.push({ marginLeft: 34 });
         }
         let [phoneNumber, TextUI] = TextUtility.detectThenFormatPhoneAndURL(message.content)
-
+        let userTag = <></>;
+        if (phoneNumber) {
+            userTag = <UserTag phoneNumber={phoneNumber} />;
+        }
         return (
             <View style={styles.friendMessageContainer}>
                 {isShowAvatar ? <FriendAvatar friend={friend} /> : <></>}
                 <View style={messageStyle}>
-                    {TextUI}
+                    <View style={{ opacity: message.isRecall ? 0.38 : 1 }}>
+                        {TextUI}
+                        {userTag}
+                    </View>
                     {isShowTime ? <HourTag date={new Date(message.time)} /> : <></>}
                 </View>
             </View>
@@ -481,7 +556,11 @@ export default function ConversationScreen({ route, navigation }) {
     }
 
     var goToUserPage = (userInfo) => {
-        console.log("Go to user's page!");
+        if(userInfo._id == context.loginState.userId){
+            navigation.navigate("ProfileScreen");
+        }else{
+            navigation.navigate("ViewProfileScreen", {userId: userInfo._id})
+        }
     }
 
     var unBlock = async () => {
@@ -557,7 +636,7 @@ export default function ConversationScreen({ route, navigation }) {
             return (
                 <View style={{ marginTop: 10 }}>
                     <Text style={styles.describeText}>Đang tải dữ liệu, chờ chút thôi ...</Text>
-                    <ActivityIndicator  size="large"/>
+                    <ActivityIndicator size="large" />
                 </View>
             );
         }
@@ -591,7 +670,7 @@ export default function ConversationScreen({ route, navigation }) {
             }
             if (curSender == userId) {
                 list.push(
-                    <UserMessage key={i} message={messages[i]} isShowTime={isShowTime} index = {i} />
+                    <UserMessage key={i} message={messages[i]} isShowTime={isShowTime} index={i} />
                 );
             } else {
                 let isShowAvatar = false;
@@ -655,7 +734,8 @@ export default function ConversationScreen({ route, navigation }) {
                         scrollEnabled={true}
                         ref={scrollViewRef}
                         onContentSizeChange={() => {
-                            setTimeout(() => {
+                            clearTimeout(timeOut);
+                            timeOut = setTimeout(() => {
                                 if (mounted.current == false) return;
                                 scrollViewRef.current.scrollToEnd({ animated: true })
                             }, 100)
@@ -778,9 +858,9 @@ const styles = StyleSheet.create({
     },
     userInfo: {
         flexDirection: "row",
-        marginLeft: 10,
+        marginLeft: 14,
         marginRight: 12,
-        marginTop: 14,
+        marginTop: 8,
         marginBottom: 8,
         minHeight: 60,
         minWidth: 220,

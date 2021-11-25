@@ -58,6 +58,7 @@ export default function HomeMessageScreen({ navigation }) {
       if (mounted.current === false) {
         return;
       }
+
       // console.log("msg: "+ msg)
       if (
         msg.chatId == chatContext.curChatId ||
@@ -81,9 +82,8 @@ export default function HomeMessageScreen({ navigation }) {
         }
         chatContext.setListUnseens(temp);
       }
-      if (!chatContext.needUpdateListChat) {
-        chatContext.setNeedUpdateListChat(true);
-      }
+      chatContext.setNeedUpdateListChat(true);
+
     };
 
     blockersListener = (msg) => {
@@ -176,10 +176,11 @@ export default function HomeMessageScreen({ navigation }) {
         closeLoading();
       }
 
-      if (chatContext.needUpdateListChat) {
-        chatContext.setNeedUpdateListChat(false);
-        // scrollViewRef.current.scrollTo({x: 0, y: 0, animated: true})
-      }
+      chatContext.setNeedUpdateListChat(false);
+      // if (chatContext.needUpdateListChat) {
+    
+      //   // scrollViewRef.current.scrollTo({x: 0, y: 0, animated: true})
+      // }
 
       setIsLoading(false);
     } catch (err) {
