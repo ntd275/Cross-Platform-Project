@@ -177,8 +177,15 @@ export default function ConversationScreen({ route, navigation }) {
         setIsLoading(true)
         try {
             accessToken = context.loginState.accessToken;
-
-            const res = await Api.getMessages(accessToken, route.params.chatId);
+            let res;
+            if(route.params.chatId){
+                res = await Api.getMessages(accessToken, route.params.chatId);
+            }else{
+                res = await Api.getMessages(accessToken, route.params.chatId);
+            }
+            if(!chatContext.needUpdateListChat){
+                chatContext.setNeedUpdateListChat(true);
+            }
             // console.log("called")
             let listMessages = res.data.data;
             if (mounted.current == false) {
@@ -215,7 +222,7 @@ export default function ConversationScreen({ route, navigation }) {
     }
 
     if (firstLoad && !isLoading) {
-        if (route.params.chatId) {
+        if (route.params.chatId || route.params.friend) {
             if (!route.params.isread) {
                 chatContext.socket.emit("seenMessage", {
                     token: context.loginState.accessToken,
@@ -223,6 +230,7 @@ export default function ConversationScreen({ route, navigation }) {
                 });
             }
             getListMessages();
+           
         }
     }
 

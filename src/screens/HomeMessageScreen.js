@@ -208,9 +208,9 @@ export default function HomeMessageScreen({ navigation }) {
     chatContext.setCurChatId(chatId);
     chatContext.setInChat(true);
     chatContext.setCurBlockers(blockers);
-    if (!isread) {
-      chatContext.setNeedUpdateListChat(true);
-    }
+    // if (!isread) {
+    //   chatContext.setNeedUpdateListChat(true);
+    // }
     navigation.navigate("ConversationScreen", {
       chatId: chatId,
       friend: friend,
