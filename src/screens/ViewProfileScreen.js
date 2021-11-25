@@ -1,5 +1,5 @@
-import React, { useContext, useRef, useState } from "react";
-import { Avatar, Image as Image2, Divider } from "react-native-elements";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { Avatar, Divider } from "react-native-elements";
 import Post from "./components/Post";
 import { Api } from "../api/Api";
 import AuthContext from "../components/context/AuthContext";
@@ -18,6 +18,8 @@ import {
   StatusBar,
   Alert,
   TouchableHighlight,
+  RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import IconBack from "../../assets/ic_nav_header_back.svg";
 import IconBackBlack from "../../assets/ic_nav_header_back_black.svg";
@@ -28,170 +30,84 @@ import { LinearGradient } from "expo-linear-gradient";
 import IconImageSolid from "../../assets/ic_photo_solidhollow_24.svg";
 import IconVideoSolid from "../../assets/ic_video_solid_24_white.svg";
 import ImageView from "react-native-image-viewing";
-
-const BaseURL = "http://13.76.46.159:8000/files/";
+import {
+  AvatarNativeBaseCache,
+  ImageReactElementCache,
+} from "./components/ImageCache";
+import { useIsFocused } from "@react-navigation/native";
+import { BaseURL } from "../utils/Constants";
+import AppContext from "../components/context/AppContext";
 const FULL_WIDTH = Dimensions.get("window").width;
 
-export default function ViewProfileScreen({ navigation, route }) {
-  const [needReload, setNeedReload] = useState(true);
-  const [firstLoad, setFirstLoad] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [posts, setPosts] = useState([]);
-
-  const [info, setInfo] = useState({
-    avatar: "avatar_2.png",
-    coverImage: "defaul_cover_image.jpg",
-    userName: "",
-    description: "",
-  });
-
-  const [isFriend, setIsFriend] = useState(false);
-
-  const context = React.useContext(AuthContext);
-  const getAvatar = async () => {
-    try {
-      const accessToken = "lol " + context.loginState.accessToken;
-      let user = await Api.getUser(accessToken, route.params.userId);
-      console.log(user.data);
-      setInfo({
-        avatar: user.data.data.avatar.fileName,
-        coverImage: user.data.data.cover_image.fileName,
-        userName: user.data.data.username,
-        description: user.data.data.description,
-      });
-    } catch (e) {
-      console.log(e);
-    }
-  };
-  const getPosts = async () => {
-    if (isLoading) {
-      return;
-    }
-    setIsLoading(true);
-    try {
-      accessToken = context.loginState.accessToken;
-      accessToken = "lol " + accessToken;
-      // console.log(accessToken)
-      const res = await Api.getPostsById(accessToken, route.params.userId);
-      let postList = res.data.data;
-
-      setPosts(postList.reverse());
-
-      if (firstLoad) {
-        setFirstLoad(false);
-      }
-      if (needReload) {
-        setNeedReload(false);
-      }
-      setIsLoading(false);
-      if (!firstLoad) {
-        closeLoading();
-      }
-    } catch (err) {
-      if (err.response && err.response.status == 401) {
-        console.log(err.response.data.message);
-        setIsLoading(false);
-        return;
-      }
-      console.log(err);
-      navigation.navigate("NoConnectionScreen", {
-        message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
-      });
-    }
-  };
-
-  let opacity = useRef(new Animated.Value(0));
-
-  let closeLoading = () => {
-    opacity.current.setValue(100);
-    Animated.timing(opacity.current, {
-      toValue: 0,
-      duration: 500,
-      easing: Easing.ease,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  if (needReload && !isLoading) {
-    getAvatar();
-    getPosts();
-  }
-
-  var NotiHeader = () => {
-    if (needReload && firstLoad) {
+const ListHeader = ({
+  info,
+  navigation,
+  isLoading,
+  firstLoad,
+  isFriend,
+  posts,
+  setIsViewCoverImage,
+  setIsViewAvatarImage,
+}) => {
+  const NotiHeader = () => {
+    if (isLoading && firstLoad) {
       return (
         <View style={{ marginTop: 10 }}>
           <Text style={styles.describeText}>
             Đang tải dữ liệu, chờ chút thôi ...
           </Text>
-          <Image
-            source={require("../../assets/loading.gif")}
-            style={{ alignSelf: "center" }}
-          />
+          <ActivityIndicator />
         </View>
       );
     }
     if (posts.length == 0) {
       return (
         <View style={{ marginTop: 10 }}>
-          <Text style={styles.describeText}>Chưa có bài đăng nào</Text>
+          <Text style={styles.describeText}>Người này chưa đăng bài nào</Text>
         </View>
       );
     }
-
     return <></>;
   };
 
-  var LoadingHeader = () => {
-    return (
-      <Animated.View style={{ height: opacity.current }}>
-        <Image
-          source={require("../../assets/loading.gif")}
-          style={{ alignSelf: "center", marginTop: 10 }}
+  return (
+    <>
+      <View style={{ position: "relative" }}>
+        <ImageReactElementCache
+          style={{ width: FULL_WIDTH, height: 200 }}
+          source={{ uri: BaseURL + info.coverImage }}
+          onPress={() => setIsViewCoverImage(true)}
         />
-        <Text style={styles.describeText}>
-          Đang tải dữ liệu, chờ chút thôi ...
-        </Text>
-      </Animated.View>
-    );
-  };
-
-  const [isViewCoverImage, setIsViewCoverImage] = useState(false);
-
-  var ListHeader = () => {
-    return (
-      <>
-        {LoadingHeader()}
-        <View style={{ position: "relative" }}>
-          <Image2
-            style={{ width: FULL_WIDTH, height: 200 }}
-            source={{ uri: BaseURL + info.coverImage }}
-            onPress={() => {}}
-          ></Image2>
-          <View style={{ alignItems: "center", paddingBottom: 10, backgroundColor: isFriend?"#fff":'#f0f0f0' }}>
-            <Text style={{ fontSize: 26, fontWeight: "500", paddingTop: 50 }}>
-              {info.userName}
-            </Text>
-            <View style={{ marginTop: 4 }}>
-              {info.decription && (
-                <Text style={{ fontSize: 16, color: "#767676" }}>
-                  {info.decription}
-                </Text>
-              )}
-            </View>
+        <View
+          style={{
+            alignItems: "center",
+            paddingBottom: 10,
+            backgroundColor: isFriend ? "#fff" : "#f0f0f0",
+          }}
+        >
+          <Text style={{ fontSize: 26, fontWeight: "500", paddingTop: 50 }}>
+            {info.userName}
+          </Text>
+          <View style={{ marginTop: 4 }}>
+            {info.decription && (
+              <Text style={{ fontSize: 16, color: "#767676" }}>
+                {info.decription}
+              </Text>
+            )}
           </View>
-          <Pressable
-            onPress={() => {}}
-            style={{ position: "absolute", alignSelf: "center", top: 120 }}
-          >
-            <Avatar2
-              size={"2xl"}
-              source={{ uri: BaseURL + info.avatar }}
-              style={{ borderWidth: 2, borderColor: "#fff" }}
-            ></Avatar2>
-          </Pressable>
         </View>
-        {isFriend ? 
+        <Pressable
+          style={{ position: "absolute", alignSelf: "center", top: 120 }}
+          onPress={() => setIsViewAvatarImage(true)}
+        >
+          <AvatarNativeBaseCache
+            size={"2xl"}
+            source={{ uri: BaseURL + info.avatar }}
+            style={{ borderWidth: 2, borderColor: "#fff" }}
+          />
+        </Pressable>
+      </View>
+      {isFriend ? (
         <ScrollView
           horizontal={true}
           style={{
@@ -268,7 +184,7 @@ export default function ViewProfileScreen({ navigation, route }) {
             </Text>
           </LinearGradient>
         </ScrollView>
-        :
+      ) : (
         <View
           style={{
             backgroundColor: "#fff",
@@ -299,7 +215,7 @@ export default function ViewProfileScreen({ navigation, route }) {
               }}
               activeOpacity={0.8}
               underlayColor="#3f3f3f"
-              onPress={()=>{}}
+              onPress={() => {}}
             >
               <LinearGradient
                 colors={["#b5d2ec55", "#b5d2ec55"]}
@@ -363,12 +279,94 @@ export default function ViewProfileScreen({ navigation, route }) {
             </TouchableHighlight>
           </View>
         </View>
-        }
-        <NotiHeader />
-      </>
-    );
+      )}
+      <NotiHeader />
+    </>
+  );
+};
+
+export default function ViewProfileScreen({ navigation, route }) {
+  const mounted = useRef(true);
+  const [firstLoad, setFirstLoad] = useState(true);
+  const [isFriend, setIsFriend] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [info, setInfo] = useState({
+    avatar: "avatar_2.png",
+    coverImage: "defaul_cover_image.jpg",
+    userName: "",
+    description: "",
+  });
+
+  const authContext = React.useContext(AuthContext);
+
+  const getInfo = async () => {
+    try {
+      const token = authContext.loginState.accessToken;
+      let res = await Api.getUser(token, route.params.userId);
+      if (!mounted.current) return;
+      let data = res.data.data;
+      setInfo({
+        avatar: data.avatar.fileName,
+        coverImage: data.cover_image.fileName,
+        userName: data.username,
+        description: data.description,
+      });
+    } catch (e) {
+      console.log(e);
+    }
   };
 
+  const getPosts = async () => {
+    setIsLoading(true);
+    try {
+      accessToken = authContext.loginState.accessToken;
+      const res = await Api.getPostsById(accessToken, route.params.userId);
+      if (!mounted.current) return;
+      let postList = res.data.data;
+      setPosts(postList.reverse());
+      if (firstLoad) {
+        setFirstLoad(false);
+      }
+      setIsLoading(false);
+    } catch (err) {
+      if (err.response && err.response.status == 401) {
+        console.log(err.response.data.message);
+        setIsLoading(false);
+        return;
+      }
+      console.log(err);
+      navigation.navigate("NoConnectionScreen", {
+        message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+      });
+    }
+  };
+
+  useEffect(() => {
+    getInfo();
+    getPosts();
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  const refreshPosts = async () => {
+    setRefreshing(true);
+    await Promise.all([getPosts(), getInfo()]);
+    setRefreshing(false);
+  };
+
+  const appContext = useContext(AppContext);
+
+  const isFocused = useIsFocused();
+  if (isFocused && appContext.needUpdateViewUser && !isLoading) {
+    setIsLoading(true);
+    refreshPosts();
+  }
+
+  const [isViewCoverImage, setIsViewCoverImage] = useState(false);
+  const [isViewAvatarImage, setIsViewAvatarImage] = useState(false);
   const offset = useRef(new Animated.Value(0)).current;
   const opacityOnScroll = offset.interpolate({
     inputRange: [0, 200],
@@ -405,7 +403,10 @@ export default function ViewProfileScreen({ navigation, route }) {
         }}
       >
         <View style={{ marginTop: 25, marginLeft: 60 }}>
-          <Avatar2 source={{ uri: BaseURL + info.avatar }} size="sm"></Avatar2>
+          <AvatarNativeBaseCache
+            source={{ uri: BaseURL + info.avatar }}
+            size="sm"
+          />
         </View>
 
         <Text
@@ -430,6 +431,7 @@ export default function ViewProfileScreen({ navigation, route }) {
       >
         {iconColor == "white" ? <IconOption /> : <IconOptionBlack />}
       </TouchableOpacity>
+
       <ImageView
         images={[{ uri: BaseURL + info.coverImage }]}
         imageIndex={0}
@@ -439,31 +441,51 @@ export default function ViewProfileScreen({ navigation, route }) {
         }}
         swipeToCloseEnabled={true}
       />
+      <ImageView
+        images={[{ uri: BaseURL + info.avatar }]}
+        imageIndex={0}
+        visible={isViewAvatarImage}
+        onRequestClose={() => {
+          setIsViewAvatarImage(false);
+        }}
+        swipeToCloseEnabled={true}
+      />
+
       <FlatList
-        scrollEventThrottle={16}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: offset } } }],
-          { useNativeDriver: false }
-        )}
         keyboardShouldPersistTaps={"always"}
         data={posts}
         keyExtractor={(item, index) => index.toString()}
-        ListHeaderComponent={<ListHeader />}
+        ListHeaderComponent={
+          <ListHeader
+            info={info}
+            navigation={navigation}
+            isFriend={isFriend}
+            isLoading={isLoading}
+            firstLoad={firstLoad}
+            posts={posts}
+            setIsViewCoverImage={setIsViewCoverImage}
+            setIsViewAvatarImage={setIsViewAvatarImage}
+          />
+        }
         renderItem={({ item }) => (
           <View style={{ marginTop: 12 }}>
             <Post
               mode={"timeline"}
-              updateFunc={getPosts}
               post={item}
               navigation={navigation}
+              from="viewuser"
             />
           </View>
         )}
         style={{ flex: 1 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={refreshPosts} />
+        }
       />
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#f6f6f6",
