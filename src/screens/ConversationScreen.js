@@ -258,6 +258,7 @@ export default function ConversationScreen({ route, navigation }) {
 
     var goToOption = () => {
         // console.log("navigating ...");
+        Keyboard.dismiss();
         navigation.navigate("ConversationOption", { friendInfo: friend })
     }
 
@@ -382,7 +383,7 @@ export default function ConversationScreen({ route, navigation }) {
                 const res = await Api.getUserByPhone(accessToken, phoneNumber);
                 if (res.status == 200) {
                     if (mounted.current) {
-                        userInfos.current["" + phoneNumber] = {...res.data.data, searched: true};
+                        userInfos.current["" + phoneNumber] = { ...res.data.data, searched: true };
                         if (!needRefresh) {
                             setNeedRefresh(true)
                         }
@@ -398,7 +399,7 @@ export default function ConversationScreen({ route, navigation }) {
 
                 if (err.response && (err.response.status == 404)) {
                     if (mounted.current) {
-                        userInfos.current["" + phoneNumber] = {searched: true};
+                        userInfos.current["" + phoneNumber] = { searched: true };
                         if (!needRefresh) {
                             setNeedRefresh(true)
                         }
@@ -421,23 +422,23 @@ export default function ConversationScreen({ route, navigation }) {
         }, [])
 
 
-        if(!userInfos.current[phoneNumber] || !userInfos.current[phoneNumber].searched){
+        if (!userInfos.current[phoneNumber] || !userInfos.current[phoneNumber].searched) {
             return <TouchableOpacity style={styles.userInfo}>
-            <ExpoFastImage
-                style={{ height: 48, width: 48, borderRadius: 28, }}
-                uri={BaseURL + "avatar_2.png"}
-                cacheKey={"avatar_2.png"}
-                resizeMode="contain"
-            />
-            <View>
-                <Text style={{fontSize: 17, marginLeft: 8, opacity: 0.6}}>Đang tìm kiếm...</Text>
-                <View style={{ marginTop: 6, marginLeft: 8, flexDirection: "row" }}>
-                    <IconContact />
-                    <Text style={styles.userPhone}>{phoneNumber}</Text>
+                <ExpoFastImage
+                    style={{ height: 48, width: 48, borderRadius: 28, }}
+                    uri={BaseURL + "avatar_2.png"}
+                    cacheKey={"avatar_2.png"}
+                    resizeMode="contain"
+                />
+                <View>
+                    <Text style={{ fontSize: 17, marginLeft: 8, opacity: 0.6 }}>Đang tìm kiếm...</Text>
+                    <View style={{ marginTop: 6, marginLeft: 8, flexDirection: "row" }}>
+                        <IconContact />
+                        <Text style={styles.userPhone}>{phoneNumber}</Text>
+                    </View>
                 </View>
-            </View>
-        </TouchableOpacity>
-        }else if (!userInfos.current[phoneNumber]._id) {
+            </TouchableOpacity>
+        } else if (!userInfos.current[phoneNumber]._id) {
             return <></>
         }
 
@@ -462,7 +463,7 @@ export default function ConversationScreen({ route, navigation }) {
 
     var FriendAvatar = ({ friend }) => {
         return (
-            <TouchableOpacity onPress={() => goToUserPage(friend)}>
+            <TouchableOpacity onPress={() => goToFriendPage()}>
                 <ExpoFastImage
                     style={{ height: 28, width: 28, borderRadius: 28, }}
                     uri={friend.avatar}
@@ -490,9 +491,17 @@ export default function ConversationScreen({ route, navigation }) {
             userTag = <UserTag phoneNumber={phoneNumber} />;
         }
         let content = <></>
+        let optionsWrapperStyle = StyleSheet.create({ width: 72, paddingTop: 3, paddingLeft: 4, height: 80 });
+        let optionsContainerStyle = StyleSheet.create({ marginTop: -70 })
+        let rendererProps = { placement: 'top', anchorStyle: StyleSheet.create({ marginTop: 3 }) }
+        if(index == 0){
+            optionsContainerStyle = StyleSheet.create({ })
+            rendererProps = { placement: 'bottom', anchorStyle: StyleSheet.create({ marginTop: -58 }) }
+        }
+
         if (!message.isRecall) {
             content = <Menu renderer={Popover}
-                rendererProps={{ placement: 'top', anchorStyle: StyleSheet.create({ marginTop: 3 }) }}
+                rendererProps = {rendererProps}
             >
                 <MenuTrigger triggerOnLongPress={true} customStyles={{ TriggerTouchableComponent: TouchableHighlight, triggerTouchable: { style: { borderRadius: 8 } } }}
                 >
@@ -500,14 +509,14 @@ export default function ConversationScreen({ route, navigation }) {
                     {userTag}
                     {isShowTime ? <HourTag date={new Date(message.time)} /> : <></>}
                 </MenuTrigger>
-                <MenuOptions placement="top" customStyles={{
-                    optionsWrapper: StyleSheet.create({ width: 110, paddingTop: 3, paddingLeft: 4, height: 80 }),
-                    optionsContainer: StyleSheet.create({ marginTop: -70 })
+                <MenuOptions customStyles={{
+                    optionsWrapper: optionsWrapperStyle,
+                    optionsContainer: optionsContainerStyle
                 }}>
                     <View style={{ width: 60 }}>
                         <MenuOption onSelect={() => recallMessage(index)} >
                             <View>
-                                <IconRecallMessage style={{ marginLeft: 3, marginBottom: 4 }} />
+                                <IconRecallMessage style={{ marginLeft: 5, marginBottom: 4 }} />
                                 <Text style={{ fontSize: 14 }}>Thu hồi</Text>
                             </View>
                         </MenuOption>
@@ -556,11 +565,21 @@ export default function ConversationScreen({ route, navigation }) {
     }
 
     var goToUserPage = (userInfo) => {
-        if(userInfo._id == context.loginState.userId){
-            navigation.navigate("ProfileScreen");
-        }else{
-            navigation.navigate("ViewProfileScreen", {userId: userInfo._id})
+        if(chatContext.needUpdateListChat){
+            chatContext.setForceUpdateChat(true);
         }
+        if (userInfo._id == context.loginState.userId) {
+            navigation.navigate("ProfileScreen");
+        } else {
+            navigation.navigate("ViewProfileScreen", { userId: userInfo._id })
+        }
+    }
+
+    goToFriendPage = () => {
+        if(chatContext.needUpdateListChat){
+            chatContext.setForceUpdateChat(true);
+        }
+        navigation.navigate("ViewProfileScreen", { userId: friend.id })
     }
 
     var unBlock = async () => {

@@ -181,6 +181,7 @@ export default function App() {
   const [listChats, setListChats] = React.useState(null);
   const [inChat, setInChat] = React.useState(false);
   const [needUpdateListChat, setNeedUpdateListChat] = React.useState(false);
+  const [forceUpdateChat, setForceUpdateChat] = React.useState(false);
   const [socket, setSocket] = React.useState(null);
   const [curBlockers, setCurBlockers] = React.useState([]);
 
@@ -197,39 +198,6 @@ export default function App() {
     });
     setSocket(socket);
   }
-
-  const getListChats = async () => {
-    try {
-      accessToken = loginState.accessToken;
-
-      const res = await Api.getChats(accessToken);
-      let listChats = res.data.data;
-      listChats.sort((chata, chatb) => {
-        return (
-          new Date(chata.lastMessage.time).getTime() <
-          new Date(chatb.lastMessage.time).getTime()
-        );
-      });
-      let listChatId = [];
-      let temp = listUnseens;
-      for (let i = 0; i < listChats.length; i++) {
-        if (!listChats[i].seen) {
-          listChatId.push(listChats[i].chatId);
-        } else {
-          let index = temp.indexOf(listChats[i].chatId);
-          if (index !== -1) {
-            temp.splice(index, 1);
-          }
-        }
-      }
-      temp = Array.from(new Set(listChatId.concat(temp)));
-      // console.log(temp);
-      setListChats(listChats);
-      setListUnseens(temp);
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   var resetChat = () => {
     setCurFriendId(null);
@@ -259,7 +227,6 @@ export default function App() {
     setListChats,
     curChatId,
     setCurChatId,
-    getListChats,
     inChat,
     setInChat,
     needUpdateListChat,
@@ -268,7 +235,55 @@ export default function App() {
     outChatRoom,
     setCurBlockers,
     curBlockers,
+    forceUpdateChat,
+    setForceUpdateChat
   };
+
+  
+  const getListChatInBackground = async () => {
+    try {
+      accessToken = loginState.accessToken;
+
+      const res = await Api.getChats(accessToken);
+      let listChats = res.data.data;
+      listChats.sort((chata, chatb) => {
+        return (
+          new Date(chata.lastMessage.time).getTime() <
+          new Date(chatb.lastMessage.time).getTime()
+        );
+      });
+      let listChatId = [];
+      let listUnseens = chatContext.listUnseens;
+      for (let i = 0; i < listChats.length; i++) {
+        if (!listChats[i].seen) {
+          listChatId.push(listChats[i].chatId);
+        } else {
+          let index = listUnseens.indexOf(listChats[i].chatId);
+          if (index !== -1) {
+            listUnseens.splice(index, 1);
+          }
+        }
+      }
+      let temp = Array.from(new Set(listChatId.concat(listUnseens)));
+      // console.log(temp);
+      chatContext.setListChats(listChats);
+      chatContext.setListUnseens(temp);
+      chatContext.setNeedUpdateListChat(false);
+    } catch (err) {
+      if (err.response && err.response.status == 401) {
+        console.log(err.response.data.message);
+        // setNotification("Không thể nhận diện");
+        // console.log(notification)
+        return;
+      }
+      console.log(err);
+    }
+  };
+
+  if(forceUpdateChat){
+    setForceUpdateChat(false);
+    getListChatInBackground();
+  }
 
   return (
     <NativeBaseProvider>

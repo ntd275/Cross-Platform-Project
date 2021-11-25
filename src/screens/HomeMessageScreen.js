@@ -198,6 +198,7 @@ export default function HomeMessageScreen({ navigation }) {
     }
   };
 
+
   if (!firstLoad && !isLoading && chatContext.needUpdateListChat && isFocused) {
     getListChats();
   }
