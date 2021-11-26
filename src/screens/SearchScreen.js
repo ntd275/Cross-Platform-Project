@@ -169,12 +169,8 @@ export default function SearchScreen({ navigation }) {
       setPeople(searchedDatas.data.data.people);
       setMessages(searchedDatas.data.data.messages);
       setFriends(searchedDatas.data.data.friends);
-      console.log("+++++++");
-      console.log(searchedDatas.data);
-      console.log("-------");
-      // console.log(people);
     } catch (e) {
-      console.log(e);
+      // console.log(e);
     }
   };
   let messageList = [];

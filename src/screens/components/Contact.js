@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar } from "react-native-elements";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import IconCall from "../../../assets/call-outline.svg";
@@ -16,30 +16,66 @@ export default function Contact(props) {
   const navigation = props.navigation;
   const [friendStatus, setFriendStatus] = useState(props.data.friendStatus);
   const context = React.useContext(AuthContext);
-  // console.log(props.data);
   const pressChat = () => {
     navigation.navigate("ProfileScreen");
   };
-  const GetFridendStatus = () => {
+  const GetFridendStatus = (friendStatus) => {
     if (friendStatus === "not friend") {
       return "Kết Bạn";
     }
     if (friendStatus === "sent") {
       return "Đã gửi";
     }
-    if (friendStatus === "recieved") {
+    if (friendStatus === "received") {
       return "Chấp nhận";
     }
     return "";
   };
+  useEffect(() => {
+    GetFridendStatus();
+  }, [friendStatus, isFriend]);
+
+  const HandleFriendRequest = () => {
+    if (friendStatus === "not friend") {
+      SenRequestFriend();
+      return;
+    }
+    if (friendStatus === "sent") {
+      SendCancelFriendRequest();
+      return;
+    }
+    if (friendStatus === "received") {
+      sendAcceptFriendRequest();
+      setisFriend(true);
+    }
+  };
   const SenRequestFriend = async () => {
     try {
       let accessToken = context.loginState.accessToken;
-      console.log(friendId);
-      results = await Api.sendFriendRequest(accessToken, friendId);
-      let newFriendStatus = results.data.newStatus;
-      setFriendStatus(newFriendStatus);
-      // console.log(results);
+      console.log("Gửi lời mời kết bạn: ", friendId);
+      let results = await Api.sendFriendRequest(accessToken, friendId);
+      setFriendStatus(results.data.newStatus);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  const SendCancelFriendRequest = async () => {
+    try {
+      let accessToken = context.loginState.accessToken;
+      console.log("Hủy gửi lời mời kết bạn: ", friendId);
+      let results = await Api.sendCancelFriendRequest(accessToken, friendId);
+      setFriendStatus(results.data.newStatus);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const sendAcceptFriendRequest = async () => {
+    try {
+      let accessToken = context.loginState.accessToken;
+      console.log("Chấp nhận lời mời kết bạn: ", friendId);
+      let results = await Api.sendAcceptFriendRequest(accessToken, friendId);
+      setFriendStatus(results.data.newStatus);
     } catch (e) {
       console.log(e);
     }
@@ -57,13 +93,15 @@ export default function Contact(props) {
   const RenderIcon = () => {
     if (isFriend) {
       return (
-        <IconCall style={[styles.iconCall, { marginRight: 20 }]}></IconCall>
+        <TouchableOpacity>
+          <IconCall style={[styles.iconCall, { marginRight: 0 }]}></IconCall>
+        </TouchableOpacity>
       );
     } else
       return (
         <View
           style={{
-            width: 60,
+            width: 70,
             height: 20,
             marginLeft: "auto",
             backgroundColor: "#a3eaff",
@@ -72,19 +110,27 @@ export default function Contact(props) {
             marginRight: 20,
           }}
         >
-          <Text
-            style={{ textAlign: "center", color: "blue" }}
-            onPress={SenRequestFriend}
-          >
-            {GetFridendStatus()}
-          </Text>
+          <TouchableOpacity>
+            <Text
+              style={{ textAlign: "center", color: "blue" }}
+              onPress={HandleFriendRequest}
+            >
+              {GetFridendStatus(friendStatus)}
+            </Text>
+          </TouchableOpacity>
         </View>
       );
   };
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <TouchableOpacity onPress={pressChat}>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            width: "85%",
+          }}
+        >
           <View style={styles.avatars}>
             <Avatar
               rounded
