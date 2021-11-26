@@ -497,7 +497,7 @@ export default function ConversationScreen({ route, navigation }) {
     }
 
     var UserMessage = ({ message, isShowTime, index }) => {
-        let [phoneNumber, TextUI] = TextUtility.detectThenFormatPhoneAndURL(message.content)
+        let [phoneNumber, TextUI] = TextUtility.detectThenFormatPhoneAndURLAndIcon(message.content)
         let userTag = <></>;
         if (phoneNumber) {
             userTag = <UserTag phoneNumber={phoneNumber} />;
@@ -557,7 +557,7 @@ export default function ConversationScreen({ route, navigation }) {
         if (!isShowAvatar) {
             messageStyle.push({ marginLeft: 34 });
         }
-        let [phoneNumber, TextUI] = TextUtility.detectThenFormatPhoneAndURL(message.content)
+        let [phoneNumber, TextUI] = TextUtility.detectThenFormatPhoneAndURLAndIcon(message.content)
         let userTag = <></>;
         if (phoneNumber) {
             userTag = <UserTag phoneNumber={phoneNumber} />;
