@@ -487,7 +487,7 @@ export default function ConversationScreen({ route, navigation }) {
     };
 
     var recallMessage = (index) => {
-        console.log("recall message index: " + index);
+        // console.log("recall message index: " + index);
         chatContext.socket.emit("recallmessage", {
             token: context.loginState.accessToken,
             chatId: chatContext.curChatId ? chatContext.curChatId : null,

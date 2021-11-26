@@ -301,7 +301,7 @@ export default function HomeContactScreen({ navigation }) {
     try {
       const accessToken = context.loginState.accessToken;
       let friends = await Api.getListFriends(accessToken, null);
-      console.log(friends.data.data.friends);
+      // console.log(friends.data.data.friends);
       // console.log(typeof friends.data.data.friends);
       setListFriend(Object.values(friends.data.data.friends));
     } catch (e) {

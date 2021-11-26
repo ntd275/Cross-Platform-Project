@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     url: {
         color: "#0068ff",
         textDecorationLine: 'underline',
-        fontSize: 18,
+        fontSize: 17,
         lineHeight: 21,
         textAlignVertical: "top",
         margin: "auto"
@@ -112,11 +112,11 @@ const styles = StyleSheet.create({
     phone: {
         color: "#0068ff",
         textDecorationLine: 'underline',
-        fontSize: 18,
+        fontSize: 17,
         lineHeight: 21,
     },
     messageText: {
-        fontSize: 18,
+        fontSize: 17,
         lineHeight: 21,
     },
     textWrapper: {
@@ -164,7 +164,7 @@ const StringToEmoji = {
     ":'\\(": "😥",
     ":’\\(": "😥",
     "=3:\\)": "😈",
-    "=O:\\)": "😈",
+    "3:-\\)": "😈",
     "=O:\\)": "😇",
     "O:\\-\\)": "😇",
     "=:\\-\\*": "😗",
