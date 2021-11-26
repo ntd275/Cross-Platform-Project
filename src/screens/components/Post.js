@@ -422,7 +422,7 @@ export default function Post(props) {
   };
 
   var renderPostContent = () => {
-    let [phone, TextUI] = TextUtility.detectThenFormatPhoneAndURL(
+    let [phone, TextUI] = TextUtility.detectThenFormatPhoneAndURLAndIcon(
       props.post.described
     );
     return TextUI;

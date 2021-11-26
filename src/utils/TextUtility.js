@@ -19,7 +19,27 @@ export const TextUtility = {
         return list;
     },
 
-    detectThenFormatPhoneAndURL: (text) => {
+    replaceStringWithIcon: (str) => {
+        let patterns = Object.keys(StringToEmoji);
+        for(let i = 0; i< patterns.length; i++){
+            let re = new RegExp("^"+patterns[i] + "$|" +  "^" + patterns[i] + " |" + " " + patterns[i] + "$|" + " " +  patterns[i]+ " ", "gi");
+            str = str.replace(re, (match)=>{
+                let icon = StringToEmoji[patterns[i]]
+                if(match.startsWith(" ")){
+                    icon = " " + icon;
+                }
+                if(match.endsWith(" ")){
+                    icon += " "
+                }
+                
+                return icon;
+            });
+        }
+    
+        return str
+    },
+
+    detectThenFormatPhoneAndURLAndIcon: (text) => {
         let urlExpression = /((?:(?:https?|ftp):\/\/|\b(?:[a-z\d]+\.))(?:(?:[^\s()<>]+|\((?:[^\s()<>]+|(?:\([^\s()<>]+\)))?\))+(?:\((?:[^\s()<>]+|(?:\(?:[^\s()<>]+\)))?\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))?)/gi;
         let urlRegex = new RegExp(urlExpression);
         let phoneExpression = /(0[937852][0-9]{8})/g;
@@ -51,7 +71,7 @@ export const TextUtility = {
                     <Text key={i} style={styles.url} onPress={() => {
                         let link = list[i];
                         if (!link.startsWith("http://") && !link.startsWith("https://")) {
-                            link = "https://" + link;
+                            link = [a - zA - Z0 - 9] * "https://" + link;
                         }
                         Linking.openURL(link);
                     }}>
@@ -67,7 +87,7 @@ export const TextUtility = {
                 )
             } else {
                 listTextUI.push(
-                    <Text key={i} style={styles.messageText}>{list[i]}</Text>
+                    <Text key={i} style={styles.messageText}>{TextUtility.replaceStringWithIcon(list[i])}</Text>
                 )
             }
         }
@@ -86,7 +106,7 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
         fontSize: 17,
         lineHeight: 21,
-        textAlignVertical:"top",
+        textAlignVertical: "top",
         margin: "auto"
     },
     phone: {
@@ -107,3 +127,48 @@ const styles = StyleSheet.create({
         paddingBottom: 12,
     }
 })
+const StringToEmoji = {
+    ":\\-\\)": "🙂",
+    ":\\)": "🙂",
+    ":\\]": "🙂",
+    "=\\)": "😄",
+    "\\^_\\^": "😄",
+    ":\\-\\(": "☹️",
+    ":\\(": "☹️",
+    ":\\[": "☹️",
+    "=\\(": "☹️",
+    ":\\-P": "😛",
+    ":P": "😛",
+    "=P": "😛",
+    ":\\-D": "😀",
+    ":D": "😀",
+    "=D": "😀",
+    ":-O": "😮",
+    ":O": "😮",
+    ":o": "😮",
+    ":-o": "😮",
+    ";-\\)": "😉",
+    ";\\)": "😉",
+    "8-\\)": "😎",
+    "8\\)": "😎",
+    "B-\\)": "😎",
+    "B\\)": "😎",
+    ">:\\(": "😡",
+    ">:\\-\\(": "😡",
+    ">:O": "😡",
+    ">:\\-O": "😡",
+    ":\\/": "😕",
+    ":\\-\\\/": "😕",
+    ":\\\\": "😕",
+    ":\\-\\\\": "😕",
+    ":'\\(": "😥",
+    ":’\\(": "😥",
+    "=3:\\)": "😈",
+    "3:-\\)": "😈",
+    "=O:\\)": "😇",
+    "O:\\-\\)": "😇",
+    "=:\\-\\*": "😗",
+    ":\\*": "😗",
+    "<3": "❤️",
+    "\\-_\\-": "😑",
+}

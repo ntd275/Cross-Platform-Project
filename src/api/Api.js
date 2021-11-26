@@ -121,7 +121,7 @@ export const Api = {
   getUser: (token, id) => {
     return axios.get(`${BaseURL}/users/show/${id}`, {
       headers: {
-        authorization: token,
+        authorization: fomartToken(token),
       },
     });
   },
@@ -152,6 +152,18 @@ export const Api = {
     return axios({
       method: "get",
       url: `${BaseURL}/chats/getMessages/${chatId}`,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        authorization: fomartToken(token),
+      },
+    });
+  },
+
+  getMessagesByFriendId: (token, friendId) => {
+    return axios({
+      method: "get",
+      url: `${BaseURL}/chats/getMessagesbyfriendId/${friendId}`,
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",

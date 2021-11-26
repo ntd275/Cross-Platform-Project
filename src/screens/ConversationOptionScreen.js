@@ -14,6 +14,7 @@ import IconMenuUser from '../../assets/ic_user_line_24.svg'
 import IconMenuBan from '../../assets/ic_ban_line_24.svg'
 import { showMessage, hideMessage } from "react-native-flash-message";
 import FlashMessage from "react-native-flash-message";
+import { Dimensions } from 'react-native';
 
 
 export default function ConversationOptionScreen({ route, navigation }) {
@@ -24,11 +25,11 @@ export default function ConversationOptionScreen({ route, navigation }) {
     const chatContext = React.useContext(ChatContext);
     const appContext = useContext(AppContext);
     var goToUserPage = () => {
-        showMessage({
-            message: "Simple message",
-            type: "success",
-        });
-        console.log("Go to user's page!");
+        if(chatContext.needUpdateListChat){
+            chatContext.setForceUpdateChat(true);
+        }
+        navigation.navigate("ViewProfileScreen", { userId: chatContext.curFriendId })
+
     }
 
     var confirmDeleteConverSation = async () => {
@@ -48,7 +49,7 @@ export default function ConversationOptionScreen({ route, navigation }) {
                 appContext.displayMessage({
                     message: "Đã xoá cuộc trò chuyện",
                     type: "info",
-                    style: { marginLeft: "auto" },
+                    style: { paddingLeft: Dimensions.get("window").width / 2 - 106, paddingBottom: 8, paddingTop: 24 },
                     icon: "success",
                     position: "top",
                     duration: 2000,
@@ -73,11 +74,12 @@ export default function ConversationOptionScreen({ route, navigation }) {
             appContext.displayMessage({
                 message: "Đã xoá cuộc trò chuyện",
                 type: "info",
-                style: { marginLeft: "auto" },
+                style: { paddingLeft: Dimensions.get("window").width / 2 - 106, paddingBottom: 8, paddingTop: 24 },
                 icon: "success",
                 position: "top",
                 duration: 2000,
                 backgroundColor: "#008bd7",
+                autoHide: false
             });
         }
     }
@@ -85,7 +87,7 @@ export default function ConversationOptionScreen({ route, navigation }) {
 
     var confirmBlock = async () => {
         closeMenuBlock();
-        setTimeout(()=>{
+        setTimeout(() => {
             chatContext.socket.emit("blockers", {
                 token: context.loginState.accessToken,
                 chatId: chatContext.curChatId ? chatContext.curChatId : null,
