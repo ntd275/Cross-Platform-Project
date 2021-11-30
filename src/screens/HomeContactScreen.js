@@ -90,7 +90,7 @@ const ListDanhBa = (props) => {
           paddingBottom: Dimensions.get("window").height - 300,
         }}
       >
-        (Không có)
+        Chưa có bạn bè nào
       </Text>
     );
   }
@@ -360,7 +360,7 @@ export default function HomeContactScreen({ navigation }) {
         <View style={styles.part1}>
           <TouchableHighlight
             style={{ paddingTop: 10, paddingBottom: 10, paddingLeft: 15 }}
-            onPress={() => {}}
+            onPress={() => {navigation.navigate("LoiMoiKetBan")}}
             activeOpacity={0.99999}
             underlayColor="#05adff22"
           >

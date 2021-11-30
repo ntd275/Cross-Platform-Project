@@ -1,1 +1,0 @@
-npm install @react-navigation/material-top-tabs react-native-tab-view --force

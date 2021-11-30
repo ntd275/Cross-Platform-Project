@@ -38,35 +38,8 @@ const MAX_VIDEO_SIZE = 10 * 1024 * 1024;
 const MAX_VIDEO_DURATION = 10;
 const MIN_VIDEO_DURATION = 1;
 const BaseURL = "http://13.76.46.159:8000/files/";
-export default function EditPost({ navigation, post }) {
-  //Rename post1 -> post
-
-//    let post = {
-//             "images": [],
-//             "videos": [
-//                 {
-//                     "_id": "617d0b2ff76a44732250f91a",
-//                     "fileName": "d71d7604-0663-470e-8703-bd6fe756583d.mp4"
-//                 }
-//             ],
-//             "like": [],
-//             "countComments": 0,
-//             "isLike": false,
-//             "_id": "617d0b2ff76a44732250f91c",
-//             "author": {
-//                 "_id": "616e60467f7ff51dd043733a",
-//                 "phonenumber": "0337888806",
-//                 "username": "Nguyễn Thế Đức",
-//                 "avatar": {
-//                     "_id": "60c39f54f0b2c4268eb53367",
-//                     "fileName": "avatar_2.png"
-//                 }
-//             },
-//             "described": "",
-//             "createdAt": "2021-10-30T09:06:55.926Z",
-//             "updatedAt": "2021-10-30T09:06:55.926Z",
-//             "__v": 0
-//         }
+export default function EditPost({ navigation, route }) {
+  const post = route.params.post;
   const refInput = useRef();
 
   const [postText, setPostText] = useState(post.described);

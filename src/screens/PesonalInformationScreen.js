@@ -150,7 +150,7 @@ export default function PersonalInformationScreen({ navigation }) {
 
       <View style={{ position:'absolute', top: 215, left: 100 }}>
         <Text style={{ fontSize: 24, fontWeight: "500", color: '#fff' }}>
-          {context.loginState.userName}
+          {appContext.userName}
         </Text>
         <View style={{ marginTop: 4 }}>
           {appContext.decription && (
@@ -167,7 +167,7 @@ export default function PersonalInformationScreen({ navigation }) {
                     <Text style={{fontSize:15}}>Giới tính</Text>
                 </View>
                 <View style={{flex:1}}>
-                    <Text style={{color:'#898989',fontSize: 15}}>Nam</Text>
+                    <Text style={{color:'#898989',fontSize: 15}}>{appContext.gender}</Text>
                 </View>
           </View>
           <Divider/>
@@ -176,7 +176,7 @@ export default function PersonalInformationScreen({ navigation }) {
                     <Text style={{fontSize:15}}>Ngày sinh</Text>
                 </View>
                 <View style={{flex:1}}>
-                    <Text style={{color:'#898989',fontSize: 15}}>27/05/1999</Text>
+                    <Text style={{color:'#898989',fontSize: 15}}>{appContext.birthday}</Text>
                 </View>
           </View>
           <Divider/>
@@ -185,7 +185,7 @@ export default function PersonalInformationScreen({ navigation }) {
                     <Text style={{fontSize:15}}>Điện thoại</Text>
                 </View>
                 <View style={{flex:1}}>
-                    <Text style={{color:'#009aff', fontSize:15}}>0337888806</Text>
+                    <Text style={{color:'#009aff', fontSize:15}}>{appContext.phonenumber}</Text>
                     <Text style={{color:'#898989',fontSize: 15, marginTop: 7}}>Số điện thoại của bạn chỉ hiện thị với bạn bè có số của bạn trong danh bạ</Text>
                 </View>
           </View>
