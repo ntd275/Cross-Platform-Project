@@ -90,7 +90,7 @@ const ListDanhBa = (props) => {
           paddingBottom: Dimensions.get("window").height - 300,
         }}
       >
-        (Không có)
+        Chưa có bạn bè nào
       </Text>
     );
   }
