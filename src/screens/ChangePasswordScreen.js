@@ -154,6 +154,7 @@ export default function ChangePasswordScreen({ navigation }) {
             const res = await Api.changePassword(token, currentPassword, password);
             if (res.status == 200) {
                 setSuccessNoti(true);
+                navigation.goBack();
                 setNotification("Đổi mật khẩu thành công");
                 appContext.displayMessage({
                     message: "Đổi mật khẩu thành công",
