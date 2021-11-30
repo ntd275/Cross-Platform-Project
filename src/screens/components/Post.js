@@ -255,8 +255,10 @@ export default function Post(props) {
   };
  
   var onPressEdit = () => {
-    console.log("pressed edit");
-    // props.navigation.navigate("EditPost");
+    // console.log("pressed edit");
+    props.navigation.navigate("EditPost", {
+        post: props.post,
+    });
   };
 
   var onPressHide = () => {
