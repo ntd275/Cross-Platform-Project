@@ -324,6 +324,15 @@ export const Api = {
       },
     });
   },
+    getListFriendsRequest: (token)=>{
+    return axios({
+      method:"get",
+      url: `${BaseURL}/friends/list_requests`,
+      headers:{
+        authorization: fomartToken(token),
+      }
+    })
+  },
 
   searchFriendAndMessage: (token, key) => {
     return axios({
