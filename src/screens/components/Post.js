@@ -211,12 +211,52 @@ export default function Post(props) {
   };
 
   var onPressDelete = () => {
-    console.log("pressed Delete");
-    // refRBSheet.current.close();
+    Alert.alert("Xác nhận", "Bạn có muốn xóa bài viết?", [
+      {text: "Không"},
+      {text:'Có', onPress: ()=>{deletePost()}}
+    ])
+  }
+
+  var deletePost = async () => {
+    try {
+
+        let res = await Api.deletePost(context.loginState.accessToken, 
+            props.post._id);
+        console.log(res);
+        appContext.displayMessage({
+            message: "Đã xóa bài đăng",
+            type: "default",
+            style: { width: 195, marginBottom: 200 },
+            titleStyle: {fontSize: 14},
+            duration: 1900,
+            icon:"success",
+            position: "center",
+            backgroundColor: "#262626",
+        });
+        props.navigation.navigate("TimeLineScreen");
+    } catch (err){
+        if (err.response && err.response.status == 404) {
+            console.log(err.response.data.message);
+            appContext.displayMessage({
+                message: "Không tìm thấy bài đăng",
+                type: "default",
+                style: { width: 195, marginBottom: 200 },
+                titleStyle: { fontSize: 14 },
+                duration: 1900,
+                position: "center",
+                backgroundColor: "#262626",
+            });
+            return
+        }
+        console.log(err);
+        navigation.navigate("NoConnectionScreen", {message: "Vui lòng kiểm tra kết nối internet và thử lại"})
+        return
+    }
   };
+ 
   var onPressEdit = () => {
-    console.log("pressed Edit");
-    // refRBSheet.current.close();
+    console.log("pressed edit");
+    // props.navigation.navigate("EditPost");
   };
 
   var onPressHide = () => {

@@ -178,6 +178,13 @@ export const Api = {
       },
     });
   },
+  deletePost: (token, id) => {
+    return axios.get(`${BaseURL}/posts/delete/${id}`, {
+      headers: {
+        authorization: fomartToken(token),
+      },
+    });
+  },
   editUser: (token, data) => {
     return axios.post(
       `${BaseURL}/users/edit`,
