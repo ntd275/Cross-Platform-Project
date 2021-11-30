@@ -626,7 +626,7 @@ export default function ConversationScreen({ route, navigation }) {
         } else if (friendStatus === "sent") {
             status =
                 <View style={[styles.recommendFriend, { backgroundColor: "#f9fafc" }]}>
-                    <Text style={{ fontSize: 16, marginLeft: "auto", marginRight: "auto", paddingTop: 3, opacity: 0.9 }}>Đã gửi yêu cầu kết bạn</Text>
+                    <Text style={{ fontSize: 16, marginLeft: "auto", marginRight: "auto", paddingTop: 3, opacity: 0.6 }}>Đã gửi yêu cầu kết bạn</Text>
                     <TouchableOpacity style={{ right: 16, position: "absolute", top: 13 }} onPress={cancelFriendRequest}>
                         <Text style={{ fontSize: 15, fontWeight: '400', color: "#ed4732" }}>Huỷ</Text>
                     </TouchableOpacity>
