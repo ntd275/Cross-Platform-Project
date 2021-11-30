@@ -25,6 +25,7 @@ import {
   Animated,
   Easing,
 } from "react-native";
+import { marginRight, style } from "styled-system";
 
 export default function SearchScreen({ navigation }) {
   const BaseURL = "http://13.76.46.159:8000/files/";
@@ -391,7 +392,7 @@ export default function SearchScreen({ navigation }) {
               </View>
             </TouchableOpacity>
 
-            <View style={{ flex: 6 }}>
+            <View style={{ flex: 5, marginRight: 10 }}>
               <TextInput
                 style={styles.input}
                 value={searchText}
@@ -423,6 +424,7 @@ const styles = StyleSheet.create({
     color: "black",
     fontSize: 16,
     marginLeft: 16,
+    marginRight: "auto",
     width: "100%",
     marginTop: 4,
     backgroundColor: "white",
@@ -448,7 +450,7 @@ const styles = StyleSheet.create({
     height: 24,
     color: "white",
     marginLeft: "auto",
-    marginRight: 12,
+    marginRight: "auto",
     marginTop: 2,
   },
   iconDown: {

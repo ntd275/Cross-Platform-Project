@@ -227,6 +227,7 @@ export default function TimeLineScreen({ navigation }) {
         >
           <View style={{ flexDirection: "row", marginTop: 28 }}>
             <TouchableOpacity
+              style={{ marginRight: 2 }}
               onPress={() => {
                 navigation.navigate("SearchScreen");
               }}
@@ -347,7 +348,7 @@ const styles = StyleSheet.create({
     height: 24,
     color: "white",
     marginLeft: "auto",
-    marginRight: 8,
+    marginRight: "auto",
     marginTop: 2,
   },
   iconNewPost: {
@@ -355,7 +356,7 @@ const styles = StyleSheet.create({
     height: 24,
     color: "black",
     marginLeft: "auto",
-    marginRight: 12,
+    marginRight: "auto",
     marginTop: 2,
   },
   iconBack: {
