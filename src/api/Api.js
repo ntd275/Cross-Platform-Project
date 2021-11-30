@@ -2,7 +2,7 @@ import axios from "axios";
 
 const BaseURL = "http://13.76.46.159:8000/api/v1";
 
-const fomartToken = (token) => "LOL " + token; 
+const fomartToken = (token) => "LOL " + token;
 
 export const Api = {
   login: (phonenumber, password) => {
@@ -121,7 +121,7 @@ export const Api = {
   getUser: (token, id) => {
     return axios.get(`${BaseURL}/users/show/${id}`, {
       headers: {
-        authorization: fomartToken(token),
+        authorization: token,
       },
     });
   },
@@ -152,18 +152,6 @@ export const Api = {
     return axios({
       method: "get",
       url: `${BaseURL}/chats/getMessages/${chatId}`,
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        authorization: fomartToken(token),
-      },
-    });
-  },
-
-  getMessagesByFriendId: (token, friendId) => {
-    return axios({
-      method: "get",
-      url: `${BaseURL}/chats/getMessagesbyfriendId/${friendId}`,
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -316,6 +304,20 @@ export const Api = {
       },
     });
   },
+  setRemoveFriend: (token, friendId) => {
+    return axios({
+      method: "post",
+      url: `${BaseURL}/friends/set-remove`,
+      data: {
+        user_id: friendId,
+      },
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        authorization: fomartToken(token),
+      },
+    });
+  },
 
   getListFriends: (token, userId) => {
     return axios({
@@ -350,16 +352,16 @@ export const Api = {
       },
     });
   },
-  setPostLike:(postID, token) =>{
+  setPostLike: (postID, token) => {
     return axios({
       method: "post",
       url: `${BaseURL}/postLike/action/${postID}`,
-      params:{
-        postId: postID
+      params: {
+        postId: postID,
       },
       headers: {
         authorization: fomartToken(token),
       },
-    })
-  }
+    });
+  },
 };

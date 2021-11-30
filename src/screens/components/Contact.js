@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import IconCall from "../../../assets/call-outline.svg";
 import { Api } from "../../api/Api";
 import AuthContext from "../../components/context/AuthContext";
+import ChatContext from "../../components/context/ChatContext";
 export default function Contact(props) {
   const BaseURL = "http://13.76.46.159:8000/files/";
   const [userName, setuserName] = useState(props.data.username);
@@ -16,9 +17,19 @@ export default function Contact(props) {
   const navigation = props.navigation;
   const [friendStatus, setFriendStatus] = useState(props.data.friendStatus);
   const context = React.useContext(AuthContext);
+  const chatContext = React.useContext(ChatContext);
   const pressChat = () => {
     navigation.navigate("ProfileScreen");
   };
+  var goToUserPage = () => {
+    if (chatContext.needUpdateListChat) {
+      chatContext.setForceUpdateChat(true);
+    }
+    navigation.navigate("ViewProfileScreen", {
+      userId: friendId,
+    });
+  };
+
   const GetFridendStatus = (friendStatus) => {
     if (friendStatus === "not friend") {
       return "Kết Bạn";
@@ -123,7 +134,7 @@ export default function Contact(props) {
   };
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
-      <TouchableOpacity onPress={pressChat}>
+      <TouchableOpacity onPress={goToUserPage}>
         <View
           style={{
             flexDirection: "row",
@@ -135,13 +146,13 @@ export default function Contact(props) {
             <Avatar
               rounded
               size="medium"
-              onPress={pressChat}
+              onPress={goToUserPage}
               source={{
                 uri: avatarURL,
               }}
             />
           </View>
-          <View style={{ marginLeft: 10, width: "78%" }}>
+          <View style={{ marginLeft: 10, marginRight: "auto" }}>
             <View style={{ flexDirection: "row" }}>
               <View>
                 <Text>
