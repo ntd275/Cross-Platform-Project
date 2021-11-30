@@ -126,6 +126,20 @@ export default function PostScreen({ navigation, route }) {
       );
       setCountComment(res.data.countComments);
     } catch (err) {
+        if (err.response && err.response.status == 404) {
+            console.log(err.response.data.message);
+            navigation.navigate("TimeLineScreen")
+            appContext.displayMessage({
+                message: "Không tìm thấy bài đăng. Vui lòng tải lại.",
+                type: "default",
+                style: { width: 195, marginBottom: 200 },
+                titleStyle: { fontSize: 14 },
+                duration: 1900,
+                position: "center",
+                backgroundColor: "#262626",
+            });
+            return
+        }
       console.log(err);
       navigation.navigate("NoConnectionScreen", {
         message: "Tài khoản sẽ tự động đăng nhập khi có kết nối internet",
