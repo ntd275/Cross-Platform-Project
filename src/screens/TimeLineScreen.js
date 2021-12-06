@@ -279,7 +279,7 @@ export default function TimeLineScreen({ navigation }) {
             />
           </View>
         )}
-        style={{ marginBottom: 74 }}
+        style={{ marginBottom: 74 , minHeight: '100%'}}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={refreshPosts} />
         }
