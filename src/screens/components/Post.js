@@ -258,6 +258,7 @@ export default function Post(props) {
     // console.log("pressed edit");
     props.navigation.navigate("EditPost", {
         post: props.post,
+        from: props.from
     });
   };
 

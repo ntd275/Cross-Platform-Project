@@ -32,6 +32,7 @@ import IconVideoActive from "../../assets/icn_video_active.svg";
 import * as FileSystem from "expo-file-system";
 import { Api } from "../api/Api";
 import * as MediaLibrary from "expo-media-library";
+import ProfileOptionScreen from "./ProfileOptionScreen";
 
 const MAX_IMAGE_SIZE = 4 * 1024 * 1024;
 const MAX_VIDEO_SIZE = 10 * 1024 * 1024;
@@ -44,6 +45,7 @@ export default function EditPost({ navigation, route }) {
 
   const [postText, setPostText] = useState(post.described);
   const [isSent, setIsSent] = useState(false);
+  const appContext = useContext(AppContext);
 
   const checkCanSend = () => {
     return (
@@ -149,6 +151,9 @@ export default function EditPost({ navigation, route }) {
           console.log(res.data);
           console.log(res.status);
           Alert.alert("Thành công", "Đã sửa bài xong", [{ text: "OK" }]);
+          if(route.params.from  == "timeline"){
+            appContext.setNeedUpdateTimeline(true);
+          };
           return;
         })
         .catch((e) => {
