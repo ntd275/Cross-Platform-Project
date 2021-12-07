@@ -40,6 +40,7 @@
     "react-native-linear-gradient": "^2.5.6",
     "react-native-material-textfield": "git+https://github.com/n4kz/react-native-material-textfield.git",
     "react-native-modal": "^13.0.0",
+    "react-native-modal-datetime-picker": "^13.0.0",
     "react-native-pager-view": "^5.4.9",
     "react-native-paper": "^4.9.2",
     "react-native-popover-view": "^4.1.0",

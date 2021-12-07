@@ -119,6 +119,15 @@ export default function PersonalInformationScreen({ navigation }) {
     }
   };
 
+  let gender = "Chưa có";
+  if(appContext.gender == "male"){
+    gender = "Nam"
+  }
+
+  if(appContext.gender == "female"){
+    gender = "Nữ"
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -167,7 +176,7 @@ export default function PersonalInformationScreen({ navigation }) {
                     <Text style={{fontSize:15}}>Giới tính</Text>
                 </View>
                 <View style={{flex:1}}>
-                    <Text style={{color:'#898989',fontSize: 15}}>{appContext.gender}</Text>
+                    <Text style={{color:'#898989',fontSize: 15}}>{gender}</Text>
                 </View>
           </View>
           <Divider/>
@@ -176,7 +185,7 @@ export default function PersonalInformationScreen({ navigation }) {
                     <Text style={{fontSize:15}}>Ngày sinh</Text>
                 </View>
                 <View style={{flex:1}}>
-                    <Text style={{color:'#898989',fontSize: 15}}>{appContext.birthday}</Text>
+                    <Text style={{color:'#898989',fontSize: 15}}>{appContext.birthday ? new Date(appContext.birthday).toLocaleDateString() : "Chưa có"}</Text>
                 </View>
           </View>
           <Divider/>

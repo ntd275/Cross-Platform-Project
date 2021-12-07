@@ -5,6 +5,8 @@ import IconAlbum from "../../assets/ic_album.svg";
 import { Avatar, Image as Image2, Divider } from "react-native-elements";
 import { Api } from "../api/Api";
 import AuthContext from "../components/context/AuthContext";
+import { Icon } from 'react-native-elements'
+import { TextField } from 'rn-material-ui-textfield';
 import {
     StyleSheet,
     Text,
@@ -21,7 +23,8 @@ import {
     Dimensions,
     StatusBar,
     Alert,
-    Button
+    Button,
+    Keyboard
 } from "react-native";
 import { useKeyboard } from "./components/useKeyboard";
 import AppContext from "../components/context/AppContext";
@@ -29,19 +32,22 @@ import IconBack from "../../assets/ic_nav_header_back.svg";
 import IconBackBlack from "../../assets/ic_nav_header_back_black.svg";
 import IconOption from "../../assets/button_option_menu.svg";
 import IconOptionBlack from "../../assets/button_option_menu_black.svg";
-import IconEdit from "../../assets/ic_profile_edit_bio.svg";
+import IconEdit from "../../assets/ic_edit_solid_24.svg";
+import IconCamera from "../../assets/ic_24_camera.svg";
+import IconCheck from "../../assets/check.svg";
+import IconUnCheck from "../../assets/uncheck.svg";
 import { Avatar as Avatar2, Actionsheet, Box } from "native-base";
 import { LinearGradient } from "expo-linear-gradient";
-import IconImageSolid from "../../assets/ic_photo_solidhollow_24.svg";
-import IconVideoSolid from "../../assets/ic_video_solid_24_white.svg";
 import RBSheet from "react-native-raw-bottom-sheet";
 import ImageView from "react-native-image-viewing";
 import * as ImagePicker from "expo-image-picker";
 import { BaseURL, MALE, FEMALE, NO_GENDER } from "../utils/Constants";
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { TimeUtility } from "../utils/TimeUtility"
 import HeaderBar from '../screens/components/HeaderBar'
+import { opacity } from "styled-system";
 
 const FULL_WIDTH = Dimensions.get("window").width;
 
@@ -52,20 +58,20 @@ export default function ProfileEditScreen({ navigation }) {
     const [needReload, setNeedReload] = useState(true);
     const [firstLoad, setFirstLoad] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
+    const [currAvatar, setCurrAvatar] = useState({ uri: BaseURL + appContext.avatar });
+    const [needChangeAvatar, setNeedChangeAvatar] = useState(false);
 
     const getInfo = async () => {
         try {
             const accessToken = context.loginState.accessToken;
             let user = await Api.getMe(accessToken);
-            console.log(user.data)
+            // console.log(user.data)
             appContext.setAvatar(user.data.data.avatar.fileName);
             appContext.setCoverImage(user.data.data.cover_image.fileName);
         } catch (e) {
             console.log(e);
         }
     };
-
-    let opacity = useRef(new Animated.Value(0));
 
     if (needReload && !isLoading) {
         getInfo();
@@ -74,59 +80,113 @@ export default function ProfileEditScreen({ navigation }) {
     const keyBoardHeight = useKeyboard();
     const inputRef = useRef();
     const mode = useRef("image");
-    var LoadingHeader = () => {
-        return (
-            <Animated.View style={{ height: opacity.current }}>
-                <Image
-                    source={require("../../assets/loading.gif")}
-                    style={{ alignSelf: "center", marginTop: 10 }}
-                />
-                <Text style={styles.describeText}>
-                    Đang tải dữ liệu, chờ chút thôi ...
-                </Text>
-            </Animated.View>
-        );
-    };
 
-    const refCoverImageOption = useRef();
-    const [isViewCoverImage, setIsViewCoverImage] = useState(false);
 
     var ListHeader = () => {
         const [name, setName] = useState(null);
         const [gender, setGender] = useState(null);
         const [dob, setDob] = useState(null);
-        const [showDate, setShowDate] = useState(false);
+
+        const [isShowFullNameClear, setShowFullNameClear] = useState(false);
+        const [isUpdateEnable, setUpdateEnable] = useState(false);
+        const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+        const [hasModify, setHasModify] = useState(false);
+
+        const showDatePicker = () => {
+            setDatePickerVisibility(true);
+        };
+
+        const hideDatePicker = () => {
+            setDatePickerVisibility(false);
+        };
+
+        const handleConfirmDatePicker = (date) => {
+            setDob(date);
+            if (!hasModify) {
+                setHasModify(true);
+            }
+            hideDatePicker();
+        };
+
+
+        const onchangeFullName = (text) => {
+            if (!hasModify) {
+                setHasModify(true);
+            }
+            setName(text);
+            setShowFullNameClear(text !== "");
+        }
+
+        const checkNeedUpdate = () => {
+            if (needChangeAvatar) {
+                return true;
+            }
+
+            if (!hasModify) {
+                return false;
+            }
+
+            if ((gender !== "male" && gender !== "female") || !dob) {
+                return false;
+            }
+
+            if (name == context.loginState.userName && gender == appContext.gender && dob.toLocaleDateString() == new Date(appContext.birthday).toLocaleDateString()) {
+                return false;
+            }
+
+            return true;
+        }
 
         useEffect(() => {
-            // console.log(appContext);
-            appContext.updateUserInfo();
+            setUpdateEnable(name !== "" && checkNeedUpdate());
+        }, [name, gender, dob]);
+
+        let fullNameClearIcon = isShowFullNameClear ? <Icon
+            name='close'
+            type='material'
+            color="#93939d"
+            size={20}
+            onPress={() => onchangeFullName("")}
+        /> : <></>;
+
+
+        useEffect(() => {
             setName(context.loginState.userName);
             setGender(appContext.gender);
             setDob(new Date(appContext.birthday));
         }, []);
-    
+
         const saveUser = async () => {
             try {
-                if (name){
-                    let res = await Api.editUser("lol " + context.loginState.accessToken, {
+                if (name) {
+                    let body = {
                         username: name,
                         gender: gender,
                         birthday: dob,
-                    });
+                    }
+                    if(needChangeAvatar){
+                        body.avatar = "data:image;base64," + currAvatar.base64;
+                    }
+
+                    let res = await Api.editUser("lol " + context.loginState.accessToken, body);
                     console.log(res.data.data);
                     setName(res.data.data.username);
                     setGender(res.data.data.gender);
                     setDob(new Date(res.data.data.birthday));
-                    context.dispatch({type: 'CHANGEUSERNAME', username: res.data.data.username});
+                    context.dispatch({ type: 'CHANGEUSERNAME', username: res.data.data.username });
                     appContext.setGender(res.data.data.gender);
                     appContext.setBirthday(res.data.data.birthday);
+                    appContext.setUserName(res.data.data.username )
+                    if(needChangeAvatar){
+                        appContext.setAvatar(res.data.data.avatar.fileName)
+                    }
                     appContext.displayMessage({
                         message: "Đã cập nhật thông tin",
                         type: "default",
-                        style: { width: 195, marginBottom: 200 },
-                        titleStyle: {fontSize: 14},
+                        style: { width: 215, marginBottom: 200 },
+                        titleStyle: { fontSize: 14 },
                         duration: 1900,
-                        icon:"success",
+                        icon: "success",
                         position: "center",
                         backgroundColor: "#262626",
                     });
@@ -143,9 +203,9 @@ export default function ProfileEditScreen({ navigation }) {
                     });
                     // Alert.alert("Thất bại", "Vui lòng nhập đầy đủ họ tên", [{ text: "OK" }]);
                 }
-            } catch (err){
+            } catch (err) {
                 console.log(err)
-                navigation.navigate("NoConnectionScreen", {message: "Vui lòng kiểm tra kết nối internet và thử lại"})
+                navigation.navigate("NoConnectionScreen", { message: "Vui lòng kiểm tra kết nối internet và thử lại" })
                 return
             }
         };
@@ -156,145 +216,142 @@ export default function ProfileEditScreen({ navigation }) {
             setDob(currentDate);
         };
 
+        let inputHeaderStyle = { fontSize: 12, color: "#a0a0a0" };
+        let inputHeaderSelectedStyle = { fontSize: 12, color: "#66d9e9" };
+        const enableColor = ["#0085ff", "#05adff"];
+        const disableColor = ["#c0d3e2", "#c0d3e2"];
+
         return (
             <>
-                {LoadingHeader()}
-                <View style={{ position: "relative" }}>
-                    <Image2
-                        style={{ width: FULL_WIDTH, height: 200 }}
-                        source={{ uri: BaseURL + appContext.coverImage }}
-                        onPress={() => refCoverImageOption.current.open()}
-                    ></Image2>
-                    <View style={{ alignItems: "center", backgroundColor: "#fff" }}>
-                        <Text style={{ fontSize: 26, fontWeight: "500", marginTop: 50 }}>
-                            {context.loginState.userName}
-                        </Text>
-                    </View>
-                    <Pressable onPress={() => refAvatarImageOption.current.open()} style={{ position: "absolute", alignSelf: "center", top: 120 }}>
-                        <Avatar2
-                            size={"2xl"}
-                            source={{ uri: BaseURL + appContext.avatar }}
-                            style={{ borderWidth: 2, borderColor: "#fff" }}
-                        ></Avatar2>
-                    </Pressable>
-                </View>
-                <ScrollView contentContainerStyle={{ flexGrow: 1 }}
-                    keyboardShouldPersistTaps='handled'
-                    style={styles.infoForm}
-                >
-                    <Text style={styles.infoLabel}>Họ tên:</Text>
-                    <TextInput style={styles.inputInfo}
-                        placeholder="Nhập tên..."
-                        value={name}
-                        onChangeText={text => setName(text)}
-                    />
-                    <Text style={styles.infoLabel}>Giới tính:</Text>
-                    <View style={styles.inputInfo}>
-                        <Picker
-                            selectedValue={gender ? gender : NO_GENDER}
-                            onValueChange={(itemValue, itemIndex) =>
-                                setGender(itemValue)
-                            }
-                        >
-                            <Picker.Item style={styles.inputPicker}
-                                label="Nam" value={MALE} />
-                            <Picker.Item style={styles.inputPicker}
-                                label="Nữ" value={FEMALE} />
-                            <Picker.Item style={styles.inputPicker}
-                                label="Chưa có" value={NO_GENDER} />
-                        </Picker>
-                    </View>
-                    <Text style={styles.infoLabel}>Ngày sinh:</Text>
-                    <View style={styles.inputInfo}>
-                        <Pressable onPress={() => setShowDate(true)}>
-                            <Text style={styles.inputPicker}>
-                                {dob ? TimeUtility.dateToDDMMYYYY(dob) : "Chưa có"}
-                            </Text>
+                <View style={styles.inputContainer}>
+                    <View style={{ width: 100, marginTop: 12 }}>
+                        <Pressable
+                            onPress={() => {
+                                Keyboard.dismiss();
+                                refAvatarImageOption.current.open()
+                            }}
+                            style={{ position: "absolute", alignSelf: "center" }}>
+                            <Avatar
+                                size={86}
+                                source={currAvatar}
+                                rounded
+                            ></Avatar>
+                            <IconCamera style={{ position: "absolute", bottom: -8, right: 3 }} />
                         </Pressable>
                     </View>
-                    <View>
-                        {showDate && (
-                            <DateTimePicker
-                                testID="dateTimePicker"
-                                value={dob ? dob : (new Date())}
-                                mode="date"
-                                display="default"
-                                onChange={onChangeDate}
+                    <View flex={1} style={{ marginLeft: 8, marginTop: 4, marginLeft: 12 }}>
+                        <View style={{ marginLeft: 4, marginRight: 8 }}>
+                            <TextField
+                                label='Tên đầy đủ'
+                                labelTextStyle={styles.textFieldLable}
+                                fontSize={18}
+                                contentInset={{ top: 5, input: 10, right: 54 }}
+                                tintColor="#5dd6ef"
+                                value={name}
+                                onChangeText={text => onchangeFullName(text)}
+                                onFocus={() => { if (name !== "") setShowFullNameClear(true); }}
+                                onSubmitEditing={() => setShowFullNameClear(false)}
+                                onBlur={() => setShowFullNameClear(false)}
                             />
-                        )}
-                    </View>
-                    <TouchableHighlight
-                        style={styles.wrapButton}
-                        activeOpacity={0.8}
-                        underlayColor="#3f3f3f"
-                        onPress={() => saveUser()}
-                    >
-                        <LinearGradient
-                            colors={["#0085ff", "#05adff"]}
-                            start={[0, 1]}
-                            end={[1, 0]}
-                            style={styles.button}
-                        >
-                            <View style={styles.centerView} >
-                                <Text style={{ color: '#fff', fontWeight: '500' }}>
-                                    Lưu
-                                </Text>
+                            <View style={{ position: "absolute", top: 26, right: 0 }}>
+                                <View style={{ flexDirection: "row" }}>
+                                    {fullNameClearIcon}
+                                    <IconEdit style={{ marginTop: 2, marginLeft: 6 }} />
+                                </View>
+
                             </View>
-                        </LinearGradient>
-                    </TouchableHighlight>
-                </ScrollView>
+                        </View>
+                        <View style={{ marginLeft: 4, marginRight: 8, flexDirection: "row", height: 48 }}>
+                            <TouchableOpacity style={{ flexDirection: "row", alignSelf: "center" }}
+                                onPress={() => {
+                                    if (gender !== "male") {
+                                        if (!hasModify) {
+                                            setHasModify(true);
+                                        }
+                                        setGender("male");
+                                    }
+                                }}
+                            >
+                                {gender == "male" ? <IconCheck /> : <IconUnCheck />}
+                                <Text style={{ fontSize: 18, marginLeft: gender == "male" ? 5 : 7, alignSelf: "center" }}>Nam</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={{ flexDirection: "row", alignSelf: "center", marginLeft: 54 }}
+                                onPress={() => {
+                                    if (gender !== "female") {
+                                        if (!hasModify) {
+                                            setHasModify(true);
+                                        }
+                                        setGender("female");
+                                    }
+                                }}
+                            >
+                                {gender == "female" ? <IconCheck /> : <IconUnCheck />}
+                                <Text style={{ fontSize: 18, marginLeft: gender == "female" ? 5 : 7, alignSelf: "center" }}>Nữ</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={{ borderBottomWidth: 1, borderBottomColor: "#cfd0cf", marginBottom: 12 }}></View>
+                        <View style={{ marginLeft: 4, marginRight: 8 }}>
+
+                            <Text style={isDatePickerVisible ? inputHeaderSelectedStyle : inputHeaderStyle}>Ngày sinh</Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    Keyboard.dismiss();
+                                    setDatePickerVisibility(true);
+                                }}
+                                style={{ flexDirection: "row" }}
+                            >
+
+                                <Text style={{ fontSize: 18, paddingTop: 3, paddingBottom: 10 }}>
+                                    {dob ? TimeUtility.dateToDDMMYYYY(dob) : "Chưa có"}
+                                </Text>
+                                <View style={{ top: 4, right: 0, marginLeft: "auto" }}>
+                                    <View style={{ flexDirection: "row" }}>
+                                        <IconEdit style={{ marginTop: 2, marginLeft: 6 }} />
+                                    </View>
+
+                                </View>
+                            </TouchableOpacity>
+
+                            <DateTimePickerModal
+                                isVisible={isDatePickerVisible}
+                                mode="date"
+                                onConfirm={handleConfirmDatePicker}
+                                onCancel={hideDatePicker}
+                                date={dob ? dob : new Date()}
+                                confirmTextIOS="Chọn"
+                                cancelTextIOS="Huỷ"
+                            />
+                        </View>
+
+                    </View>
+                </View>
+                <TouchableHighlight
+                    style={styles.wrapButton}
+                    activeOpacity={0.8}
+                    underlayColor="#3f3f3f"
+                    onPress={() => saveUser()}
+                    disabled={!isUpdateEnable}
+                >
+
+                    <LinearGradient
+                        colors={isUpdateEnable ? enableColor : disableColor}
+                        start={[0, 1]}
+                        end={[1, 0]}
+                        style={styles.button
+                        }
+                    >
+                        <View style={styles.centerView} >
+                            <Text style={{ color: '#fff', fontWeight: '500' }}>Cập nhật</Text>
+                        </View>
+                    </LinearGradient>
+                </TouchableHighlight>
             </>
         );
     };
 
-    const offset = useRef(new Animated.Value(0)).current;
-    const opacityOnScroll = offset.interpolate({
-        inputRange: [0, 200],
-        outputRange: [0, 1],
-        extrapolate: "clamp",
-    });
-
-    opacityOnScroll.addListener((e) => {
-        if (e.value == 1 && iconColor == "white") setIconColor("black");
-        if (e.value < 1 && iconColor == "black") setIconColor("white");
-    });
-
     const [iconColor, setIconColor] = useState("white");
     const refCallBack = useRef(() => { });
-
-    const changeCoverPicture = async (mode) => {
-        let result;
-        if (mode == "camera") {
-            result = await ImagePicker.launchCameraAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                quality: 0.5,
-                base64: true,
-                allowsEditing: true,
-            });
-        } else {
-            result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                quality: 1,
-                base64: true,
-                allowsEditing: true,
-            });
-        }
-        refCoverImageOption.current.close();
-        if (!result.cancelled) {
-            try {
-                let res = await Api.editUser("lol " + context.loginState.accessToken, {
-                    cover_image: "data:image;base64," + result.base64,
-                });
-                console.log(res.data.data.cover_image.fileName)
-                appContext.setCoverImage(res.data.data.cover_image.fileName)
-                Alert.alert("Thành công", "Đã thay đổi ảnh bìa", [{ text: "OK" }]);
-
-            } catch (e) {
-                console.log(e);
-            }
-        }
-    };
-
     const refAvatarImageOption = useRef();
 
     const changeAvatarPicture = async (mode) => {
@@ -317,12 +374,14 @@ export default function ProfileEditScreen({ navigation }) {
         refAvatarImageOption.current.close();
         if (!result.cancelled) {
             try {
-                let res = await Api.editUser("lol " + context.loginState.accessToken, {
-                    avatar: "data:image;base64," + result.base64,
-                });
-                console.log(res.data.data.avatar.fileName)
-                appContext.setAvatar(res.data.data.avatar.fileName)
-                Alert.alert("Thành công", "Đã thay đổi ảnh đại diện", [{ text: "OK" }]);
+                setCurrAvatar(result);
+                setNeedChangeAvatar(true);
+                // let res = await Api.editUser("lol " + context.loginState.accessToken, {
+                //     avatar: "data:image;base64," + result.base64,
+                // });
+                // console.log(res.data.data.avatar.fileName)
+                // appContext.setAvatar(res.data.data.avatar.fileName)
+                // Alert.alert("Thành công", "Đã thay đổi ảnh đại diện", [{ text: "OK" }]);
             } catch (e) {
                 console.log(e);
             }
@@ -331,286 +390,119 @@ export default function ProfileEditScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            {/* <StatusBar
+            <ScrollView keyboardShouldPersistTaps="handled" scrollEnabled={false}>
+                {/* <StatusBar
                 backgroundColor="#00000000"
                 barStyle={iconColor == "white" ? "light-content" : "dark-content"}
                 translucent={true}
             /> */}
-            <View style={{ zIndex: 3 }}>
-                <HeaderBar text="Sửa thông tin cá nhân"
-                    navigation={navigation} />
-            </View>
-            <Animated.View
-                style={{
-                    position: "absolute",
-                    height: 70,
-                    backgroundColor: "#fff",
-                    top: 0,
-                    width: FULL_WIDTH,
-                    opacity: opacityOnScroll,
-                    zIndex: 2,
-                    flexDirection: "row",
-                    borderBottomColor: "#cdcdcd",
-                    borderBottomWidth: 1,
-                }}
-            >
-                <View style={{ marginTop: 25, marginLeft: 60 }}>
-                    <Avatar2
-                        source={{ uri: BaseURL + appContext.avatar }}
-                        size="sm"
-                    ></Avatar2>
+                <View style={{ zIndex: 3 }}>
+                    <HeaderBar text="Thông tin cá nhân"
+                        navigation={navigation} />
                 </View>
-
-                <Text
-                    style={{
-                        marginTop: 28,
-                        marginLeft: 10,
-                        fontWeight: "500",
-                        fontSize: 20,
-                    }}
-                >
-                    {context.loginState.userName}
-                </Text>
-            </Animated.View>
-            {/* <TouchableOpacity
-                style={{ position: "absolute", top: 30, left: 10, zIndex: 2 }}
-                onPress={() => navigation.goBack()}
-            >
-                {iconColor == "white" ? <IconBack /> : <IconBackBlack />}
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={{ position: "absolute", top: 25, right: 10, zIndex: 2 }}
-                onPress={() => navigation.navigate("ProfileOptionScreen")}
-            >
-                {iconColor == "white" ? <IconOption /> : <IconOptionBlack />}
-            </TouchableOpacity> */}
-            <RBSheet
-                ref={refCoverImageOption}
-                closeOnDragDown={true}
-                closeOnPressMask={true}
-                closeOnPressBack={true}
-                animationType="fade"
-                height={320}
-                closeDuration={0}
-                onClose={() => refCallBack.current()}
-                customStyles={{
-                    wrapper: {
-                        backgroundColor: "rgba(0,0,0,0.28)",
-                        width: "100%",
-                    },
-                    container: {
-                        marginBottom: 10,
-                        width: "95%",
-                        alignSelf: "center",
-                        backgroundColor: "rgba(255,255,255,0)",
-                    },
-                    draggableIcon: {
-                        opacity: 0,
-                    },
-                }}
-            >
-                <View
-                    style={{
-                        justifyContent: "center",
-                        flexDirection: "column",
-                        height: "100%",
-                        width: "100%",
+                <RBSheet
+                    ref={refAvatarImageOption}
+                    closeOnDragDown={true}
+                    closeOnPressMask={true}
+                    closeOnPressBack={true}
+                    animationType="fade"
+                    height={280}
+                    closeDuration={0}
+                    onClose={() => refCallBack.current()}
+                    customStyles={{
+                        wrapper: {
+                            backgroundColor: "rgba(0,0,0,0.28)",
+                            width: "100%",
+                        },
+                        container: {
+                            marginBottom: 10,
+                            width: "95%",
+                            alignSelf: "center",
+                            backgroundColor: "rgba(255,255,255,0)",
+                        },
+                        draggableIcon: {
+                            opacity: 0,
+                        },
                     }}
                 >
                     <View
                         style={{
-                            backgroundColor: "rgba(240,240,240,1)",
-                            borderTopLeftRadius: 15,
-                            borderTopEndRadius: 15,
-                            borderBottomRightRadius: 15,
-                            borderBottomStartRadius: 15,
                             justifyContent: "center",
+                            flexDirection: "column",
+                            height: "100%",
+                            width: "100%",
                         }}
                     >
-                        <Text
+                        <View
                             style={{
-                                fontSize: 14,
-                                fontWeight: "400",
-                                color: "#767676",
-                                textAlign: "center",
-                                marginTop: 15,
+                                backgroundColor: "rgba(240,240,240,1)",
+                                borderTopLeftRadius: 15,
+                                borderTopEndRadius: 15,
+                                borderBottomRightRadius: 15,
+                                borderBottomStartRadius: 15,
+                                justifyContent: "center",
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    fontSize: 14,
+                                    fontWeight: "400",
+                                    color: "#767676",
+                                    textAlign: "center",
+                                    marginTop: 15,
+                                    marginBottom: 10,
+                                }}
+                            >
+                                Ảnh đại diện
+                            </Text>
+                            <Divider orientation="horizontal" />
+                            <TouchableHighlight
+                                style={styles.reportOption}
+                                onPress={() => {
+                                    changeAvatarPicture("camera");
+                                }}
+                                activeOpacity={0.99}
+                                underlayColor="#989898"
+                            >
+                                <Text style={styles.reportOptionText}>Chụp ảnh mới</Text>
+                            </TouchableHighlight>
+                            <Divider orientation="horizontal" />
+                            <TouchableHighlight
+                                style={styles.reportOption}
+                                onPress={() => {
+                                    changeAvatarPicture("library");
+                                }}
+                                activeOpacity={0.99}
+                                underlayColor="#989898"
+                            >
+                                <Text style={styles.reportOptionText}>Chọn ảnh từ thư viện</Text>
+                            </TouchableHighlight>
+                        </View>
+                        <TouchableHighlight
+                            style={{
+                                backgroundColor: "#fff",
+                                borderTopLeftRadius: 15,
+                                borderTopEndRadius: 15,
+                                borderBottomRightRadius: 15,
+                                borderBottomStartRadius: 15,
+                                justifyContent: "center",
+                                alignItems: "center",
+                                height: 60,
+                                marginTop: 10,
                                 marginBottom: 10,
                             }}
-                        >
-                            Ảnh bìa
-                        </Text>
-                        <Divider orientation="horizontal" />
-                        <TouchableHighlight
-                            style={styles.reportOption}
-                            onPress={() => {
-                                refCallBack.current = () => {
-                                    setIsViewCoverImage(true);
-                                };
-                                refCoverImageOption.current.close();
-                            }}
-                            activeOpacity={0.99}
+                            onPress={() => refAvatarImageOption.current.close()}
+                            activeOpacity={0.999}
                             underlayColor="#989898"
                         >
-                            <Text style={styles.reportOptionText}>Xem ảnh bìa</Text>
-                        </TouchableHighlight>
-                        <Divider orientation="horizontal" />
-                        <TouchableHighlight
-                            style={styles.reportOption}
-                            onPress={() => {
-                                changeCoverPicture("camera");
-                            }}
-                            activeOpacity={0.99}
-                            underlayColor="#989898"
-                        >
-                            <Text style={styles.reportOptionText}>Chụp ảnh mới</Text>
-                        </TouchableHighlight>
-                        <Divider orientation="horizontal" />
-                        <TouchableHighlight
-                            style={styles.reportOption}
-                            onPress={() => {
-                                changeCoverPicture("library");
-                            }}
-                            activeOpacity={0.99}
-                            underlayColor="#989898"
-                        >
-                            <Text style={styles.reportOptionText}>Chọn ảnh từ thư viện</Text>
+                            <Text style={{ color: "#0085ff", fontWeight: "600", fontSize: 19 }}>
+                                Hủy
+                            </Text>
                         </TouchableHighlight>
                     </View>
-                    <TouchableHighlight
-                        style={{
-                            backgroundColor: "#fff",
-                            borderTopLeftRadius: 15,
-                            borderTopEndRadius: 15,
-                            borderBottomRightRadius: 15,
-                            borderBottomStartRadius: 15,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            height: 60,
-                            marginTop: 10,
-                            marginBottom: 10,
-                        }}
-                        onPress={() => refCoverImageOption.current.close()}
-                        activeOpacity={0.999}
-                        underlayColor="#989898"
-                    >
-                        <Text style={{ color: "#0085ff", fontWeight: "600", fontSize: 19 }}>
-                            Hủy
-                        </Text>
-                    </TouchableHighlight>
-                </View>
-            </RBSheet>
-            <ImageView
-                images={[{ uri: BaseURL + appContext.coverImage }]}
-                imageIndex={0}
-                visible={isViewCoverImage}
-                onRequestClose={() => {
-                    refCallBack.current = () => { };
-                    setIsViewCoverImage(false);
-                }}
-                swipeToCloseEnabled={true}
-            />
-            <RBSheet
-                ref={refAvatarImageOption}
-                closeOnDragDown={true}
-                closeOnPressMask={true}
-                closeOnPressBack={true}
-                animationType="fade"
-                height={280}
-                closeDuration={0}
-                onClose={() => refCallBack.current()}
-                customStyles={{
-                    wrapper: {
-                        backgroundColor: "rgba(0,0,0,0.28)",
-                        width: "100%",
-                    },
-                    container: {
-                        marginBottom: 10,
-                        width: "95%",
-                        alignSelf: "center",
-                        backgroundColor: "rgba(255,255,255,0)",
-                    },
-                    draggableIcon: {
-                        opacity: 0,
-                    },
-                }}
-            >
-                <View
-                    style={{
-                        justifyContent: "center",
-                        flexDirection: "column",
-                        height: "100%",
-                        width: "100%",
-                    }}
-                >
-                    <View
-                        style={{
-                            backgroundColor: "rgba(240,240,240,1)",
-                            borderTopLeftRadius: 15,
-                            borderTopEndRadius: 15,
-                            borderBottomRightRadius: 15,
-                            borderBottomStartRadius: 15,
-                            justifyContent: "center",
-                        }}
-                    >
-                        <Text
-                            style={{
-                                fontSize: 14,
-                                fontWeight: "400",
-                                color: "#767676",
-                                textAlign: "center",
-                                marginTop: 15,
-                                marginBottom: 10,
-                            }}
-                        >
-                            Ảnh đại diện
-                        </Text>
-                        <Divider orientation="horizontal" />
-                        <TouchableHighlight
-                            style={styles.reportOption}
-                            onPress={() => {
-                                changeAvatarPicture("camera");
-                            }}
-                            activeOpacity={0.99}
-                            underlayColor="#989898"
-                        >
-                            <Text style={styles.reportOptionText}>Chụp ảnh mới</Text>
-                        </TouchableHighlight>
-                        <Divider orientation="horizontal" />
-                        <TouchableHighlight
-                            style={styles.reportOption}
-                            onPress={() => {
-                                changeAvatarPicture("library");
-                            }}
-                            activeOpacity={0.99}
-                            underlayColor="#989898"
-                        >
-                            <Text style={styles.reportOptionText}>Chọn ảnh từ thư viện</Text>
-                        </TouchableHighlight>
-                    </View>
-                    <TouchableHighlight
-                        style={{
-                            backgroundColor: "#fff",
-                            borderTopLeftRadius: 15,
-                            borderTopEndRadius: 15,
-                            borderBottomRightRadius: 15,
-                            borderBottomStartRadius: 15,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            height: 60,
-                            marginTop: 10,
-                            marginBottom: 10,
-                        }}
-                        onPress={() => refAvatarImageOption.current.close()}
-                        activeOpacity={0.999}
-                        underlayColor="#989898"
-                    >
-                        <Text style={{ color: "#0085ff", fontWeight: "600", fontSize: 19 }}>
-                            Hủy
-                        </Text>
-                    </TouchableHighlight>
-                </View>
-            </RBSheet>
-            <ListHeader />
+                </RBSheet>
+                <ListHeader />
+            </ScrollView>
         </View>
     );
 }
@@ -735,9 +627,6 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "400",
     },
-    infoForm: {
-        padding: 20,
-    },
     infoLabel: {
         fontSize: 20,
     },
@@ -759,7 +648,7 @@ const styles = StyleSheet.create({
     },
     wrapButton: {
         width: '50%',
-        marginTop: 'auto',
+        marginTop: 20,
         alignSelf: 'center',
         borderRadius: 20,
     },
@@ -767,5 +656,16 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    inputContainer: {
+        flexDirection: "row",
+        paddingLeft: 6,
+        paddingRight: 12,
+        marginTop: 16,
+        backgroundColor: "#fff",
+        paddingBottom: 4,
+    },
+    textFieldLable: {
+        paddingTop: 3
     },
 });
