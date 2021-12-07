@@ -263,8 +263,10 @@ export default function Post(props) {
     };
 
     var onPressHide = () => {
+        refCallBack.current = () => {
+            setBlockModalVisible(true);
+        };
         refRBSheet.current.close();
-        setBlockModalVisible(true);
     };
 
     var BlockConfirm = () => {
