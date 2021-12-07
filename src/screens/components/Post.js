@@ -255,11 +255,13 @@ export default function Post(props) {
     };
 
     var onPressEdit = () => {
-        // console.log("pressed edit");
-        props.navigation.navigate("EditPost", {
-            post: props.post,
-            from: props.from
-        });
+        refCallBack.current = () => {
+            props.navigation.navigate("EditPost", {
+                post: props.post,
+                from: props.from
+            });
+        };
+        refRBSheet.current.close();
     };
 
     var onPressHide = () => {
@@ -609,7 +611,7 @@ export default function Post(props) {
                                     Xoá bài đăng
                                 </Text>
                                 <Text style={{ fontSize: 14, color: "#9ea1a6" }}>
-                                    Bài đăng này sẽ ẩn khỏi nhật ký
+                                    Bài đăng này bị xóa khỏi nhật ký
                                 </Text>
                             </View>
                         </Pressable>
