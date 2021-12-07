@@ -58,6 +58,82 @@ export default function App({navigation}) {
   useLayoutEffect(() => {
     getListS();
   }, []);
+  
+  
+    const handleAgreeRequest = async(id) => {
+      try {
+        const accessToken = context.loginState.accessToken;
+        let response = await Api.sendAcceptFriendRequest(accessToken,id);
+        if(response.data.success){
+          const newListR = ListR.filter(el => el.sender._id !== id);
+          setListR([...newListR]);
+        } else {
+          console.log(e);
+          navigation.navigate("", {
+            message: "Kết bạn không thành công",
+          });
+        }
+        // console.log(friends.data.data.friends);
+        // console.log(typeof friends.data.data.friends);
+        // setListR(Object.values(List.data.data.receivedList));
+      } catch (e) {
+        console.log(e);
+        navigation.navigate("NoConnectionScreen", {
+          message: "Vui lòng kiểm tra kết nối internet và thử lại",
+        });
+      }
+    }
+
+    const handleRejectRequest = async(id) => {
+      try {
+        const accessToken = context.loginState.accessToken;
+        let response = await Api.sendRejectFriendRequest(accessToken,id);
+        if(response.data.success){
+          const newListR = ListR.filter(el => el.sender._id !== id);
+          setListR([...newListR]);
+        } else {
+          console.log(e);
+          navigation.navigate("", {
+            message: "Hủy kết bạn không thành công",
+          });
+        }
+        // console.log(friends.data.data.friends);
+        // console.log(typeof friends.data.data.friends);
+        // setListR(Object.values(List.data.data.receivedList));
+      } catch (e) {
+        console.log(e);
+        navigation.navigate("NoConnectionScreen", {
+          message: "Vui lòng kiểm tra kết nối internet và thử lại",
+        });
+      }
+    }
+
+    const handleCancelRequest = async(id) => {
+      
+      try {
+        const accessToken = context.loginState.accessToken;
+        let response = await Api.sendCancelFriendRequest(accessToken,id);
+        if(response.data.success){
+          const newListS = ListS.filter(el => el.receiver._id !== id);
+          setListS([...newListS]);
+        } else {
+          console.log(e);
+          navigation.navigate("", {
+            message: "Hủy kết bạn không thành công",
+          });
+        }
+        // console.log(friends.data.data.friends);
+        // console.log(typeof friends.data.data.friends);
+        // setListR(Object.values(List.data.data.receivedList));
+      } catch (e) {
+        console.log(e);
+        navigation.navigate("NoConnectionScreen", {
+          message: "Vui lòng kiểm tra kết nối internet và thử lại",
+        });
+      }
+    }
+
+
 
   const getListR = async () => {
     try {
@@ -109,10 +185,10 @@ export default function App({navigation}) {
         <Text style = {{fontSize: 10,borderWidth:0.2,borderRadius: 5, marginTop: 0, padding:10, marginLeft:75}}>Xin chào, tôi là {props.name}</Text>
         </View>
         <View style = {{flexDirection: 'row', }}>
-            <TouchableOpacity style = {{borderWidth:0,flexDirection: 'row', borderRadius: 40, padding: 5, marginTop:5,marginLeft:75, backgroundColor: "#3399ff"}}>
+            <TouchableOpacity style = {{borderWidth:0,flexDirection: 'row', borderRadius: 40, padding: 5, marginTop:5,marginLeft:75, backgroundColor: "#3399ff"}} onPress={() => {handleAgreeRequest(props.id)}}>
               <Text style = {{fontSize:10,color:'white', width: 70, textAlign:'center',fontWeight:'bold'}}>ĐỒNG Ý</Text>
             </TouchableOpacity>
-            <TouchableOpacity style = {{borderWidth:0,flexDirection: 'row', borderRadius: 40, padding: 5, marginTop:5,marginLeft:20, backgroundColor:'#e6e6e6'}}>
+            <TouchableOpacity style = {{borderWidth:0,flexDirection: 'row', borderRadius: 40, padding: 5, marginTop:5,marginLeft:20, backgroundColor:'#e6e6e6'}} onPress={() => {handleRejectRequest(props.id)}}>
               <Text style = {{fontSize:10,color:'black', width: 80, textAlign:'center',fontWeight:'bold'}}>TỪ CHỐI</Text>
             </TouchableOpacity>
         </View>
@@ -150,7 +226,7 @@ export default function App({navigation}) {
         
         <View style = {{flexDirection: 'row'}}>
         <Text style = {{marginTop:-30,fontSize: 12, marginLeft:80, color:"#a6a6a6"}}>Muốn kết bạn</Text>
-        <TouchableOpacity style = {{flexDirection: 'row', borderRadius: 40, borderWidth:0,marginTop:-30,marginBottom:10, padding: 5,marginLeft:40, backgroundColor:'#e6e6e6'}}>
+        <TouchableOpacity style = {{flexDirection: 'row', borderRadius: 40, borderWidth:0,marginTop:-30,marginBottom:10, padding: 5,marginLeft:40, backgroundColor:'#e6e6e6'}} onPress={() => {handleCancelRequest(props.id)}}>
               <Text style = {{fontSize:10,color:'black', width: 80, textAlign:'center',fontWeight:'bold'}}>THU HỒI</Text>
             </TouchableOpacity>
         </View>
