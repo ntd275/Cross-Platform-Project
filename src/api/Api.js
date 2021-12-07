@@ -121,7 +121,7 @@ export const Api = {
   getUser: (token, id) => {
     return axios.get(`${BaseURL}/users/show/${id}`, {
       headers: {
-        authorization: token,
+        authorization: fomartToken(token),
       },
     });
   },
@@ -160,6 +160,7 @@ export const Api = {
     });
   },
   getPostsById: (token, id) => {
+    // console.log(`${BaseURL}/posts/list?userId=${id}`)
     return axios.get(`${BaseURL}/posts/list?userId=${id}`, {
       headers: {
         authorization: fomartToken(token),

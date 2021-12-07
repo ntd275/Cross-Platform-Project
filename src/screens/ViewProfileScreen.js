@@ -318,12 +318,29 @@ export default function ViewProfileScreen({ navigation, route }) {
     }
   };
 
+  const getFriendStatus = async()=>{
+    try {
+      const token = authContext.loginState.accessToken;
+      let res = await Api.getFriendStatus(token,route.params.userId)
+      if (!mounted.current) return;
+      if(res.data.data.status != "not friend"){
+        setIsFriend(true);
+      } 
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   const getPosts = async () => {
     setIsLoading(true);
     try {
-      accessToken = authContext.loginState.accessToken;
+      const accessToken = authContext.loginState.accessToken;
+      // console.log(route.params.userId);
+      // console.log(authContext.loginState.userId)
+      // console.log(mounted.current);
       const res = await Api.getPostsById(accessToken, route.params.userId);
       if (!mounted.current) return;
+      console.log(res.data)
       let postList = res.data.data;
       setPosts(postList.reverse());
       if (firstLoad) {
@@ -346,14 +363,16 @@ export default function ViewProfileScreen({ navigation, route }) {
   useEffect(() => {
     getInfo();
     getPosts();
+    getFriendStatus();
+
     return () => {
       mounted.current = false;
     };
-  }, []);
+  },[]);
 
   const refreshPosts = async () => {
     setRefreshing(true);
-    await Promise.all([getPosts(), getInfo()]);
+    await Promise.all([getPosts(), getInfo(), getFriendStatus()]);
     setRefreshing(false);
   };
 
@@ -455,7 +474,7 @@ export default function ViewProfileScreen({ navigation, route }) {
         keyboardShouldPersistTaps={"always"}
         data={posts}
         keyExtractor={(item, index) => index.toString()}
-        ListHeaderComponent={
+        ListHeaderComponent={()=>
           <ListHeader
             info={info}
             navigation={navigation}
