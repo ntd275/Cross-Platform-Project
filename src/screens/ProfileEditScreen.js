@@ -169,7 +169,7 @@ export default function ProfileEditScreen({ navigation }) {
                     }
 
                     let res = await Api.editUser("lol " + context.loginState.accessToken, body);
-                    console.log(res.data.data);
+                    // console.log(res.data.data);
                     setName(res.data.data.username);
                     setGender(res.data.data.gender);
                     setDob(new Date(res.data.data.birthday));
@@ -180,12 +180,13 @@ export default function ProfileEditScreen({ navigation }) {
                     if(needChangeAvatar){
                         appContext.setAvatar(res.data.data.avatar.fileName)
                     }
+                    navigation.goBack();
                     appContext.displayMessage({
                         message: "Đã cập nhật thông tin",
                         type: "default",
-                        style: { width: 215, marginBottom: 200 },
+                        style: { width: 215, marginBottom: 120 },
                         titleStyle: { fontSize: 14 },
-                        duration: 1900,
+                        duration: 1000,
                         icon: "success",
                         position: "center",
                         backgroundColor: "#262626",
