@@ -182,11 +182,11 @@ export default function ProfileEditScreen({ navigation }) {
                     }
                     navigation.goBack();
                     appContext.displayMessage({
-                        message: "Đã cập nhật thông tin",
+                        message: "Cập nhật thành công",
                         type: "default",
-                        style: { width: 215, marginBottom: 120 },
+                        style: { width: 205, marginBottom: 120 },
                         titleStyle: { fontSize: 14 },
-                        duration: 1000,
+                        duration: 1200,
                         icon: "success",
                         position: "center",
                         backgroundColor: "#262626",
