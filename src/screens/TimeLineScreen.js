@@ -84,6 +84,7 @@ const ListHeader = ({ navigation, isLoading, firstLoad }) => {
             source={{
               uri: BaseURL + appContext.avatar,
             }}
+            onPress={()=>{navigation.navigate("ProfileScreen")}}
           />
         </View>
         <View style={{ marginTop: 25, marginLeft: 10 }}>

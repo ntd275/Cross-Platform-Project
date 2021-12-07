@@ -65,7 +65,12 @@ export default function Post(props) {
     let numComment = props.post.countComments;
 
     var goToUserPage = () => {
-        console.log("Go to user's page!");
+        if (props.post.author._id != context.loginState.userId) {
+            props.navigation.navigate("ViewProfileScreen", { userId: props.post.author._id })
+        }else{
+            props.navigation.navigate("ProfileScreen")
+        }
+        // console.log("Go to user's page!");
     };
 
     var showMenu = () => {
