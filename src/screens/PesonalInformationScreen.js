@@ -25,27 +25,16 @@ import { LinearGradient } from "expo-linear-gradient";
 import RBSheet from "react-native-raw-bottom-sheet";
 import ImageView from "react-native-image-viewing";
 import * as ImagePicker from "expo-image-picker";
-
-const BaseURL = "http://13.76.46.159:8000/files/";
+import { AvatarNativeBaseCache,ImageReactElementCache } from "./components/ImageCache";
+import { BaseURL } from "../utils/Constants";
 const FULL_WIDTH = Dimensions.get("window").width;
 
 export default function PersonalInformationScreen({ navigation }) {
   const context = React.useContext(AuthContext);
   const appContext = useContext(AppContext);
-  const getAvatar = async () => {
-    try {
-      const accessToken = context.loginState.accessToken;
-      let user = await Api.getMe(accessToken);
-      //console.log(user.data)
-      appContext.setAvatar(user.data.data.avatar.fileName);
-      appContext.setCoverImage(user.data.data.cover_image.fileName);
-    } catch (e) {
-      console.log(e);
-    }
-  };
 
   useEffect(() => {
-    getAvatar();
+    appContext.updateUserInfo();
   }, []);
 
   const [isViewCoverImage, setIsViewCoverImage] = useState(false);
@@ -109,7 +98,6 @@ export default function PersonalInformationScreen({ navigation }) {
         let res = await Api.editUser("lol " + context.loginState.accessToken, {
           avatar: "data:image;base64," + result.base64,
         });
-        await getPosts();
         console.log(res.data.data.avatar.fileName);
         appContext.setAvatar(res.data.data.avatar.fileName);
         Alert.alert("Thành công", "Đã thay đổi ảnh đại diện", [{ text: "OK" }]);
@@ -119,15 +107,6 @@ export default function PersonalInformationScreen({ navigation }) {
     }
   };
 
-  let gender = "Chưa có";
-  if(appContext.gender == "male"){
-    gender = "Nam"
-  }
-
-  if(appContext.gender == "female"){
-    gender = "Nữ"
-  }
-
   return (
     <View style={styles.container}>
       <StatusBar
@@ -135,30 +114,33 @@ export default function PersonalInformationScreen({ navigation }) {
         barStyle={"light-content"}
         translucent={true}
       />
-      <Image2
+      <ImageReactElementCache
+        key={appContext.coverImage}
         style={{ width: FULL_WIDTH, height: 280 }}
         source={{ uri: BaseURL + appContext.coverImage }}
         onPress={() => refCoverImageOption.current.open()}
-      ></Image2>
+      />
       <TouchableOpacity
         style={{ position: "absolute", top: 30, left: 10, zIndex: 2 }}
         onPress={() => navigation.goBack()}
       >
         <IconBack />
       </TouchableOpacity>
+
       <Pressable
         onPress={() => refAvatarImageOption.current.open()}
         style={{ position: "absolute", left: 10, top: 190 }}
       >
-        <Avatar2
+        <AvatarNativeBaseCache
+          key={appContext.avatar}
           size={"20"}
-          source={{ uri: BaseURL + appContext.avatar }}
+          source={{  uri: BaseURL + appContext.avatar  }}
           style={{ borderWidth: 2, borderColor: "#fff" }}
-        ></Avatar2>
+        />
       </Pressable>
 
-      <View style={{ position:'absolute', top: 215, left: 100 }}>
-        <Text style={{ fontSize: 24, fontWeight: "500", color: '#fff' }}>
+      <View style={{ position: "absolute", top: 215, left: 100 }}>
+        <Text style={{ fontSize: 24, fontWeight: "500", color: "#fff" }}>
           {appContext.userName}
         </Text>
         <View style={{ marginTop: 4 }}>
@@ -170,70 +152,83 @@ export default function PersonalInformationScreen({ navigation }) {
         </View>
       </View>
 
-      <View style={{paddingLeft: 12, backgroundColor:'#fff', paddingRight: 12}}>
-          <View style={styles.info}>
-                <View style={styles.infoTitle}>
-                    <Text style={{fontSize:15}}>Giới tính</Text>
-                </View>
-                <View style={{flex:1}}>
-                    <Text style={{color:'#898989',fontSize: 15}}>{gender}</Text>
-                </View>
+      <View
+        style={{ paddingLeft: 12, backgroundColor: "#fff", paddingRight: 12 }}
+      >
+        <View style={styles.info}>
+          <View style={styles.infoTitle}>
+            <Text style={{ fontSize: 15 }}>Giới tính</Text>
           </View>
-          <Divider/>
-          <View style={styles.info}>
-                <View style={styles.infoTitle}>
-                    <Text style={{fontSize:15}}>Ngày sinh</Text>
-                </View>
-                <View style={{flex:1}}>
-                    <Text style={{color:'#898989',fontSize: 15}}>{appContext.birthday ? new Date(appContext.birthday).toLocaleDateString() : "Chưa có"}</Text>
-                </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: "#898989", fontSize: 15 }}>
+              {appContext.gender}
+            </Text>
           </View>
-          <Divider/>
-          <View style={styles.info}>
-                <View style={styles.infoTitle}>
-                    <Text style={{fontSize:15}}>Điện thoại</Text>
-                </View>
-                <View style={{flex:1}}>
-                    <Text style={{color:'#009aff', fontSize:15}}>{appContext.phonenumber}</Text>
-                    <Text style={{color:'#898989',fontSize: 15, marginTop: 7}}>Số điện thoại của bạn chỉ hiện thị với bạn bè có số của bạn trong danh bạ</Text>
-                </View>
+        </View>
+        <Divider />
+        <View style={styles.info}>
+          <View style={styles.infoTitle}>
+            <Text style={{ fontSize: 15 }}>Ngày sinh</Text>
           </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: "#898989", fontSize: 15 }}>
+              {appContext.birthday}
+            </Text>
+          </View>
+        </View>
+        <Divider />
+        <View style={styles.info}>
+          <View style={styles.infoTitle}>
+            <Text style={{ fontSize: 15 }}>Điện thoại</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: "#009aff", fontSize: 15 }}>
+              {appContext.phonenumber}
+            </Text>
+            <Text style={{ color: "#898989", fontSize: 15, marginTop: 7 }}>
+              Số điện thoại của bạn chỉ hiện thị với bạn bè có số của bạn trong
+              danh bạ
+            </Text>
+          </View>
+        </View>
       </View>
       <TouchableHighlight
-              style={{
-                width: "90%",
-                marginTop: 10,
-                alignSelf: "center",
-                borderRadius: 20,
-              }}
-              activeOpacity={0.8}
-              underlayColor="#3f3f3f"
-              onPress={() => {navigation.navigate("ProfileEditScreen")}}
-            >
-              <LinearGradient
-                colors={["#0085ff", "#05adff"]}
-                start={[0, 1]}
-                end={[1, 0]}
-                style={{
-                  width: "100%",
-                  height: 40,
-                  alignSelf: "center",
-                  borderRadius: 20,
-                }}
-              >
-                <View
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flex: 1,
-                  }}
-                >
-                  <Text style={{ color: "#fff", fontWeight: "500", fontSize: 15 }}>
-                    Đổi thông tin
-                  </Text>
-                </View>
-              </LinearGradient>
-            </TouchableHighlight>
+        style={{
+          width: "90%",
+          marginTop: 10,
+          alignSelf: "center",
+          borderRadius: 20,
+        }}
+        activeOpacity={0.8}
+        underlayColor="#3f3f3f"
+        onPress={() => {
+          navigation.navigate("ProfileEditScreen");
+        }}
+      >
+        <LinearGradient
+          colors={["#0085ff", "#05adff"]}
+          start={[0, 1]}
+          end={[1, 0]}
+          style={{
+            width: "100%",
+            height: 40,
+            alignSelf: "center",
+            borderRadius: 20,
+          }}
+        >
+          <View
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              flex: 1,
+            }}
+          >
+            <Text style={{ color: "#fff", fontWeight: "500", fontSize: 15 }}>
+              Đổi thông tin
+            </Text>
+          </View>
+        </LinearGradient>
+      </TouchableHighlight>
 
       <RBSheet
         ref={refCoverImageOption}
@@ -586,11 +581,11 @@ const styles = StyleSheet.create({
     fontWeight: "400",
   },
   info: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingTop: 15,
     paddingBottom: 15,
   },
   infoTitle: {
     width: 120,
-  }
+  },
 });

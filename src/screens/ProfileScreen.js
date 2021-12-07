@@ -341,7 +341,7 @@ export default function ProfileScreen({ navigation }) {
     refCoverImageOption.current.close();
     if (!result.cancelled) {
       try {
-        let res = await Api.editUser("lol " + context.loginState.accessToken, {
+        let res = await Api.editUser("lol " + authContext.loginState.accessToken, {
           cover_image: "data:image;base64," + result.base64,
         });
         console.log(res.data.data.cover_image.fileName)
@@ -376,7 +376,7 @@ export default function ProfileScreen({ navigation }) {
     refAvatarImageOption.current.close();
     if (!result.cancelled) {
       try {
-        let res = await Api.editUser("lol " + context.loginState.accessToken, {
+        let res = await Api.editUser("lol " + authContext.loginState.accessToken, {
             avatar: "data:image;base64," + result.base64,
         })
         await getPosts()
