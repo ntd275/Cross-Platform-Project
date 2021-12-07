@@ -184,6 +184,12 @@ export default function ConversationScreen({ route, navigation }) {
                
             }else{
                 res = await Api.getMessagesByFriendId(accessToken, route.params.friend.id);
+                if(route.params.from == "ContactScreen"){
+                    chatContext.socket.emit("seenMessage", {
+                        token: context.loginState.accessToken,
+                        chatId: res.data.chatId
+                    });
+                }
                 chatContext.setCurChatId(res.data.chatId);
                 chatContext.setCurBlockers(res.data.blockers);
             }
@@ -227,7 +233,7 @@ export default function ConversationScreen({ route, navigation }) {
 
     if (firstLoad && !isLoading) {
         if (route.params.chatId || route.params.friend) {
-            if (!route.params.isread) {
+            if (!route.params.isread && route.params.chatId) {
                 chatContext.socket.emit("seenMessage", {
                     token: context.loginState.accessToken,
                     chatId: route.params.chatId

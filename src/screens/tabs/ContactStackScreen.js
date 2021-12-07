@@ -4,9 +4,32 @@ import HomeContactScreen from "../HomeContactScreen";
 import NoConnectionScreen from "../NoConnectionScreen";
 import SearchScreen from "../SearchScreen";
 import LoiMoiKetBan from "../LoiMoiKetBan";
+import ConversationScreen from "../ConversationScreen";
+import ConversationOptionScreen from "../ConversationOptionScreen";
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
+import ProfileScreen from "../ProfileScreen";
+import CreatePost from "../CreatePost";
+import PostScreen from "../PostScreen";
+import ProfileEditScreen from "../ProfileEditScreen";
+import ChangePasswordScreen from "../ChangePasswordScreen";
+import ViewProfileScreen from "../ViewProfileScreen";
+import ProfileOptionScreen from "../ProfileOptionScreen";
+import PersonalInformationScreen from "../PesonalInformationScreen";
+import SettingScreen from "../SettingScreen";
+
 const ContactStack = createNativeStackNavigator();
 
-export default function ContactStackScreen() {
+export default function ContactStackScreen({ route, navigation }) {
+  React.useLayoutEffect(() => {
+    const routeName = getFocusedRouteNameFromRoute(route);
+    const hideScreens = ["ConversationScreen", "ConversationOption"];
+    if (hideScreens.includes(routeName)) {
+      navigation.setOptions({ tabBarStyle: { display: "none" } });
+    } else {
+      navigation.setOptions({ tabBarStyle: { display: null } });
+    }
+  }, [navigation, route]);
+
   return (
     <ContactStack.Navigator
       screenOptions={{
@@ -27,8 +50,42 @@ export default function ContactStackScreen() {
         options={{ animation: "none" }}
       />
       <ContactStack.Screen
-      name = "LoiMoiKetBan"
-      component={LoiMoiKetBan}
+        name="LoiMoiKetBan"
+        component={LoiMoiKetBan}
+      />
+
+      <ContactStack.Screen
+        name="ConversationScreen"
+        component={ConversationScreen}
+      />
+      <ContactStack.Screen
+        name="ConversationOption"
+        component={ConversationOptionScreen}
+      />
+      <ContactStack.Screen name="SettingScreen" component={SettingScreen} />
+      <ContactStack.Screen name="ProfileScreen" component={ProfileScreen} />
+      <ContactStack.Screen
+        name="ViewProfileScreen"
+        component={ViewProfileScreen}
+      />
+      <ContactStack.Screen name="CreatePost" component={CreatePost} />
+      <ContactStack.Screen name="PostScreen" component={PostScreen} />
+      <ContactStack.Screen
+        name="ChangePasswordScreen"
+        component={ChangePasswordScreen}
+      />
+      <ContactStack.Screen
+        name="ProfileEditScreen"
+        component={ProfileEditScreen}
+      />
+
+      <ContactStack.Screen
+        name="ProfileOptionScreen"
+        component={ProfileOptionScreen}
+      />
+      <ContactStack.Screen
+        name="PersonalInformationScreen"
+        component={PersonalInformationScreen}
       />
     </ContactStack.Navigator>
   );

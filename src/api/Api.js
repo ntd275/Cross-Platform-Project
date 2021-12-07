@@ -159,6 +159,17 @@ export const Api = {
       },
     });
   },
+  getMessagesByFriendId: (token, friendId) => {
+    return axios({
+      method: "get",
+      url: `${BaseURL}/chats/getMessagesbyfriendId/${friendId}`,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        authorization: fomartToken(token),
+      },
+    });
+  },
   getPostsById: (token, id) => {
     // console.log(`${BaseURL}/posts/list?userId=${id}`)
     return axios.get(`${BaseURL}/posts/list?userId=${id}`, {

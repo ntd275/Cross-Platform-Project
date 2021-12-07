@@ -31,30 +31,7 @@ import AppContext from "../components/context/AppContext";
 import { BaseURL } from "../utils/Constants";
 import { Dimensions } from 'react-native';
 
-const renderItem = ({ item }) => (
-  <Pressable
-    onPress={() => {
-      Keyboard.dismiss();
-    }}
-  >
-    <ListItem bottomDivider>
-      <Avatar size={42} rounded source={{ uri: item.img }} />
-      <ListItem.Content>
-        <ListItem.Title style={styles.commentUser}>{item.user}</ListItem.Title>
-        <ListItem.Subtitle style={styles.commentContent}>
-          {item.content}
-        </ListItem.Subtitle>
-        <Text style={styles.commentDate}>{item.date}</Text>
-      </ListItem.Content>
-      <Icon
-        name="heart-outline" // like: heart
-        type="ionicon"
-        color="#818181" // like: #f84c5d
-        size={24}
-      />
-    </ListItem>
-  </Pressable>
-);
+
 
 export default function PostScreen({ navigation, route }) {
   const mounted = useRef(false);
@@ -88,7 +65,7 @@ export default function PostScreen({ navigation, route }) {
       appContext.displayMessage({
         message: "Đã gửi bình luận",
         type: "info",
-        style: { paddingLeft: Dimensions.get("window").width/2 - 80, paddingBottom: 8, paddingTop: 24},
+        style: { paddingLeft: Dimensions.get("window").width / 2 - 80, paddingBottom: 8, paddingTop: 24 },
         icon: "success",
         position: "top",
         duration: 1600,
@@ -126,20 +103,20 @@ export default function PostScreen({ navigation, route }) {
       );
       setCountComment(res.data.countComments);
     } catch (err) {
-        if (err.response && err.response.status == 404) {
-            console.log(err.response.data.message);
-            navigation.navigate("TimeLineScreen")
-            appContext.displayMessage({
-                message: "Không tìm thấy bài đăng. Vui lòng tải lại.",
-                type: "default",
-                style: { width: 195, marginBottom: 200 },
-                titleStyle: { fontSize: 14 },
-                duration: 1900,
-                position: "center",
-                backgroundColor: "#262626",
-            });
-            return
-        }
+      if (err.response && err.response.status == 404) {
+        console.log(err.response.data.message);
+        navigation.navigate("TimeLineScreen")
+        appContext.displayMessage({
+          message: "Không tìm thấy bài đăng. Vui lòng tải lại.",
+          type: "default",
+          style: { width: 195, marginBottom: 200 },
+          titleStyle: { fontSize: 14 },
+          duration: 1900,
+          position: "center",
+          backgroundColor: "#262626",
+        });
+        return
+      }
       console.log(err);
       navigation.navigate("NoConnectionScreen", {
         message: "Tài khoản sẽ tự động đăng nhập khi có kết nối internet",
@@ -188,6 +165,41 @@ export default function PostScreen({ navigation, route }) {
       </>
     );
   };
+
+  const goToUserPage = (userID) => {
+    if (userID == authContext.loginState.userId) {
+      navigation.navigate("ProfileScreen");
+    } else {
+      navigation.navigate("ViewProfileScreen", { userId: userID })
+    }
+  }
+
+  const renderItem = ({ item }) => (
+    <Pressable
+      onPress={() => {
+        Keyboard.dismiss();
+      }}
+    >
+      <ListItem bottomDivider>
+        <Avatar size={42} rounded source={{ uri: item.img }} onPress={() => { goToUserPage(item.userId) }} />
+        <ListItem.Content>
+          <TouchableOpacity onPress={() => { goToUserPage(item.userId) }}>
+            <ListItem.Title style={styles.commentUser}>{item.user}</ListItem.Title>
+          </TouchableOpacity>
+          <ListItem.Subtitle style={styles.commentContent}>
+            {item.content}
+          </ListItem.Subtitle>
+          <Text style={styles.commentDate}>{item.date}</Text>
+        </ListItem.Content>
+        <Icon
+          name="heart-outline" // like: heart
+          type="ionicon"
+          color="#818181" // like: #f84c5d
+          size={24}
+        />
+      </ListItem>
+    </Pressable>
+  );
 
   const PostAndComment = () => {
     return (
@@ -248,13 +260,13 @@ export default function PostScreen({ navigation, route }) {
 
   var goBackFunc = () => {
     if (needUpdateParent) {
-        if (route.params.from.includes("timeline")) {
-          appContext.setNeedUpdateTimeline(true);
-        }
+      if (route.params.from.includes("timeline")) {
+        appContext.setNeedUpdateTimeline(true);
+      }
 
-        if (route.params.from.includes("profile")) {
-          appContext.setNeedUpdateProfile(true);
-        }
+      if (route.params.from.includes("profile")) {
+        appContext.setNeedUpdateProfile(true);
+      }
     }
     navigation.goBack();
   };
