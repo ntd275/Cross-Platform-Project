@@ -19,7 +19,7 @@ import { Icon } from "react-native-elements";
 import { Api } from "../api/Api";
 import AuthContext from "../components/context/AuthContext";
 import SettingIcon from "../../assets/setting.svg";
-import IconSearch from "../../assets/ic_searchbox.svg";
+import IconSearch from "../../assets/search-outline.svg";
 import { Avatar } from "native-base";
 import { BaseURL } from "../utils/Constants";
 import AppContext from "../components/context/AppContext";
@@ -46,6 +46,7 @@ export default function HomeProfileScreen({ navigation }) {
         >
           <View style={{ flexDirection: "row", marginTop: 28 }}>
             <TouchableOpacity
+              style={{ marginRight: 2 }}
               onPress={() => {
                 navigation.navigate("SearchScreen");
               }}
@@ -62,7 +63,7 @@ export default function HomeProfileScreen({ navigation }) {
                 onTouchStart={() => {
                   navigation.navigate("SearchScreen");
                 }}
-                placeholder="Tìm bạn bè, tin nhắn, ..."
+                placeholder="Tìm bạn bè, tin nhắn..."
                 placeholderTextColor="#fff"
               ></TextInput>
             </View>
@@ -117,7 +118,7 @@ const styles = StyleSheet.create({
   input: {
     color: "white",
     fontSize: 16,
-    marginLeft: 16,
+    marginLeft: 14,
     width: "100%",
     marginTop: 4,
   },

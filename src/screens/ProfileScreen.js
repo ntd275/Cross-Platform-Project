@@ -40,10 +40,13 @@ import ImageView from "react-native-image-viewing";
 import * as ImagePicker from "expo-image-picker";
 import { BaseURL } from "../utils/Constants";
 import { AvatarNativeBaseCache, AvatarReactElementCache, ImageReactElementCache } from "./components/ImageCache";
+import { useIsFocused } from "@react-navigation/native";
+
 
 const FULL_WIDTH = Dimensions.get("window").width;
 
 export default function ProfileScreen({ navigation }) {
+  const isFocused = useIsFocused();
   const [firstLoad, setFirstLoad] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -62,6 +65,9 @@ export default function ProfileScreen({ navigation }) {
       appContext.setPostsInProfile(postList.reverse());
       setFirstLoad(false);
       setIsLoading(false);
+      if(appContext.needUpdateProfile){
+        appContext.setNeedUpdateProfile(false);
+      }
     } catch (err) {
       if (err.response && err.response.status == 401) {
         console.log(err.response.data.message);
@@ -74,6 +80,12 @@ export default function ProfileScreen({ navigation }) {
       });
     }
   };
+
+  if (isFocused && appContext.needUpdateProfile && !isLoading) {
+    setIsLoading(true);
+    // console.log("update timeline")
+    getPosts();
+  }
 
   useEffect(()=>{
     getPosts();

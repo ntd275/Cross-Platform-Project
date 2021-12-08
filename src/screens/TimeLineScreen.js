@@ -245,7 +245,7 @@ export default function TimeLineScreen({ navigation }) {
                 onTouchStart={() => {
                   navigation.navigate("SearchScreen");
                 }}
-                placeholder="Tìm bạn bè, tin nhắn, ..."
+                placeholder="Tìm bạn bè, tin nhắn..."
                 placeholderTextColor="#fff"
               ></TextInput>
             </View>
@@ -269,6 +269,9 @@ export default function TimeLineScreen({ navigation }) {
             navigation={navigation}
             firstLoad={firstLoad}
           />
+        }
+        ListFooterComponent={
+          <View style={{height: 200}}></View>
         }
         renderItem={({ item }) => (
           <View style={{ marginTop: 12 }}>
@@ -297,7 +300,7 @@ const styles = StyleSheet.create({
   input: {
     color: "white",
     fontSize: 16,
-    marginLeft: 16,
+    marginLeft: 14,
     width: "100%",
     marginTop: 4,
   },

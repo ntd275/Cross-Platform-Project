@@ -3,7 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import IconBack from "../../assets/arrow-back-outline.svg";
 import IconQR from "../../assets/ic_scan_qr_footer.svg";
 import IconDown from "../../assets/down.svg";
-import IconList from "../../assets/list.svg";
+import IconList from "../../assets/illus_emptystate_list.svg";
 import ChatContext from "../components/context/ChatContext";
 import Contact from "./components/Contact";
 import { Api } from "../api/Api";
@@ -332,9 +332,9 @@ export default function SearchScreen({ navigation }) {
     if (isRenderMessage) {
       if (messages.length === 0) {
         return (
-          <View style={{ justifyContent: "center", flexDirection: "column" }}>
-            <IconList style={{ color: "grey", marginTop: 20 }} />
-            <Text style={{ textAlign: "center", fontSize: 20 }}>
+          <View style={{ justifyContent: "center", flexDirection: "column"}}>
+            <IconList style={{marginBottom: 18, marginLeft: "auto", marginRight: "auto", marginTop: 20 }} />
+            <Text style={{ textAlign: "center", fontSize: 16 , fontWeight: "400"}}>
               Không tìm thấy kết quả phù hợp
             </Text>
           </View>
@@ -349,9 +349,9 @@ export default function SearchScreen({ navigation }) {
     if (isRenderContact) {
       if (people.length === 0) {
         return (
-          <View style={{ justifyContent: "center", flexDirection: "column" }}>
-            <IconList style={{ color: "grey", marginTop: 20 }} />
-            <Text style={{ textAlign: "center", fontSize: 20 }}>
+          <View style={{ justifyContent: "center", flexDirection: "column"}}>
+            <IconList style={{marginBottom: 18, marginLeft: "auto", marginRight: "auto", marginTop: 20 }} />
+            <Text style={{ textAlign: "center", fontSize: 16 , fontWeight: "400"}}>
               Không tìm thấy kết quả phù hợp
             </Text>
           </View>
