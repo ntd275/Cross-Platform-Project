@@ -492,6 +492,7 @@ export default function Post(props) {
                     <View style={styles.postHeader}>
                         <View style={styles.posterAvatar}>
                             <AvatarReactElementCache
+                                key={props.post.author.avatar.fileName}
                                 size={42}
                                 rounded
                                 onPress={() => goToUserPage()}
