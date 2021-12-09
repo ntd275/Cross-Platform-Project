@@ -133,6 +133,8 @@ export default function CreatePost({ navigation,route }) {
         .then((res) => {
           console.log(res.data);
           console.log(res.status);
+          context.setNeedUpdateProfile(true);
+          context.setNeedUpdateTimeline(true);
           Alert.alert("Thành công", "Đã đăng bài xong", [{ text: "OK" }]);
           return;
         })
