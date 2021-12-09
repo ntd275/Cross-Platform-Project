@@ -37,14 +37,17 @@ import {
 import { useIsFocused } from "@react-navigation/native";
 import { BaseURL } from "../utils/Constants";
 import AppContext from "../components/context/AppContext";
+import ChatContext from "../components/context/ChatContext";
 const FULL_WIDTH = Dimensions.get("window").width;
 
 const ListHeader = ({
+  id,
   info,
   navigation,
   isLoading,
   firstLoad,
-  isFriend,
+  friendStatus,
+  setFriendStatus,
   posts,
   setIsViewCoverImage,
   setIsViewAvatarImage,
@@ -70,6 +73,66 @@ const ListHeader = ({
     return <></>;
   };
 
+  const authContext = useContext(AuthContext);
+
+  const requestFriend = async () => {
+    try {
+      accessToken = authContext.loginState.accessToken;
+      const res = await Api.sendFriendRequest(accessToken, id);
+      if (res.status == 200) {
+        setFriendStatus(res.data.newStatus);
+      }
+    } catch (err) {
+      if (err.response && err.response.status == 401) {
+        console.log(err.response.data.message);
+        return;
+      }
+      console.log(err);
+      navigation.navigate("NoConnectionScreen", {
+        message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+      });
+    }
+  };
+
+  const cancelFriendRequest = async () => {
+    try {
+      accessToken = authContext.loginState.accessToken;
+
+      const res = await Api.sendCancelFriendRequest(accessToken, id);
+      if (res.status == 200) {
+        setFriendStatus(res.data.newStatus);
+      }
+    } catch (err) {
+      if (err.response && err.response.status == 401) {
+        console.log(err.response.data.message);
+        return;
+      }
+      console.log(err);
+      navigation.navigate("NoConnectionScreen", {
+        message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+      });
+    }
+  };
+
+  const chatContext = useContext(ChatContext);
+
+  const goToChat = () => {
+    chatContext.setCurFriendId(id);
+    chatContext.setInChat(true);
+    chatContext.setNeedUpdateListChat(true);
+    let friend = {
+      username: info.userName,
+      avatar: info.avatar,
+      id: id,
+      phonenumber: info.phonenumber,
+    };
+    navigation.navigate("ConversationScreen", {
+      from: "ContactScreen",
+      friend: friend,
+      isread: false,
+    });
+  };
+
   return (
     <>
       <View style={{ position: "relative" }}>
@@ -82,7 +145,7 @@ const ListHeader = ({
           style={{
             alignItems: "center",
             paddingBottom: 10,
-            backgroundColor: isFriend ? "#fff" : "#f0f0f0",
+            backgroundColor: friendStatus == "friend" ? "#fff" : "#f0f0f0",
           }}
         >
           <Text style={{ fontSize: 26, fontWeight: "500", paddingTop: 50 }}>
@@ -107,7 +170,7 @@ const ListHeader = ({
           />
         </Pressable>
       </View>
-      {isFriend ? (
+      {friendStatus == "friend" && (
         <ScrollView
           horizontal={true}
           style={{
@@ -184,7 +247,9 @@ const ListHeader = ({
             </Text>
           </LinearGradient>
         </ScrollView>
-      ) : (
+      )}
+
+      {friendStatus == "not friend" && (
         <View
           style={{
             backgroundColor: "#fff",
@@ -215,7 +280,9 @@ const ListHeader = ({
               }}
               activeOpacity={0.8}
               underlayColor="#3f3f3f"
-              onPress={() => {}}
+              onPress={() => {
+                goToChat();
+              }}
             >
               <LinearGradient
                 colors={["#b5d2ec55", "#b5d2ec55"]}
@@ -251,7 +318,9 @@ const ListHeader = ({
               }}
               activeOpacity={0.8}
               underlayColor="#3f3f3f"
-              onPress={() => {}}
+              onPress={() => {
+                requestFriend();
+              }}
             >
               <LinearGradient
                 colors={["#0085ff", "#05adff"]}
@@ -280,6 +349,107 @@ const ListHeader = ({
           </View>
         </View>
       )}
+
+      {friendStatus == "sent" && (
+        <View
+          style={{
+            backgroundColor: "#fff",
+            paddingTop: 10,
+            paddingLeft: 20,
+            paddingRight: 20,
+          }}
+        >
+          <Text style={{ textAlign: "center", fontSize: 15 }}>
+            Lời mời kết bạn đã được gửi đi. Hãy để lại tin nhắn cho{" "}
+            {info.userName} trong lúc chờ đợi nhé!
+          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignSelf: "center",
+              paddingTop: 10,
+              paddingBottom: 12,
+            }}
+          >
+            <TouchableHighlight
+              style={{
+                width: "30%",
+                marginTop: "auto",
+                alignSelf: "center",
+                borderRadius: 15,
+                marginRight: 10,
+              }}
+              activeOpacity={0.8}
+              underlayColor="#3f3f3f"
+              onPress={() => {
+                goToChat();
+              }}
+            >
+              <LinearGradient
+                colors={["#b5d2ec55", "#b5d2ec55"]}
+                start={[0, 1]}
+                end={[1, 0]}
+                style={{
+                  width: "100%",
+                  height: 30,
+                  alignSelf: "center",
+                  borderRadius: 15,
+                }}
+              >
+                <View
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flex: 1,
+                  }}
+                >
+                  <Text style={{ color: "#0085ff", fontWeight: "500" }}>
+                    Nhắn tin
+                  </Text>
+                </View>
+              </LinearGradient>
+            </TouchableHighlight>
+            <TouchableHighlight
+              style={{
+                width: "30%",
+                marginTop: "auto",
+                alignSelf: "center",
+                borderRadius: 15,
+                marginLeft: 10,
+              }}
+              activeOpacity={0.8}
+              underlayColor="#3f3f3f"
+              onPress={() => {
+                cancelFriendRequest();
+              }}
+            >
+              <LinearGradient
+                colors={["#0085ff", "#05adff"]}
+                start={[0, 1]}
+                end={[1, 0]}
+                style={{
+                  width: "100%",
+                  height: 30,
+                  alignSelf: "center",
+                  borderRadius: 15,
+                }}
+              >
+                <View
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flex: 1,
+                  }}
+                >
+                  <Text style={{ color: "#fff", fontWeight: "500" }}>
+                    Hủy kết bạn
+                  </Text>
+                </View>
+              </LinearGradient>
+            </TouchableHighlight>
+          </View>
+        </View>
+      )}
       <NotiHeader />
     </>
   );
@@ -287,8 +457,9 @@ const ListHeader = ({
 
 export default function ViewProfileScreen({ navigation, route }) {
   const mounted = useRef(true);
+  const [loaded, setLoaded] = useState(false);
   const [firstLoad, setFirstLoad] = useState(true);
-  const [isFriend, setIsFriend] = useState(false);
+  const [friendStatus, setFriendStatus] = useState("not friend");
   const [isLoading, setIsLoading] = useState(false);
   const [posts, setPosts] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -297,6 +468,7 @@ export default function ViewProfileScreen({ navigation, route }) {
     coverImage: "defaul_cover_image.jpg",
     userName: "",
     description: "",
+    phonenumber: "",
   });
 
   const authContext = React.useContext(AuthContext);
@@ -312,41 +484,40 @@ export default function ViewProfileScreen({ navigation, route }) {
         coverImage: data.cover_image.fileName,
         userName: data.username,
         description: data.description,
+        phonenumber: data.phonenumber,
       });
     } catch (e) {
       console.log(e);
     }
   };
 
-  const getFriendStatus = async()=>{
+  const getFriendStatus = async () => {
     try {
       const token = authContext.loginState.accessToken;
-      let res = await Api.getFriendStatus(token,route.params.userId)
+      let res = await Api.getFriendStatus(token, route.params.userId);
       if (!mounted.current) return;
-      if(res.data.data.status != "not friend"){
-        setIsFriend(true);
-      } 
+      setFriendStatus(res.data.data.status);
     } catch (e) {
       console.log(e);
     }
-  }
+  };
 
   const getPosts = async () => {
     setIsLoading(true);
     try {
       const accessToken = authContext.loginState.accessToken;
-      // console.log(route.params.userId);
-      // console.log(authContext.loginState.userId)
-      // console.log(mounted.current);
       const res = await Api.getPostsById(accessToken, route.params.userId);
       if (!mounted.current) return;
-      console.log(res.data)
+      console.log(res.data);
       let postList = res.data.data;
       setPosts(postList.reverse());
+      setIsLoading(false);
+      if (appContext.needUpdateViewProfileScreen) {
+        appContext.setNeedUpdateViewProfileScreen(false);
+      }
       if (firstLoad) {
         setFirstLoad(false);
       }
-      setIsLoading(false);
     } catch (err) {
       if (err.response && err.response.status == 401) {
         console.log(err.response.data.message);
@@ -361,14 +532,15 @@ export default function ViewProfileScreen({ navigation, route }) {
   };
 
   useEffect(() => {
-    getInfo();
-    getPosts();
-    getFriendStatus();
-
+    const load = async () => {
+      await Promise.all(getInfo(), getPosts(), getFriendStatus());
+      setLoaded(true);
+    };
+    load();
     return () => {
       mounted.current = false;
     };
-  },[]);
+  }, []);
 
   const refreshPosts = async () => {
     setRefreshing(true);
@@ -379,7 +551,7 @@ export default function ViewProfileScreen({ navigation, route }) {
   const appContext = useContext(AppContext);
 
   const isFocused = useIsFocused();
-  if (isFocused && appContext.needUpdateViewUser && !isLoading) {
+  if (isFocused && appContext.needUpdateViewProfileScreen && !isLoading) {
     setIsLoading(true);
     refreshPosts();
   }
@@ -399,6 +571,14 @@ export default function ViewProfileScreen({ navigation, route }) {
   });
 
   const [iconColor, setIconColor] = useState("white");
+
+  if (!loaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -423,6 +603,7 @@ export default function ViewProfileScreen({ navigation, route }) {
       >
         <View style={{ marginTop: 25, marginLeft: 60 }}>
           <AvatarNativeBaseCache
+            key={info.avatar}
             source={{ uri: BaseURL + info.avatar }}
             size="sm"
           />
@@ -471,21 +652,28 @@ export default function ViewProfileScreen({ navigation, route }) {
       />
 
       <FlatList
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: offset } } }],
+          { useNativeDriver: false }
+        )}
         keyboardShouldPersistTaps={"always"}
         data={posts}
         keyExtractor={(item, index) => index.toString()}
-        ListHeaderComponent={()=>
+        ListHeaderComponent={() => (
           <ListHeader
+            id={route.params.userId}
             info={info}
             navigation={navigation}
-            isFriend={isFriend}
+            friendStatus={friendStatus}
+            setFriendStatus={setFriendStatus}
             isLoading={isLoading}
             firstLoad={firstLoad}
             posts={posts}
             setIsViewCoverImage={setIsViewCoverImage}
             setIsViewAvatarImage={setIsViewAvatarImage}
           />
-        }
+        )}
         renderItem={({ item }) => (
           <View style={{ marginTop: 12 }}>
             <Post

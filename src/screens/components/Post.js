@@ -99,6 +99,9 @@ export default function Post(props) {
                 if (props.from.includes("profile")) {
                     appContext.setNeedUpdateProfile(true);
                 }
+                if(props.from.includes("viewuser")){
+                    appContext.setNeedUpdateViewProfileScreen(true);
+                }
             }
 
         } catch (e) {
