@@ -380,7 +380,7 @@ export default function HomeContactScreen({ navigation }) {
         <View style={styles.part1}>
           <TouchableHighlight
             style={{ paddingTop: 10, paddingBottom: 10, paddingLeft: 15 }}
-            onPress={() => {navigation.navigate("LoiMoiKetBan")}}
+            onPress={() => {navigation.navigate("FriendRequests")}}
             activeOpacity={0.99999}
             underlayColor="#05adff22"
           >

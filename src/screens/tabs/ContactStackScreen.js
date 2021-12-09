@@ -16,13 +16,14 @@ import ViewProfileScreen from "../ViewProfileScreen";
 import ProfileOptionScreen from "../ProfileOptionScreen";
 import PersonalInformationScreen from "../PesonalInformationScreen";
 import SettingScreen from "../SettingScreen";
+import FriendRequests from "../LoiMoiKetBan";
 
 const ContactStack = createNativeStackNavigator();
 
 export default function ContactStackScreen({ route, navigation }) {
   React.useLayoutEffect(() => {
     const routeName = getFocusedRouteNameFromRoute(route);
-    const hideScreens = ["ConversationScreen", "ConversationOption"];
+    const hideScreens = ["ConversationScreen", "ConversationOption", "FriendRequests"];
     if (hideScreens.includes(routeName)) {
       navigation.setOptions({ tabBarStyle: { display: "none" } });
     } else {
@@ -50,8 +51,8 @@ export default function ContactStackScreen({ route, navigation }) {
         options={{ animation: "none" }}
       />
       <ContactStack.Screen
-        name="LoiMoiKetBan"
-        component={LoiMoiKetBan}
+        name="FriendRequests"
+        component={FriendRequests}
       />
 
       <ContactStack.Screen

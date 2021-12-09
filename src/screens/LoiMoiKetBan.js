@@ -37,7 +37,7 @@ import { BaseURL } from "../utils/Constants";
 
 
 
-export default function App({ navigation }) {
+export default function FriendRequests({ navigation }) {
   const context = React.useContext(AuthContext);
   const [ListS, setListS] = useState([]);
   const [ListR, setListR] = useState([]);
@@ -112,19 +112,47 @@ export default function App({ navigation }) {
 
     try {
       const accessToken = context.loginState.accessToken;
-      let response = await Api.sendCancelFriendRequest(accessToken, id);
-      if (response.data.success) {
-        const newListS = ListS.filter(el => el.receiver._id !== id);
+      let res = await Api.sendCancelFriendRequest(accessToken, id);
+      if (res.data.newStatus == "not friend") {
+        const newListS = ListS;
+        for (let i = 0; i < newListS.length; i++) {
+          if (newListS[i].receiver._id == id) {
+            newListS[i].status = '3';
+            break;
+          }
+        }
         setListS([...newListS]);
       } else {
-        console.log(e);
-        navigation.navigate("", {
-          message: "Hủy kết bạn không thành công",
-        });
+        const newListS = ListS.filter(el => el.receiver._id !== id);
+        setListS([...newListS]);
       }
-      // console.log(friends.data.data.friends);
-      // console.log(typeof friends.data.data.friends);
-      // setListR(Object.values(List.data.data.receivedList));
+    } catch (e) {
+      console.log(e);
+      navigation.navigate("NoConnectionScreen", {
+        message: "Vui lòng kiểm tra kết nối internet và thử lại",
+      });
+    }
+  }
+
+
+  const handleResentRequest = async (id) => {
+
+    try {
+      const accessToken = context.loginState.accessToken;
+      let res = await Api.sendFriendRequest(accessToken, id);
+      if (res.data.newStatus == "sent") {
+        const newListS = ListS;
+        for (let i = 0; i < newListS.length; i++) {
+          if (newListS[i].receiver._id == id) {
+            newListS[i].status = '0';
+            break;
+          }
+        }
+        setListS([...newListS]);
+      } else {
+        const newListS = ListS.filter(el => el.receiver._id !== id);
+        setListS([...newListS]);
+      }
     } catch (e) {
       console.log(e);
       navigation.navigate("NoConnectionScreen", {
@@ -152,11 +180,6 @@ export default function App({ navigation }) {
   useLayoutEffect(() => {
     getListR();
   }, []);
-
-
-
-
-
 
 
   const FriendSent = (props) => {
@@ -199,6 +222,52 @@ export default function App({ navigation }) {
   };
 
   const FriendReceived = (props) => {
+    let button;
+    if (props.status == "0") {
+      button = <TouchableOpacity style={{ flexDirection: 'row', height: 30, marginRight: 16, borderRadius: 40, marginTop: 9, padding: 5, marginLeft: "auto", backgroundColor: '#e6e6e6' }} onPress={() => { handleCancelRequest(props.id) }}>
+        <Text style={{ fontSize: 12, color: 'black', width: 80, textAlign: 'center', alignSelf: "center", fontWeight: "500" }}>Thu hồi</Text>
+      </TouchableOpacity>
+    } else if (props.status == "3") {
+      button = <TouchableHighlight
+        style={{
+          width: 90,
+          marginTop: 9,
+          borderRadius: 15,
+          marginLeft: "auto",
+          marginRight: 16,
+          height: 30
+        }}
+        activeOpacity={0.8}
+        underlayColor="#3f3f3f"
+        onPress={() => {
+          handleResentRequest(props.id)
+        }}
+      >
+        <LinearGradient
+          colors={["#0085ff", "#05adff"]}
+          start={[0, 1]}
+          end={[1, 0]}
+          style={{
+            width: "100%",
+            height: 30,
+            alignSelf: "center",
+            borderRadius: 15,
+          }}
+        >
+          <View
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              flex: 1,
+            }}
+          >
+            <Text style={{ color: "#fff", fontWeight: "500", fontSize: 13 }}>
+              Kết bạn
+            </Text>
+          </View>
+        </LinearGradient>
+      </TouchableHighlight>
+    }
     return (
       <View
         style={{ paddingTop: 15, paddingBottom: 15, paddingLeft: 15, marginTop: 10, backgroundColor: "white" }}
@@ -208,28 +277,29 @@ export default function App({ navigation }) {
       >
         <View style={{ flexDirection: "row" }}>
           <Avatar size="lg" source={{ uri: props.img }} />
+          <View flex={1}>
+            <TouchableOpacity>
+              <Text
+                style={{
+                  marginLeft: 15,
+                  fontSize: 16,
+                  marginTop: 6,
+                  fontWeight: '500'
+                }}
+              >
+                {props.name}
+              </Text>
+            </TouchableOpacity>
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={{ fontSize: 12, marginLeft: 16, marginTop: 12, color: "#a6a6a6" }}>Đã gửi lời mời kết bạn</Text>
 
-          <Text
-            style={{
-              alignSelf: "center",
-              marginLeft: 15,
-              fontSize: 12,
+            </View>
 
-              marginTop: -30
-
-            }}
-          >
-            {props.name}
-          </Text>
-
+          </View>
+          {button}
         </View>
 
-        <View style={{ flexDirection: 'row' }}>
-          <Text style={{ marginTop: -30, fontSize: 12, marginLeft: 80, color: "#a6a6a6" }}>Muốn kết bạn</Text>
-          <TouchableOpacity style={{ flexDirection: 'row', borderRadius: 40, borderWidth: 0, marginTop: -30, marginBottom: 10, padding: 5, marginLeft: 40, backgroundColor: '#e6e6e6' }} onPress={() => { handleCancelRequest(props.id) }}>
-            <Text style={{ fontSize: 10, color: 'black', width: 80, textAlign: 'center', fontWeight: 'bold' }}>THU HỒI</Text>
-          </TouchableOpacity>
-        </View>
+
 
         {/* <Text style = {{borderWidth:1,borderRadius: 5, marginTop: 5, paddingLeft: 10}}>Xin chào tôi là {props.name}</Text> */}
         {/* padding: 0, marginTop:-50,marginLeft:35 */}
@@ -244,13 +314,12 @@ export default function App({ navigation }) {
 
   let tmp = [];
   for (let i = 0; i < ListS.length; i++) {
-    tmp.push(<FriendReceived key={i} name={ListS[i].receiver.username} img={BaseURL + ListS[i].receiver.avatar.fileName} />);
+    tmp.push(<FriendReceived key={i} name={ListS[i].receiver.username} img={BaseURL + ListS[i].receiver.avatar.fileName} id={ListS[i].receiver._id} status={ListS[i].status} />);
   }
   let tmp1 = [];
   for (let i = 0; i < ListR.length; i++) {
-    tmp1.push(<FriendSent key={i} name={ListR[i].sender.username} img={BaseURL + ListR[i].sender.avatar.fileName} />);
+    tmp1.push(<FriendSent key={i} name={ListR[i].sender.username} img={BaseURL + ListR[i].sender.avatar.fileName} id={ListR[i].sender._id} status={ListR[i].status} />);
   }
-
   function ListSent() {
     return (
 
@@ -266,7 +335,7 @@ export default function App({ navigation }) {
   function ListReceived() {
     return (
       <ScrollView
-        style={{ backgroundColor: '#e6e6e6' }}
+      // style={{ backgroundColor: '#ffff' }}
       >
         {tmp1}
       </ScrollView>
@@ -315,23 +384,14 @@ export default function App({ navigation }) {
           end={[1, 0]}
           style={styles.header}
         >
-          <View style={{ flexDirection: "row", marginTop: 28 }}>
-            <TouchableOpacity>
-              <View style={{ flex: 1 }}>
-                <IconSearch style={styles.iconSearch} />
-              </View>
+          <View style={{ flex: 1, flexDirection: "row" }}>
+            <TouchableOpacity
+              style={styles.iconBackWrap}
+              onPress={() => { navigation.goBack() }}
+            >
+              <IconBack style={styles.iconBack} />
             </TouchableOpacity>
-
-            <View style={{ flex: 6 }}>
-              <TextInput
-                style={styles.input}
-                placeholder="Tìm bạn bè, tin nhắn..."
-                placeholderTextColor="#fff"
-              ></TextInput>
-            </View>
-            <View style={{ marginLeft: 'auto', marginRight: 15, marginTop: 2 }}>
-              <SettingIcon style={{ height: 28, width: 28 }} />
-            </View>
+            <Text style={styles.title} >Lời mời kết bạn</Text>
           </View>
         </LinearGradient>
       </View>
@@ -344,6 +404,26 @@ export default function App({ navigation }) {
 const styles = StyleSheet.create({
   input: {
     marginLeft: 10,
+  },
+  header: {
+    width: '100%',
+    color: "#fff",
+    height: 62,
+  },
+  iconBack: {
+    marginTop: 30,
+    left: 10,
+  },
+  iconBackWrap: {
+    width: 40,
+    position: "absolute"
+  },
+  title: {
+    marginTop: 30,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    color: '#fff',
+    fontSize: 18,
   },
   part1: {
     borderBottomWidth: 2,
