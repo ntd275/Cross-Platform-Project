@@ -53,6 +53,7 @@ export default function SearchScreen({ navigation }) {
       chatId: chatId,
       friend: friend,
       isread: isread,
+      from: "ContactScreen",
     });
     // console.log("go to chat screen");
   };
