@@ -154,12 +154,12 @@ export default function ChangePasswordScreen({ navigation }) {
             const res = await Api.changePassword(token, currentPassword, password);
             if (res.status == 200) {
                 setSuccessNoti(true);
-                navigation.goBack();
                 setNotification("Đổi mật khẩu thành công");
+                navigation.goBack();
                 appContext.displayMessage({
                     message: "Đổi mật khẩu thành công",
                     type: "default",
-                    style: { width: 195, marginBottom: 200 },
+                    style: { width: 245, marginBottom: 200 },
                     titleStyle: {fontSize: 14},
                     duration: 1900,
                     icon:"success",

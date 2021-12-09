@@ -71,7 +71,7 @@ export const TextUtility = {
                     <Text key={i} style={styles.url} onPress={() => {
                         let link = list[i];
                         if (!link.startsWith("http://") && !link.startsWith("https://")) {
-                            link = [a - zA - Z0 - 9] * "https://" + link;
+                            link = "https://" + link;
                         }
                         Linking.openURL(link);
                     }}>
