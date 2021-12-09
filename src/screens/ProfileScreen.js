@@ -71,10 +71,13 @@ export default function ProfileScreen({ navigation }) {
       );
       if(!mounted.current) return;
       let postList = res.data.data;
+      if(appContext.needUpdateProfile){
+        appContext.setNeedUpdateProfile(false);
+      }
       appContext.setPostsInProfile(postList.reverse());
       setFirstLoad(false);
       setIsLoading(false);
-  
+        
     } catch (err) {
       if (err.response && err.response.status == 401) {
         console.log(err.response.data.message);
