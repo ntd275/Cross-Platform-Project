@@ -424,6 +424,7 @@ export default function ProfileScreen({ navigation }) {
       >
         <View style={{ marginTop: 25, marginLeft: 60 }}>
           <AvatarNativeBaseCache
+            key={appContext.avatar}
             source={{ uri: BaseURL + appContext.avatar }}
             size="sm"
           />
