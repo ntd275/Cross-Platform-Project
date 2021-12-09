@@ -36,7 +36,7 @@ import { Dimensions } from 'react-native';
 export default function PostScreen({ navigation, route }) {
   const mounted = useRef(false);
   const flatList = useRef(null);
-
+  const [post, setPost] = useState(route.params.post);
   useEffect(() => {
     mounted.current = true;
     return () => {
@@ -51,7 +51,34 @@ export default function PostScreen({ navigation, route }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [DidComment, setDidComment] = useState(false);
   const [needUpdateParent, setNeedUpdateParent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
+  const updatePost = async () => {
+    try {
+      let accessToken = authContext.loginState.accessToken;
+      let res = await  Api.getPostsByPostId(accessToken, route.params.post._id);
+      if (appContext.needUpdatePostScreen) {
+        appContext.setNeedUpdatePostScreen(false);
+      }
+      if (mounted.current === false) {
+        return;
+      }
+      setPost(res.data.data);
+      setIsLoading(false);
+    } catch (err) {
+      console.log(err);
+      if (err.response && err.response.status == 404) {
+        return;
+      }
+      navigation.navigate("NoConnectionScreen", { message: "" });
+    }
+
+  }
+
+  if (appContext.needUpdatePostScreen && !isLoading) {
+    setIsLoading(true);
+    updatePost();
+  };
   const createComment = async (content) => {
     try {
       let accessToken = authContext.loginState.accessToken;
@@ -154,12 +181,13 @@ export default function PostScreen({ navigation, route }) {
     return (
       <>
         <View style={styles.post}>
-          <Post
+          {post ? <Post
             mode="comment"
-            post={route.params.post}
+            post={post}
             navigation={navigation}
             from={route.params.from}
-          ></Post>
+          ></Post> : <></>}
+
         </View>
         {describe}
       </>

@@ -60,6 +60,7 @@ export default function App() {
   const [postsInProfile, setPostsInProfile] = React.useState([]);
   const [needUpdateTimeline, setNeedUpdateTimeline] = React.useState(false);
   const [needUpdateProfile, setNeedUpdateProfile] = React.useState(false);
+  const [needUpdatePostScreen, setNeedUpdatePostScreen] = React.useState(false);
 
   const getMe = async () => {
     try {
@@ -166,6 +167,9 @@ export default function App() {
 
     needUpdateProfile,
     setNeedUpdateProfile,
+
+    needUpdatePostScreen,
+    setNeedUpdatePostScreen,
 
   };
 

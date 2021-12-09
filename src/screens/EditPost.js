@@ -50,7 +50,7 @@ export default function EditPost({ navigation, route }) {
   const checkCanSend = () => {
     return (
       postText !== post.described ||
-      JSON.stringify(selectedVideo?[selectedVideo]:[]) != JSON.stringify(post.videos) ||
+      JSON.stringify(selectedVideo ? [selectedVideo] : []) != JSON.stringify(post.videos) ||
       JSON.stringify(selectedImage) != JSON.stringify(post.images)
     );
   };
@@ -148,12 +148,16 @@ export default function EditPost({ navigation, route }) {
         onSend
       )
         .then((res) => {
-          console.log(res.data);
-          console.log(res.status);
+          // console.log(res.data);
+          // console.log(res.status);
           Alert.alert("Thành công", "Đã sửa bài xong", [{ text: "OK" }]);
-          if(route.params.from  == "timeline"){
-            appContext.setNeedUpdateTimeline(true);
-          };
+          if (route.params.from.includes("postscreen")) {
+            appContext.setNeedUpdatePostScreen(true);
+          }
+          if (route.params.from.includes("profile")) {
+            appContext.setNeedUpdateProfile(true);
+          }
+          appContext.setNeedUpdateTimeline(true);
           return;
         })
         .catch((e) => {
@@ -282,7 +286,7 @@ export default function EditPost({ navigation, route }) {
                       : selectedImage[0]
                   }
                   style={{ height: "100%" }}
-                  onPress={() => {}}
+                  onPress={() => { }}
                 />
                 <TouchableOpacity
                   style={{ position: "absolute", top: 5, right: 5 }}
@@ -312,7 +316,7 @@ export default function EditPost({ navigation, route }) {
                               : selectedImage[i + 1]
                           }
                           style={{ height: "100%", resizeMode: "cover" }}
-                          onPress={() => {}}
+                          onPress={() => { }}
                         />
                         <TouchableOpacity
                           style={{ position: "absolute", top: 5, right: 5 }}
@@ -365,8 +369,8 @@ export default function EditPost({ navigation, route }) {
               style={{
                 height: openSelect
                   ? Dimensions.get("screen").height -
-                    150 -
-                    context.keyBoardHeight
+                  150 -
+                  context.keyBoardHeight
                   : Dimensions.get("screen").height - 150 - keyBoardHeight,
               }}
               onPress={() => {

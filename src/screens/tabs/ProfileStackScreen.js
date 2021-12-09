@@ -6,6 +6,7 @@ import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import ProfileScreen from "../ProfileScreen";
 import CreatePost from "../CreatePost";
 import PostScreen from "../PostScreen";
+import EditPost from "../EditPost";
 import ProfileEditScreen from "../ProfileEditScreen";
 import ChangePasswordScreen from "../ChangePasswordScreen";
 import ViewProfileScreen from "../ViewProfileScreen";
@@ -55,6 +56,7 @@ export default function ProfileStackScreen({ route, navigation }) {
         component={SearchScreen}
         options={{ animation: "none" }}
       />
+      <ProfileStack.Screen name="EditPost" component={EditPost} />
       <ProfileStack.Screen
         name="ChangePasswordScreen"
         component={ChangePasswordScreen}

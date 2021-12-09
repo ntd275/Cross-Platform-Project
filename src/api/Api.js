@@ -178,6 +178,15 @@ export const Api = {
       },
     });
   },
+
+  getPostsByPostId: (token, id) => {
+    // console.log(`${BaseURL}/posts/list?userId=${id}`)
+    return axios.get(`${BaseURL}/posts/show/${id}`, {
+      headers: {
+        authorization: fomartToken(token),
+      },
+    });
+  },
   deletePost: (token, id) => {
     return axios.get(`${BaseURL}/posts/delete/${id}`, {
       headers: {
