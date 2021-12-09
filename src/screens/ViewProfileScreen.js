@@ -451,7 +451,7 @@ const ListHeader = ({
         </View>
       )}
 
-{friendStatus == "received+" && (
+      {friendStatus == "received" && (
         <View
           style={{
             backgroundColor: "#fff",
