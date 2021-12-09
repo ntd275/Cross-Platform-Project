@@ -93,6 +93,7 @@ export default function HomeProfileScreen({ navigation }) {
           }}
         >
           <AvatarNativeBaseCache
+            key={appContext.avatar}
             source={{ uri: BaseURL + appContext.avatar }}
             size={"lg"}
           />

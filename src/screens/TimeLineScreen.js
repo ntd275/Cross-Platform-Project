@@ -79,6 +79,7 @@ const ListHeader = ({ navigation, isLoading, firstLoad }) => {
       <View style={styles.createPostArea}>
         <View style={styles.avatar}>
           <AvatarReactElementCache
+            key={appContext.avatar}
             rounded
             size="medium"
             source={{
