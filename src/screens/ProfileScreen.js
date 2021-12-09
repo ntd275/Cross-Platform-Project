@@ -46,12 +46,20 @@ import { useIsFocused } from "@react-navigation/native";
 const FULL_WIDTH = Dimensions.get("window").width;
 
 export default function ProfileScreen({ navigation }) {
+  const mounted = useRef(false);
   const isFocused = useIsFocused();
   const [firstLoad, setFirstLoad] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const authContext = React.useContext(AuthContext);
   const appContext = useContext(AppContext);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const getPosts = async () => {
     setIsLoading(true);
@@ -61,13 +69,12 @@ export default function ProfileScreen({ navigation }) {
         accessToken,
         authContext.loginState.userId
       );
+      if(!mounted.current) return;
       let postList = res.data.data;
       appContext.setPostsInProfile(postList.reverse());
       setFirstLoad(false);
       setIsLoading(false);
-      if(appContext.needUpdateProfile){
-        appContext.setNeedUpdateProfile(false);
-      }
+  
     } catch (err) {
       if (err.response && err.response.status == 401) {
         console.log(err.response.data.message);
@@ -391,9 +398,11 @@ export default function ProfileScreen({ navigation }) {
         let res = await Api.editUser("lol " + authContext.loginState.accessToken, {
             avatar: "data:image;base64," + result.base64,
         })
-        await getPosts()
+
         console.log(res.data.data.avatar.fileName)
         appContext.setAvatar(res.data.data.avatar.fileName)
+        appContext.setNeedUpdateTimeline(true);
+        appContext.setNeedUpdateProfile(true);
         Alert.alert("Thành công", "Đã thay đổi ảnh đại diện", [{ text: "OK" }]);
       } catch (e) {
         console.log(e);

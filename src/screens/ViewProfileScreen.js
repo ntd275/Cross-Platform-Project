@@ -450,6 +450,107 @@ const ListHeader = ({
           </View>
         </View>
       )}
+
+{friendStatus == "received+" && (
+        <View
+          style={{
+            backgroundColor: "#fff",
+            paddingTop: 10,
+            paddingLeft: 20,
+            paddingRight: 20,
+          }}
+        >
+          <Text style={{ textAlign: "center", fontSize: 15 }}>
+            Kết bạn với {info.userName} ngay để cùng tạo nên những cuộc trò
+            chuyện thú vị và đáng nhớ
+          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignSelf: "center",
+              paddingTop: 10,
+              paddingBottom: 12,
+            }}
+          >
+            <TouchableHighlight
+              style={{
+                width: "30%",
+                marginTop: "auto",
+                alignSelf: "center",
+                borderRadius: 15,
+                marginRight: 10,
+              }}
+              activeOpacity={0.8}
+              underlayColor="#3f3f3f"
+              onPress={() => {
+                goToChat();
+              }}
+            >
+              <LinearGradient
+                colors={["#b5d2ec55", "#b5d2ec55"]}
+                start={[0, 1]}
+                end={[1, 0]}
+                style={{
+                  width: "100%",
+                  height: 30,
+                  alignSelf: "center",
+                  borderRadius: 15,
+                }}
+              >
+                <View
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flex: 1,
+                  }}
+                >
+                  <Text style={{ color: "#0085ff", fontWeight: "500" }}>
+                    Nhắn tin
+                  </Text>
+                </View>
+              </LinearGradient>
+            </TouchableHighlight>
+            <TouchableHighlight
+              style={{
+                width: "30%",
+                marginTop: "auto",
+                alignSelf: "center",
+                borderRadius: 15,
+                marginLeft: 10,
+              }}
+              activeOpacity={0.8}
+              underlayColor="#3f3f3f"
+              onPress={() => {
+                requestFriend();
+              }}
+            >
+              <LinearGradient
+                colors={["#0085ff", "#05adff"]}
+                start={[0, 1]}
+                end={[1, 0]}
+                style={{
+                  width: "100%",
+                  height: 30,
+                  alignSelf: "center",
+                  borderRadius: 15,
+                }}
+              >
+                <View
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flex: 1,
+                  }}
+                >
+                  <Text style={{ color: "#fff", fontWeight: "500" }}>
+                    Kết bạn
+                  </Text>
+                </View>
+              </LinearGradient>
+            </TouchableHighlight>
+          </View>
+        </View>
+      )}
       <NotiHeader />
     </>
   );
