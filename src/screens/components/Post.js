@@ -1,7 +1,6 @@
 import { useLinkProps } from "@react-navigation/native";
 import React, { useState, useEffect, useRef, useContext } from "react";
 import {
-    ScrollView,
     StyleSheet,
     Pressable,
     Text,
@@ -11,8 +10,6 @@ import {
     TouchableHighlight,
     Keyboard,
     TouchableOpacity,
-    TouchableNativeFeedback,
-    TouchableHighlightBase,
     Dimensions,
     Alert,
 } from "react-native";
@@ -70,11 +67,9 @@ export default function Post(props) {
         }else{
             props.navigation.navigate("ProfileScreen")
         }
-        // console.log("Go to user's page!");
     };
 
     var showMenu = () => {
-        console.log("showing menu ...");
         refRBSheet.current.open();
     };
 
@@ -114,7 +109,6 @@ export default function Post(props) {
                     appContext.setNeedUpdateTimeline(true);
                 }
             }
-
         } catch (e) {
             console.log(e);
         }
@@ -238,7 +232,6 @@ export default function Post(props) {
 
     var deletePost = async () => {
         try {
-
             let res = await Api.deletePost(context.loginState.accessToken,
                 props.post._id);
             console.log(res);
@@ -338,8 +331,9 @@ export default function Post(props) {
                 isVisible={blockModalVisible}
                 onBackdropPress={() => {
                     setBlockModalVisible(false);
+                    refCallBack.current = ()=>{};
                 }}
-                style={{ width: 292, alignSelf: "center" }}
+                style={{alignSelf: "center", width:292 }}
                 animationIn="fadeInUp"
                 animationOut="fadeOutDownBig"
             >
@@ -356,6 +350,7 @@ export default function Post(props) {
                             style={styles.menuCancelBtn}
                             onPress={() => {
                                 setBlockModalVisible(false);
+                                refCallBack.current = ()=>{};
                             }}
                         >
                             <Text style={styles.textCancel}>Không</Text>
@@ -365,6 +360,7 @@ export default function Post(props) {
                             style={styles.menuAcceptBtn}
                             onPress={() => {
                                 setBlockModalVisible(false);
+                                refCallBack.current = ()=>{};
                                 block();
                             }}
                         >
@@ -429,10 +425,6 @@ export default function Post(props) {
                 },
             ]
         );
-    };
-
-    var onPressBlock = () => {
-        console.log("pressed Block");
     };
 
     let refCallBack = useRef(() => { });
@@ -1066,7 +1058,6 @@ const styles = StyleSheet.create({
     },
     menuStyle: {
         flexDirection: "column",
-        minHeight: 151,
         backgroundColor: "#fff",
         borderRadius: 12,
         paddingTop: 20,
@@ -1087,7 +1078,6 @@ const styles = StyleSheet.create({
         paddingRight: 12,
     },
     menuBottom: {
-        height: 40,
         flexDirection: "row",
         borderTopWidth: 1,
         borderTopColor: "#dadada",
