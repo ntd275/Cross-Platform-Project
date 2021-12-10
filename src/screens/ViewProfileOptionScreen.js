@@ -11,7 +11,7 @@ import {
   TouchableHighlight,
   TouchableOpacity,
   Alert,
-  Dimensions
+  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import IconBack from "../../assets/ic_nav_header_back.svg";
@@ -31,7 +31,7 @@ export default function ViewProfileOptionScreen({ navigation, route }) {
   const [menuDeleteVisible, setMenuDeleteVisible] = useState(false);
   const authContext = useContext(AuthContext);
   const appContext = useContext(AppContext);
-  const removeFriend = async() => {
+  const removeFriend = async () => {
     try {
       accessToken = authContext.loginState.accessToken;
       const res = await Api.setRemoveFriend(accessToken, route.params.id);
@@ -40,7 +40,11 @@ export default function ViewProfileOptionScreen({ navigation, route }) {
       appContext.displayMessage({
         message: "Đã xóa bạn thành công",
         type: "info",
-        style: { paddingLeft: Dimensions.get("window").width/2 - 80, paddingBottom: 8, paddingTop: 24},
+        style: {
+          paddingLeft: Dimensions.get("window").width / 2 - 80,
+          paddingBottom: 8,
+          paddingTop: 24,
+        },
         icon: "success",
         position: "top",
         duration: 1600,
@@ -57,7 +61,49 @@ export default function ViewProfileOptionScreen({ navigation, route }) {
         message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
       });
     }
-  }
+  };
+
+  const block = async () => {
+    let hide = !appContext.blockedDiary.includes(route.params.id);
+    try {
+      let accessToken = authContext.loginState.accessToken;
+      const res = await Api.setBlockDiary(
+        accessToken,
+        route.params.id,
+        hide
+      );
+      if (res.status == 200) {
+        appContext.displayMessage({
+          message: hide ? "Chặn thành công" : "Bỏ chặn thành công",
+          type: "default",
+          style: { width: 195, marginBottom: 200 },
+          titleStyle: { fontSize: 14 },
+          duration: 1900,
+          icon: "success",
+          position: "center",
+          backgroundColor: "#262626",
+        });
+        appContext.setBlockedDiary(res.data.data.blocked_diary);
+      }
+      appContext.setNeedUpdateTimeline(true);
+    } catch (err) {
+      console.log(err);
+      if (err.response && err.response.status == 400) {
+        console.log(err.response.data.message);
+        appContext.displayMessage({
+          message: err.response.data.message,
+          type: "default",
+          style: { width: 195, marginBottom: 200 },
+          titleStyle: { fontSize: 14 },
+          duration: 1900,
+          position: "center",
+          backgroundColor: "#262626",
+        });
+        return;
+      }
+      props.navigation.navigate("NoConnectionScreen", { message: "" });
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -92,29 +138,33 @@ export default function ViewProfileOptionScreen({ navigation, route }) {
           <ListItem
             bottomDivider
             onPress={() => {
-              navigation.navigate("PersonalInformationScreen");
+              block();
             }}
             underlayColor="#0085ff"
           >
             <ListItem.Content>
-              <ListItem.Title>Ẩn nhật ký người này</ListItem.Title>
-            </ListItem.Content>
-          </ListItem>
-          { route.params.friendStatus == "friend" &&
-          <ListItem
-            bottomDivider
-            onPress={() => {
-              setMenuDeleteVisible(true);
-            }}
-            underlayColor="#0085ff"
-          >
-            <ListItem.Content>
-              <ListItem.Title style={{ color: "#ff2222" }}>
-                Xóa bạn
+              <ListItem.Title>
+                {appContext.blockedDiary.includes(route.params.id)
+                  ? "Bỏ ẩn nhật ký người này"
+                  : "Ẩn nhật ký người này"}
               </ListItem.Title>
             </ListItem.Content>
           </ListItem>
-          }
+          {route.params.friendStatus == "friend" && (
+            <ListItem
+              bottomDivider
+              onPress={() => {
+                setMenuDeleteVisible(true);
+              }}
+              underlayColor="#0085ff"
+            >
+              <ListItem.Content>
+                <ListItem.Title style={{ color: "#ff2222" }}>
+                  Xóa bạn
+                </ListItem.Title>
+              </ListItem.Content>
+            </ListItem>
+          )}
         </View>
       </ScrollView>
       <Modal
@@ -134,14 +184,18 @@ export default function ViewProfileOptionScreen({ navigation, route }) {
             <TouchableOpacity
               flex={1}
               style={styles.menuCancelBtn}
-              onPress={() => {setMenuDeleteVisible(false)}}
+              onPress={() => {
+                setMenuDeleteVisible(false);
+              }}
             >
               <Text style={styles.textCancel}>Hủy</Text>
             </TouchableOpacity>
             <TouchableOpacity
               flex={1}
               style={styles.menuAcceptBtn}
-              onPress={() => {removeFriend()}}
+              onPress={() => {
+                removeFriend();
+              }}
             >
               <Text style={styles.textAccept}>Xoá</Text>
             </TouchableOpacity>
@@ -238,16 +292,16 @@ const styles = StyleSheet.create({
   textCancel: {
     fontSize: 17,
     textAlign: "center",
-    marginTop:"auto",
-    marginBottom:"auto",
+    marginTop: "auto",
+    marginBottom: "auto",
     fontWeight: "500",
     color: "#1476f8",
   },
   textAccept: {
     fontSize: 17,
     textAlign: "center",
-    marginTop:"auto",
-    marginBottom:"auto",
+    marginTop: "auto",
+    marginBottom: "auto",
     fontWeight: "400",
     color: "#ed4732",
   },

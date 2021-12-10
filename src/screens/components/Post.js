@@ -307,6 +307,7 @@ export default function Post(props) {
                     });
                     appContext.setBlockedDiary(res.data.data.blocked_diary);
                 }
+                appContext.setNeedUpdateTimeline(true);
             } catch (err) {
                 console.log(err);
                 if (err.response && err.response.status == 400) {
