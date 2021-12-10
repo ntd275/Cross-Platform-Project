@@ -16,13 +16,18 @@ import ViewProfileScreen from "../ViewProfileScreen";
 import ProfileOptionScreen from "../ProfileOptionScreen";
 import PersonalInformationScreen from "../PesonalInformationScreen";
 import SettingScreen from "../SettingScreen";
+import ViewProfileOptionScreen from "../ViewProfileOptionScreen";
 
 const MessageStack = createNativeStackNavigator();
 
 export default function MessageStackScreen({ route, navigation }) {
   React.useLayoutEffect(() => {
     const routeName = getFocusedRouteNameFromRoute(route);
-    const hideScreens = ["ConversationScreen", "ConversationOption"];
+    const hideScreens = [
+      "ConversationScreen",
+      "ConversationOption",
+      "ViewProfileOptionScreen",
+    ];
     if (hideScreens.includes(routeName)) {
       navigation.setOptions({ tabBarStyle: { display: "none" } });
     } else {
@@ -81,7 +86,10 @@ export default function MessageStackScreen({ route, navigation }) {
         name="PersonalInformationScreen"
         component={PersonalInformationScreen}
       />
-
+      <MessageStack.Screen
+        name="ViewProfileOptionScreen"
+        component={ViewProfileOptionScreen}
+      />
     </MessageStack.Navigator>
   );
 }

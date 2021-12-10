@@ -14,6 +14,7 @@ import ProfileOptionScreen from "../ProfileOptionScreen";
 import PersonalInformationScreen from "../PesonalInformationScreen";
 import NoConnectionScreen from "../NoConnectionScreen";
 import SearchScreen from "../SearchScreen";
+import ViewProfileOptionScreen from "../ViewProfileOptionScreen";
 const ProfileStack = createNativeStackNavigator();
 
 export default function ProfileStackScreen({ route, navigation }) {
@@ -29,6 +30,7 @@ export default function ProfileStackScreen({ route, navigation }) {
       "ViewProfileScreen",
       "PersonalInformationScreen",
       "NoConnectionScreen",
+      "ViewProfileOptionScreen",
     ];
 
     if (hideScreens.includes(routeName)) {
@@ -76,6 +78,10 @@ export default function ProfileStackScreen({ route, navigation }) {
       <ProfileStack.Screen
         name="PersonalInformationScreen"
         component={PersonalInformationScreen}
+      />
+      <ProfileStack.Screen
+        name="ViewProfileOptionScreen"
+        component={ViewProfileOptionScreen}
       />
       <ProfileStack.Screen
         name="NoConnectionScreen"

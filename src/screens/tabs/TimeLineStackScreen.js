@@ -12,6 +12,7 @@ import ProfileEditScreen from "../ProfileEditScreen";
 import ViewProfileScreen from "../ViewProfileScreen";
 import ProfileOptionScreen from "../ProfileOptionScreen";
 import PersonalInformationScreen from "../PesonalInformationScreen";
+import ViewProfileOptionScreen from "../ViewProfileOptionScreen";
 
 const TimeLineStack = createNativeStackNavigator();
 
@@ -29,6 +30,7 @@ export default function TimeLineStackScreen({route, navigation}) {
       "ViewProfileScreen",
       "PersonalInformationScreen",
       "NoConnectionScreen",
+      "ViewProfileOptionScreen",
     ]
     if (hideScreens.includes(routeName)){
         navigation.setOptions({tabBarStyle:{display: 'none'}});
@@ -65,6 +67,10 @@ export default function TimeLineStackScreen({route, navigation}) {
       <TimeLineStack.Screen
         name="PersonalInformationScreen"
         component={PersonalInformationScreen}
+      />
+      <TimeLineStack.Screen
+        name="ViewProfileOptionScreen"
+        component={ViewProfileOptionScreen}
       />
     </TimeLineStack.Navigator>
   );

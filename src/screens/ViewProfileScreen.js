@@ -114,6 +114,46 @@ const ListHeader = ({
     }
   };
 
+  const acceptFriendRequest = async () => {
+    try {
+      accessToken = authContext.loginState.accessToken;
+
+      const res = await Api.sendAcceptFriendRequest(accessToken, id);
+      if (res.status == 200) {
+        setFriendStatus(res.data.newStatus);
+      }
+    } catch (err) {
+      if (err.response && err.response.status == 401) {
+        console.log(err.response.data.message);
+        return;
+      }
+      console.log(err);
+      navigation.navigate("NoConnectionScreen", {
+        message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+      });
+    }
+  };
+
+  const rejectFriendRequest = async () => {
+    try {
+      accessToken = authContext.loginState.accessToken;
+
+      const res = await Api.sendRejectFriendRequest(accessToken, id);
+      if (res.status == 200) {
+        setFriendStatus(res.data.newStatus);
+      }
+    } catch (err) {
+      if (err.response && err.response.status == 401) {
+        console.log(err.response.data.message);
+        return;
+      }
+      console.log(err);
+      navigation.navigate("NoConnectionScreen", {
+        message: "Lỗi kết nối, sẽ tự động thử lại khi có internet",
+      });
+    }
+  };
+
   const chatContext = useContext(ChatContext);
 
   const goToChat = () => {
@@ -137,6 +177,7 @@ const ListHeader = ({
     <>
       <View style={{ position: "relative" }}>
         <ImageReactElementCache
+          key={info.coverImage}
           style={{ width: FULL_WIDTH, height: 200 }}
           source={{ uri: BaseURL + info.coverImage }}
           onPress={() => setIsViewCoverImage(true)}
@@ -164,6 +205,7 @@ const ListHeader = ({
           onPress={() => setIsViewAvatarImage(true)}
         >
           <AvatarNativeBaseCache
+            key={info.avatar}
             size={"2xl"}
             source={{ uri: BaseURL + info.avatar }}
             style={{ borderWidth: 2, borderColor: "#fff" }}
@@ -461,8 +503,7 @@ const ListHeader = ({
           }}
         >
           <Text style={{ textAlign: "center", fontSize: 15 }}>
-            Kết bạn với {info.userName} ngay để cùng tạo nên những cuộc trò
-            chuyện thú vị và đáng nhớ
+            "Xin chào mình là {info.userName}. Kết bạn với mình nhé!"
           </Text>
           <View
             style={{
@@ -483,7 +524,7 @@ const ListHeader = ({
               activeOpacity={0.8}
               underlayColor="#3f3f3f"
               onPress={() => {
-                goToChat();
+                rejectFriendRequest()
               }}
             >
               <LinearGradient
@@ -505,7 +546,7 @@ const ListHeader = ({
                   }}
                 >
                   <Text style={{ color: "#0085ff", fontWeight: "500" }}>
-                    Nhắn tin
+                    Từ chối
                   </Text>
                 </View>
               </LinearGradient>
@@ -521,7 +562,7 @@ const ListHeader = ({
               activeOpacity={0.8}
               underlayColor="#3f3f3f"
               onPress={() => {
-                requestFriend();
+                acceptFriendRequest()
               }}
             >
               <LinearGradient
@@ -543,7 +584,7 @@ const ListHeader = ({
                   }}
                 >
                   <Text style={{ color: "#fff", fontWeight: "500" }}>
-                    Kết bạn
+                    Đồng ý
                   </Text>
                 </View>
               </LinearGradient>
@@ -609,7 +650,6 @@ export default function ViewProfileScreen({ navigation, route }) {
       const accessToken = authContext.loginState.accessToken;
       const res = await Api.getPostsById(accessToken, route.params.userId);
       if (!mounted.current) return;
-      console.log(res.data);
       let postList = res.data.data;
       setPosts(postList.reverse());
       setIsLoading(false);
@@ -729,6 +769,7 @@ export default function ViewProfileScreen({ navigation, route }) {
       </TouchableOpacity>
       <TouchableOpacity
         style={{ position: "absolute", top: 25, right: 10, zIndex: 2 }}
+        onPress={() => { navigation.navigate("ViewProfileOptionScreen",{id: route.params.userId, userName: info.userName, friendStatus})}}
       >
         {iconColor == "white" ? <IconOption /> : <IconOptionBlack />}
       </TouchableOpacity>
@@ -761,7 +802,7 @@ export default function ViewProfileScreen({ navigation, route }) {
         keyboardShouldPersistTaps={"always"}
         data={posts}
         keyExtractor={(item, index) => index.toString()}
-        ListHeaderComponent={() => (
+        ListHeaderComponent={
           <ListHeader
             id={route.params.userId}
             info={info}
@@ -774,7 +815,7 @@ export default function ViewProfileScreen({ navigation, route }) {
             setIsViewCoverImage={setIsViewCoverImage}
             setIsViewAvatarImage={setIsViewAvatarImage}
           />
-        )}
+        }
         renderItem={({ item }) => (
           <View style={{ marginTop: 12 }}>
             <Post
