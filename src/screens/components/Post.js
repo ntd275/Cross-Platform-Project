@@ -98,9 +98,20 @@ export default function Post(props) {
                 }
                 if (props.from.includes("profile")) {
                     appContext.setNeedUpdateProfile(true);
+                    appContext.setNeedUpdateTimeline(true);
                 }
                 if(props.from.includes("viewuser")){
                     appContext.setNeedUpdateViewProfileScreen(true);
+                    appContext.setNeedUpdateTimeline(true);
+                }
+            }else{
+                if (props.from.includes("profile")) {
+                    appContext.setNeedUpdateProfile(true);
+                    appContext.setNeedUpdateTimeline(true);
+                }
+                if(props.from.includes("viewuser")){
+                    appContext.setNeedUpdateViewProfileScreen(true);
+                    appContext.setNeedUpdateTimeline(true);
                 }
             }
 

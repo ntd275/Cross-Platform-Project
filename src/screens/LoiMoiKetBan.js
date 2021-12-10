@@ -162,6 +162,9 @@ export default function FriendRequests({ navigation }) {
   }
 
 
+  const goToUserPage = (id) => {
+    navigation.navigate("ViewProfileScreen", { userId: id })
+  }
 
   const getListR = async () => {
     try {
@@ -191,31 +194,73 @@ export default function FriendRequests({ navigation }) {
         underlayColor="#05adff22"
       >
         <View style={{ flexDirection: "row" }}>
-          <Avatar size="lg" source={{ uri: props.img }} />
-          <Text
-            style={{
-              alignSelf: "center",
-              marginLeft: 15,
-              fontSize: 15,
-              fontWeight: 'bold',
+          <TouchableOpacity onPress={() => { goToUserPage(props.id) }}>
+            <Avatar size="lg" source={{ uri: props.img }} />
+          </TouchableOpacity>
+          <View flex={1}>
+            <TouchableOpacity onPress={() => { goToUserPage(props.id) }}>
+              <Text
+                style={{
+                  marginLeft: 15,
+                  fontSize: 16,
+                  marginTop: 6,
+                  fontWeight: '500'
+                }}
+              >
+                {props.name}
+              </Text>
+            </TouchableOpacity>
+            <View style={{ flexDirection: 'row' , width: '100%', marginTop: 10, marginBottom: 4, paddingLeft: 14, paddingRight: 24 }}>
+              <Text style={{ borderColor: "#dce1e4", fontSize: 15 , minHeight: 60, width: '100%', borderWidth: 1,borderRadius: 5, marginTop: 0, padding: 10}}>
+                Xin chào, mình là {props.name}. Mình biết bạn qua số điện thoại.
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', }}>
+              <TouchableHighlight
+                style={{
+                  width: 104,
+                  marginTop: 9,
+                  borderRadius: 15,
+                  marginLeft: 12,
+                  height: 30
+                }}
+                activeOpacity={0.8}
+                underlayColor="#3f3f3f"
+                onPress={() => {
+                  handleAgreeRequest(props.id)
+                }}
+              >
+                <LinearGradient
+                  colors={["#0085ff", "#05adff"]}
+                  start={[0, 1]}
+                  end={[1, 0]}
+                  style={{
+                    width: "100%",
+                    height: 30,
+                    alignSelf: "center",
+                    borderRadius: 15,
+                  }}
+                >
+                  <View
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                      flex: 1,
+                    }}
+                  >
+                    <Text style={{ color: "#fff", fontWeight: "500", fontSize: 15 }}>
+                      Đồng ý
+                    </Text>
+                  </View>
+                </LinearGradient>
+              </TouchableHighlight>
+              <TouchableOpacity style={{ flexDirection: 'row', height: 30, marginRight: 16, borderRadius: 40, marginTop: 9, padding: 5, marginLeft: 14, backgroundColor: '#e6e6e6' }} onPress={() => { handleRejectRequest(props.id) }}>
+                <Text style={{ fontSize: 15, color: 'black', width: 94, textAlign: 'center', alignSelf: "center", fontWeight: "500" }}>Từ chối</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
 
-            }}
-          >
-            {props.name}
-          </Text>
-        </View>
-        <View style={{ flexDirection: 'row' }}>
-          <Text style={{ fontSize: 10, borderWidth: 0.2, borderRadius: 5, marginTop: 0, padding: 10, marginLeft: 75 }}>Xin chào, tôi là {props.name}</Text>
-        </View>
-        <View style={{ flexDirection: 'row', }}>
-          <TouchableOpacity style={{ borderWidth: 0, flexDirection: 'row', borderRadius: 40, padding: 5, marginTop: 5, marginLeft: 75, backgroundColor: "#3399ff" }} onPress={() => { handleAgreeRequest(props.id) }}>
-            <Text style={{ fontSize: 10, color: 'white', width: 70, textAlign: 'center', fontWeight: 'bold' }}>ĐỒNG Ý</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={{ borderWidth: 0, flexDirection: 'row', borderRadius: 40, padding: 5, marginTop: 5, marginLeft: 20, backgroundColor: '#e6e6e6' }} onPress={() => { handleRejectRequest(props.id) }}>
-            <Text style={{ fontSize: 10, color: 'black', width: 80, textAlign: 'center', fontWeight: 'bold' }}>TỪ CHỐI</Text>
-          </TouchableOpacity>
-        </View>
-        {/* <Text style = {{borderWidth:1,borderRadius: 5, marginTop: 5, paddingLeft: 10}}>Xin chào tôi là {props.name}</Text> */}
 
       </View>
     );
@@ -223,10 +268,12 @@ export default function FriendRequests({ navigation }) {
 
   const FriendReceived = (props) => {
     let button;
+    let describe = "";
     if (props.status == "0") {
       button = <TouchableOpacity style={{ flexDirection: 'row', height: 30, marginRight: 16, borderRadius: 40, marginTop: 9, padding: 5, marginLeft: "auto", backgroundColor: '#e6e6e6' }} onPress={() => { handleCancelRequest(props.id) }}>
         <Text style={{ fontSize: 12, color: 'black', width: 80, textAlign: 'center', alignSelf: "center", fontWeight: "500" }}>Thu hồi</Text>
       </TouchableOpacity>
+      describe = "Đã gửi lời mời kết bạn"
     } else if (props.status == "3") {
       button = <TouchableHighlight
         style={{
@@ -267,6 +314,7 @@ export default function FriendRequests({ navigation }) {
           </View>
         </LinearGradient>
       </TouchableHighlight>
+      describe = "Đã huỷ lời mời kết bạn"
     }
     return (
       <View
@@ -276,9 +324,11 @@ export default function FriendRequests({ navigation }) {
         underlayColor="#05adff22"
       >
         <View style={{ flexDirection: "row" }}>
-          <Avatar size="lg" source={{ uri: props.img }} />
+          <TouchableOpacity onPress={() => { goToUserPage(props.id) }}>
+            <Avatar size="lg" source={{ uri: props.img }} />
+          </TouchableOpacity>
           <View flex={1}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => { goToUserPage(props.id) }}>
               <Text
                 style={{
                   marginLeft: 15,
@@ -291,7 +341,7 @@ export default function FriendRequests({ navigation }) {
               </Text>
             </TouchableOpacity>
             <View style={{ flexDirection: 'row' }}>
-              <Text style={{ fontSize: 12, marginLeft: 16, marginTop: 12, color: "#a6a6a6" }}>Đã gửi lời mời kết bạn</Text>
+              <Text style={{ fontSize: 12, marginLeft: 16, marginTop: 12, color: "#a6a6a6" }}>{describe}</Text>
 
             </View>
 
@@ -335,7 +385,7 @@ export default function FriendRequests({ navigation }) {
   function ListReceived() {
     return (
       <ScrollView
-      // style={{ backgroundColor: '#ffff' }}
+        style={{ backgroundColor: '#ffff' }}
       >
         {tmp1}
       </ScrollView>
@@ -355,14 +405,13 @@ export default function FriendRequests({ navigation }) {
         <Tab.Screen
           name="ListReceived"
           component={ListReceived}
-          options={{ tabBarLabel: 'ĐÃ NHẬN ' + ListR.length }}
-
+          options={{ tabBarLabel: 'ĐÃ NHẬN  ' + ListR.length }}
 
         />
         <Tab.Screen
           name="ListSent"
           component={ListSent}
-          options={{ tabBarLabel: 'ĐÃ GỬI ' + ListS.length }}
+          options={{ tabBarLabel: 'ĐÃ GỬI  ' + ListS.length }}
         />
 
       </Tab.Navigator>
