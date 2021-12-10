@@ -186,6 +186,59 @@ export default function FriendRequests({ navigation }) {
 
 
   const FriendSent = (props) => {
+    let describe;
+    let button;
+    if (props.status == '0') {
+      button = <View style={{ flexDirection: 'row', }}>
+        <TouchableHighlight
+          style={{
+            width: 104,
+            marginTop: 9,
+            borderRadius: 15,
+            marginLeft: 12,
+            height: 30
+          }}
+          activeOpacity={0.8}
+          underlayColor="#3f3f3f"
+          onPress={() => {
+            handleAgreeRequest(props.id)
+          }}
+        >
+          <LinearGradient
+            colors={["#0085ff", "#05adff"]}
+            start={[0, 1]}
+            end={[1, 0]}
+            style={{
+              width: "100%",
+              height: 30,
+              alignSelf: "center",
+              borderRadius: 15,
+            }}
+          >
+            <View
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                flex: 1,
+              }}
+            >
+              <Text style={{ color: "#fff", fontWeight: "500", fontSize: 15 }}>
+                Đồng ý
+              </Text>
+            </View>
+          </LinearGradient>
+        </TouchableHighlight>
+        <TouchableOpacity style={{ flexDirection: 'row', height: 30, marginRight: 16, borderRadius: 40, marginTop: 9, padding: 5, marginLeft: 14, backgroundColor: '#e6e6e6' }} onPress={() => { handleRejectRequest(props.id) }}>
+          <Text style={{ fontSize: 15, color: 'black', width: 94, textAlign: 'center', alignSelf: "center", fontWeight: "500" }}>Từ chối</Text>
+        </TouchableOpacity>
+      </View>;
+      describe = <Text style={{ borderColor: "#dce1e4", fontSize: 15, minHeight: 60, width: '100%', borderWidth: 1, borderRadius: 5, marginTop: 0, padding: 10 }}>
+        Xin chào, mình là {props.name}. Mình biết bạn qua số điện thoại.
+      </Text>
+    } else if (props.status == '3') {
+
+    }
+
     return (
       <View
         style={{ paddingTop: 15, paddingBottom: 15, paddingLeft: 15, marginTop: 10, backgroundColor: "white" }}
@@ -202,7 +255,7 @@ export default function FriendRequests({ navigation }) {
               <Text
                 style={{
                   marginLeft: 15,
-                  fontSize: 16,
+                  fontSize: 18,
                   marginTop: 6,
                   fontWeight: '500'
                 }}
@@ -210,54 +263,10 @@ export default function FriendRequests({ navigation }) {
                 {props.name}
               </Text>
             </TouchableOpacity>
-            <View style={{ flexDirection: 'row' , width: '100%', marginTop: 10, marginBottom: 4, paddingLeft: 14, paddingRight: 24 }}>
-              <Text style={{ borderColor: "#dce1e4", fontSize: 15 , minHeight: 60, width: '100%', borderWidth: 1,borderRadius: 5, marginTop: 0, padding: 10}}>
-                Xin chào, mình là {props.name}. Mình biết bạn qua số điện thoại.
-              </Text>
+            <View style={{ flexDirection: 'row', width: '100%', marginTop: 10, marginBottom: 4, paddingLeft: 14, paddingRight: 24 }}>
+              {describe}
             </View>
-            <View style={{ flexDirection: 'row', }}>
-              <TouchableHighlight
-                style={{
-                  width: 104,
-                  marginTop: 9,
-                  borderRadius: 15,
-                  marginLeft: 12,
-                  height: 30
-                }}
-                activeOpacity={0.8}
-                underlayColor="#3f3f3f"
-                onPress={() => {
-                  handleAgreeRequest(props.id)
-                }}
-              >
-                <LinearGradient
-                  colors={["#0085ff", "#05adff"]}
-                  start={[0, 1]}
-                  end={[1, 0]}
-                  style={{
-                    width: "100%",
-                    height: 30,
-                    alignSelf: "center",
-                    borderRadius: 15,
-                  }}
-                >
-                  <View
-                    style={{
-                      justifyContent: "center",
-                      alignItems: "center",
-                      flex: 1,
-                    }}
-                  >
-                    <Text style={{ color: "#fff", fontWeight: "500", fontSize: 15 }}>
-                      Đồng ý
-                    </Text>
-                  </View>
-                </LinearGradient>
-              </TouchableHighlight>
-              <TouchableOpacity style={{ flexDirection: 'row', height: 30, marginRight: 16, borderRadius: 40, marginTop: 9, padding: 5, marginLeft: 14, backgroundColor: '#e6e6e6' }} onPress={() => { handleRejectRequest(props.id) }}>
-                <Text style={{ fontSize: 15, color: 'black', width: 94, textAlign: 'center', alignSelf: "center", fontWeight: "500" }}>Từ chối</Text>
-              </TouchableOpacity>
-            </View>
+            {button}
           </View>
         </View>
 
@@ -332,7 +341,7 @@ export default function FriendRequests({ navigation }) {
               <Text
                 style={{
                   marginLeft: 15,
-                  fontSize: 16,
+                  fontSize: 18,
                   marginTop: 6,
                   fontWeight: '500'
                 }}
