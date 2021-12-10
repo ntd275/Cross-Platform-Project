@@ -27,6 +27,7 @@ export default function MessageStackScreen({ route, navigation }) {
       "ConversationScreen",
       "ConversationOption",
       "ViewProfileOptionScreen",
+      "ViewProfileScreen",
     ];
     if (hideScreens.includes(routeName)) {
       navigation.setOptions({ tabBarStyle: { display: "none" } });
