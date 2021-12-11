@@ -77,8 +77,11 @@ export default function SearchScreen({ navigation }) {
         indexDraw.push(j);
       }
     }
-    if (chatId == userId) {
+    if (message.senderId._id == userId) {
       content = "Bạn: " + content;
+      for(let i = 0; i<indexDraw.length; i++){
+        indexDraw[i] += "Bạn: ".length;
+      }
     }
     return (
       <TouchableOpacity
@@ -86,7 +89,7 @@ export default function SearchScreen({ navigation }) {
           let friend = {
             username: userName,
             avatar: avatarURL,
-            id: userId,
+            id: message.friend._id,
             phonenumber: phonenumber,
           };
           pressChat(chatId, friend, isread);
