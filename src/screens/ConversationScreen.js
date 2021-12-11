@@ -7,6 +7,7 @@ import { Icon, Avatar } from 'react-native-elements';
 import { Api } from '../api/Api'
 import AuthContext from '../components/context/AuthContext';
 import ChatContext from '../components/context/ChatContext';
+import AppContext from '../components/context/AppContext';
 import IconSend from '../../assets/icn_send.svg'
 import IconSendDiable from '../../assets/icn_send_disable.svg'
 import IconPhoto from '../../assets/icn_csc_menu_sticker_n.svg'
@@ -114,6 +115,7 @@ export default function ConversationScreen({ route, navigation }) {
 
     const context = React.useContext(AuthContext);
     const chatContext = React.useContext(ChatContext);
+    const appContext = React.useContext(AppContext);
     const friend = route.params.friend;
     const [isLoading, setIsLoading] = useState(false);
     const [isSending, setIsSending] = useState(false);
@@ -331,6 +333,7 @@ export default function ConversationScreen({ route, navigation }) {
             const res = await Api.sendAcceptFriendRequest(accessToken, route.params.friend.id);
             if (res.status == 200) {
                 setFriendStatus(res.data.newStatus);
+                appContext.setNeedUpdateContact(true);
             }
         } catch (err) {
             if (err.response && err.response.status == 401) {

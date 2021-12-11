@@ -61,7 +61,9 @@ export default function App() {
   const [needUpdateTimeline, setNeedUpdateTimeline] = React.useState(false);
   const [needUpdateProfile, setNeedUpdateProfile] = React.useState(false);
   const [needUpdatePostScreen, setNeedUpdatePostScreen] = React.useState(false);
+  const [needUpdateContact, setNeedUpdateContact] = React.useState(false);
   const [needUpdateViewProfileScreen, setNeedUpdateViewProfileScreen] = React.useState(false);
+  const [editFriendRequestsInfo, setEditFriendRequestsInfo] = React.useState(null);
 
   const getMe = async () => {
     try {
@@ -174,6 +176,12 @@ export default function App() {
 
     needUpdateViewProfileScreen,
     setNeedUpdateViewProfileScreen,
+    
+    editFriendRequestsInfo,
+    setEditFriendRequestsInfo,
+    
+    needUpdateContact,
+    setNeedUpdateContact,
 
   };
 

@@ -51,6 +51,7 @@ const ListHeader = ({
   posts,
   setIsViewCoverImage,
   setIsViewAvatarImage,
+  route
 }) => {
   const NotiHeader = () => {
     if (isLoading && firstLoad) {
@@ -74,6 +75,7 @@ const ListHeader = ({
   };
 
   const authContext = useContext(AuthContext);
+  const appContext = useContext(AppContext);
 
   const requestFriend = async () => {
     try {
@@ -81,6 +83,22 @@ const ListHeader = ({
       const res = await Api.sendFriendRequest(accessToken, id);
       if (res.status == 200) {
         setFriendStatus(res.data.newStatus);
+        if(route.params.from == "friend_requests"){
+          let newInfo = {};
+          newInfo.type = route.params.type;
+          newInfo.index = route.params.index;
+          if(res.data.newStatus == "not friend"){
+            newInfo.status = "3"
+          }else if(res.data.newStatus == "friend"){
+            newInfo.status = "1"
+          }else if(res.data.newStatus == "sent"){
+            newInfo.status = "0"
+          }
+          else if(res.data.newStatus == "received"){
+            newInfo.status = "2"
+          }
+          appContext.setEditFriendRequestsInfo(newInfo);
+        }
       }
     } catch (err) {
       if (err.response && err.response.status == 401) {
@@ -101,6 +119,22 @@ const ListHeader = ({
       const res = await Api.sendCancelFriendRequest(accessToken, id);
       if (res.status == 200) {
         setFriendStatus(res.data.newStatus);
+        if(route.params.from == "friend_requests"){
+          let newInfo = {};
+          newInfo.type = route.params.type;
+          newInfo.index = route.params.index;
+          if(res.data.newStatus == "not friend"){
+            newInfo.status = "3"
+          }else if(res.data.newStatus == "friend"){
+            newInfo.status = "1"
+          }else if(res.data.newStatus == "sent"){
+            newInfo.status = "0"
+          }
+          else if(res.data.newStatus == "received"){
+            newInfo.status = "2"
+          }
+          appContext.setEditFriendRequestsInfo(newInfo);
+        }
       }
     } catch (err) {
       if (err.response && err.response.status == 401) {
@@ -121,6 +155,23 @@ const ListHeader = ({
       const res = await Api.sendAcceptFriendRequest(accessToken, id);
       if (res.status == 200) {
         setFriendStatus(res.data.newStatus);
+        if(route.params.from == "friend_requests"){
+          let newInfo = {};
+          newInfo.type = route.params.type;
+          newInfo.index = route.params.index;
+          if(res.data.newStatus == "not friend"){
+            newInfo.status = "3"
+          }else if(res.data.newStatus == "friend"){
+            newInfo.status = "1"
+          }else if(res.data.newStatus == "sent"){
+            newInfo.status = "0"
+          }
+          else if(res.data.newStatus == "received"){
+            newInfo.status = "2"
+          }
+          appContext.setEditFriendRequestsInfo(newInfo);
+          appContext.setNeedUpdateContact(true);
+        }
       }
     } catch (err) {
       if (err.response && err.response.status == 401) {
@@ -141,6 +192,22 @@ const ListHeader = ({
       const res = await Api.sendRejectFriendRequest(accessToken, id);
       if (res.status == 200) {
         setFriendStatus(res.data.newStatus);
+        if(route.params.from == "friend_requests"){
+          let newInfo = {};
+          newInfo.type = route.params.type;
+          newInfo.index = route.params.index;
+          if(res.data.newStatus == "not friend"){
+            newInfo.status = "3"
+          }else if(res.data.newStatus == "friend"){
+            newInfo.status = "1"
+          }else if(res.data.newStatus == "sent"){
+            newInfo.status = "0"
+          }
+          else if(res.data.newStatus == "received"){
+            newInfo.status = "2"
+          }
+          appContext.setEditFriendRequestsInfo(newInfo);
+        }
       }
     } catch (err) {
       if (err.response && err.response.status == 401) {
@@ -769,7 +836,14 @@ export default function ViewProfileScreen({ navigation, route }) {
       </TouchableOpacity>
       <TouchableOpacity
         style={{ position: "absolute", top: 25, right: 10, zIndex: 2 }}
-        onPress={() => { navigation.navigate("ViewProfileOptionScreen",{id: route.params.userId, userName: info.userName, friendStatus})}}
+        onPress={() => { navigation.navigate("ViewProfileOptionScreen",{
+          id: route.params.userId,
+          userName: info.userName, 
+          friendStatus,
+          from: route.params.from,
+          type: route.params.type,
+          index: route.params.index 
+          })}}
       >
         {iconColor == "white" ? <IconOption /> : <IconOptionBlack />}
       </TouchableOpacity>
@@ -814,6 +888,7 @@ export default function ViewProfileScreen({ navigation, route }) {
             posts={posts}
             setIsViewCoverImage={setIsViewCoverImage}
             setIsViewAvatarImage={setIsViewAvatarImage}
+            route={route}
           />
         }
         renderItem={({ item }) => (

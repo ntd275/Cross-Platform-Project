@@ -31,12 +31,17 @@ import { Avatar } from "native-base";
 import { AvatarNativeBaseCache } from "./components/ImageCache";
 import { BaseURL } from "../utils/Constants";
 import ChatContext from "../components/context/ChatContext";
+import AppContext from "../components/context/AppContext";
+import { useIsFocused } from "@react-navigation/native";
 
 
 export default function HomeContactScreen({ navigation }) {
   const context = React.useContext(AuthContext);
   const [listFriend, setListFriend] = useState([]);
   const chatContext = React.useContext(ChatContext);
+  const appContext = React.useContext(AppContext);
+  const [isLoading, setIsLoading] = useState(false);
+  const isFocused = useIsFocused();
 
   const Friend = (props) => {
     return (
@@ -324,6 +329,10 @@ export default function HomeContactScreen({ navigation }) {
       // console.log(friends.data.data.friends);
       // console.log(typeof friends.data.data.friends);
       setListFriend(Object.values(friends.data.data.friends));
+      setIsLoading(false);
+      if(appContext.needUpdateContact){
+        appContext.setNeedUpdateContact(false);
+      }
     } catch (e) {
       console.log(e);
       navigation.navigate("NoConnectionScreen", {
@@ -333,8 +342,14 @@ export default function HomeContactScreen({ navigation }) {
   };
 
   useLayoutEffect(() => {
+    setIsLoading(true);
     getListFriends();
   }, []);
+
+  if(appContext.needUpdateContact && isFocused && !isLoading){
+    setIsLoading(true);
+    getListFriends();
+  }
 
   return (
     <View style={styles.container}>
@@ -380,7 +395,10 @@ export default function HomeContactScreen({ navigation }) {
         <View style={styles.part1}>
           <TouchableHighlight
             style={{ paddingTop: 10, paddingBottom: 10, paddingLeft: 15 }}
-            onPress={() => {navigation.navigate("FriendRequests")}}
+            onPress={() => {
+              appContext.setEditFriendRequestsInfo(null);
+              navigation.navigate("FriendRequests");
+            }}
             activeOpacity={0.99999}
             underlayColor="#05adff22"
           >

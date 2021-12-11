@@ -91,6 +91,7 @@ export default function ProfileEditScreen({ navigation }) {
         const [isUpdateEnable, setUpdateEnable] = useState(false);
         const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
         const [hasModify, setHasModify] = useState(false);
+        console.log(dob);
 
         const showDatePicker = () => {
             setDatePickerVisibility(true);
@@ -153,7 +154,7 @@ export default function ProfileEditScreen({ navigation }) {
         useEffect(() => {
             setName(context.loginState.userName);
             setGender(appContext.gender);
-            setDob(new Date(appContext.birthday));
+            setDob(appContext.birthday ? new Date(appContext.birthday): null);
         }, []);
 
         const saveUser = async () => {
@@ -172,7 +173,7 @@ export default function ProfileEditScreen({ navigation }) {
                     // console.log(res.data.data);
                     setName(res.data.data.username);
                     setGender(res.data.data.gender);
-                    setDob(new Date(res.data.data.birthday));
+                    setDob(res.data.data.birthday ? new Date(res.data.data.birthday) : null);
                     context.dispatch({ type: 'CHANGEUSERNAME', username: res.data.data.username });
                     appContext.setGender(res.data.data.gender);
                     appContext.setBirthday(res.data.data.birthday);

@@ -34,20 +34,81 @@ import CallIcon from "../../assets/ic_call_line_24.svg";
 import { Avatar } from "native-base";
 import { flex, flexDirection } from 'styled-system';
 import { BaseURL } from "../utils/Constants";
+import AppContext from "../components/context/AppContext";
+import { useIsFocused } from "@react-navigation/native";
 
 
 
 export default function FriendRequests({ navigation }) {
   const context = React.useContext(AuthContext);
+  const appContext = React.useContext(AppContext);
+  const isFocused = useIsFocused();
   const [ListS, setListS] = useState([]);
   const [ListR, setListR] = useState([]);
+  const [isLoadS, setIsLoadS] = useState(false);
+  const [isLoadR, setIsLoadR] = useState(false);
+  const [editFriendRequestsInfo, setEditFriendRequestsInfo] = useState(null);
+
+  useEffect(() => {
+    if (appContext.editFriendRequestsInfo) {
+      setEditFriendRequestsInfo(appContext.editFriendRequestsInfo);
+      appContext.setEditFriendRequestsInfo(null);
+    }
+  }, [appContext.editFriendRequestsInfo])
+
+  if (isLoadS && isLoadR && editFriendRequestsInfo && isFocused) {
+    const newListR = ListR;
+    const newListS = ListS;
+    let req = editFriendRequestsInfo;
+    setEditFriendRequestsInfo(null);
+    if (req.type == 'received') {
+      if (req.status == '0') {
+        let temp = ListR[req.index];
+        temp.status = '0';
+        let tmp = temp.sender;
+        temp.sender = temp.receiver;
+        temp.receiver = tmp;
+        newListR.splice(req.index, 1);
+        setListR([...newListR]);
+
+        newListS.push(temp);
+        setListS([...newListS]);
+      } else {
+        if (req.status == '2') {
+          req.status = '0';
+        }
+        newListR[req.index].status = req.status;
+        setListR([...newListR]);
+      }
+
+    } else {
+      if (req.status == '2') {
+        let temp = ListS[req.index];
+        temp.status = '0';
+        let tmp = temp.sender;
+        temp.sender = temp.receiver;
+        temp.receiver = tmp;
+        newListS.splice(req.index, 1);
+        setListS([...newListS]);
+
+        newListR.push(temp);
+        setListR([...newListR]);
+      } else {
+        newListS[req.index].status = req.status;
+        setListS([...newListS]);
+      }
+    }
+
+  }
+
   const getListS = async () => {
     try {
       const accessToken = context.loginState.accessToken;
       let List = await Api.getListFriendsRequest(accessToken);
       // console.log(friends.data.data.friends);
       // console.log(typeof friends.data.data.friends);
-      setListS(Object.values(List.data.data.sentList));
+      setListS(List.data.data.sentList);
+      setIsLoadS(true);
     } catch (e) {
       console.log(e);
       navigation.navigate("NoConnectionScreen", {
@@ -63,19 +124,21 @@ export default function FriendRequests({ navigation }) {
   const handleAgreeRequest = async (id) => {
     try {
       const accessToken = context.loginState.accessToken;
-      let response = await Api.sendAcceptFriendRequest(accessToken, id);
-      if (response.data.success) {
-        const newListR = ListR.filter(el => el.sender._id !== id);
+      let res = await Api.sendAcceptFriendRequest(accessToken, id);
+      appContext.setNeedUpdateContact(true);
+      if (res.data.newStatus == "friend") {
+        const newListR = ListR;
+        for (let i = 0; i < newListR.length; i++) {
+          if (newListR[i].sender._id == id) {
+            newListR[i].status = '1';
+            break;
+          }
+        }
         setListR([...newListR]);
       } else {
-        console.log(e);
-        navigation.navigate("", {
-          message: "Kết bạn không thành công",
-        });
+        const newListR = ListR.filter(el => el.receiver._id !== id);
+        setListR([...newListR]);
       }
-      // console.log(friends.data.data.friends);
-      // console.log(typeof friends.data.data.friends);
-      // setListR(Object.values(List.data.data.receivedList));
     } catch (e) {
       console.log(e);
       navigation.navigate("NoConnectionScreen", {
@@ -87,19 +150,20 @@ export default function FriendRequests({ navigation }) {
   const handleRejectRequest = async (id) => {
     try {
       const accessToken = context.loginState.accessToken;
-      let response = await Api.sendRejectFriendRequest(accessToken, id);
-      if (response.data.success) {
-        const newListR = ListR.filter(el => el.sender._id !== id);
+      let res = await Api.sendRejectFriendRequest(accessToken, id);
+      if (res.data.newStatus == "not friend") {
+        const newListR = ListR;
+        for (let i = 0; i < newListR.length; i++) {
+          if (newListR[i].sender._id == id) {
+            newListR[i].status = '3';
+            break;
+          }
+        }
         setListR([...newListR]);
       } else {
-        console.log(e);
-        navigation.navigate("", {
-          message: "Hủy kết bạn không thành công",
-        });
+        const newListR = ListR.filter(el => el.receiver._id !== id);
+        setListR([...newListR]);
       }
-      // console.log(friends.data.data.friends);
-      // console.log(typeof friends.data.data.friends);
-      // setListR(Object.values(List.data.data.receivedList));
     } catch (e) {
       console.log(e);
       navigation.navigate("NoConnectionScreen", {
@@ -162,8 +226,56 @@ export default function FriendRequests({ navigation }) {
   }
 
 
-  const goToUserPage = (id) => {
-    navigation.navigate("ViewProfileScreen", { userId: id })
+  const handleSentRequestFromReceived = async (id) => {
+
+    try {
+      const accessToken = context.loginState.accessToken;
+      let res = await Api.sendFriendRequest(accessToken, id);
+      if (res.data.newStatus == "sent") {
+        const newListS = ListS;
+        for (let i = 0; i < ListR.length; i++) {
+          if (ListR[i].sender._id == id) {
+            let temp = ListR[i];
+            let tmp = temp.sender;
+            temp.sender = temp.receiver;
+            temp.receiver = tmp;
+            temp.status = "0"
+            newListS.push(temp);
+            break;
+          }
+        }
+        setListS([...newListS]);
+        const newListR = ListR.filter(el => el.receiver._id !== id);
+        setListR([...newListR]);
+      } else if (res.data.newStatus == "received") {
+        const newListR = ListR;
+        for (let i = 0; i < newListR.length; i++) {
+          if (newListR[i].sender._id == id) {
+            newListR[i].status = '0';
+            break;
+          }
+        }
+        setListR([...newListR]);
+      } else if (res.data.newStatus == "friend") {
+        const newListR = ListR;
+        for (let i = 0; i < newListR.length; i++) {
+          if (newListR[i].sender._id == id) {
+            newListR[i].status = '1';
+            break;
+          }
+        }
+        setListR([...newListR]);
+      }
+    } catch (e) {
+      console.log(e);
+      navigation.navigate("NoConnectionScreen", {
+        message: "Vui lòng kiểm tra kết nối internet và thử lại",
+      });
+    }
+  }
+
+  const goToUserPage = (id, type, index) => {
+    navigation.navigate("ViewProfileScreen", { userId: id, from: 'friend_requests', type: type, index: index })
   }
 
   const getListR = async () => {
@@ -172,7 +284,8 @@ export default function FriendRequests({ navigation }) {
       let List = await Api.getListFriendsRequest(accessToken);
       // console.log(friends.data.data.friends);
       // console.log(typeof friends.data.data.friends);
-      setListR(Object.values(List.data.data.receivedList));
+      setListR(List.data.data.receivedList);
+      setIsLoadR(true);
     } catch (e) {
       console.log(e);
       navigation.navigate("NoConnectionScreen", {
@@ -184,95 +297,195 @@ export default function FriendRequests({ navigation }) {
     getListR();
   }, []);
 
-
   const FriendSent = (props) => {
-    let describe;
-    let button;
     if (props.status == '0') {
-      button = <View style={{ flexDirection: 'row', }}>
-        <TouchableHighlight
-          style={{
-            width: 104,
-            marginTop: 9,
-            borderRadius: 15,
-            marginLeft: 12,
-            height: 30
-          }}
-          activeOpacity={0.8}
-          underlayColor="#3f3f3f"
-          onPress={() => {
-            handleAgreeRequest(props.id)
-          }}
+      return (
+        <View
+          style={{ paddingTop: 15, paddingBottom: 15, paddingLeft: 15, marginTop: 10, backgroundColor: "white" }}
+          onPress={() => { }}
+          activeOpacity={0.99999}
+          underlayColor="#05adff22"
         >
-          <LinearGradient
-            colors={["#0085ff", "#05adff"]}
-            start={[0, 1]}
-            end={[1, 0]}
-            style={{
-              width: "100%",
-              height: 30,
-              alignSelf: "center",
-              borderRadius: 15,
-            }}
-          >
-            <View
-              style={{
-                justifyContent: "center",
-                alignItems: "center",
-                flex: 1,
-              }}
-            >
-              <Text style={{ color: "#fff", fontWeight: "500", fontSize: 15 }}>
-                Đồng ý
-              </Text>
-            </View>
-          </LinearGradient>
-        </TouchableHighlight>
-        <TouchableOpacity style={{ flexDirection: 'row', height: 30, marginRight: 16, borderRadius: 40, marginTop: 9, padding: 5, marginLeft: 14, backgroundColor: '#e6e6e6' }} onPress={() => { handleRejectRequest(props.id) }}>
-          <Text style={{ fontSize: 15, color: 'black', width: 94, textAlign: 'center', alignSelf: "center", fontWeight: "500" }}>Từ chối</Text>
-        </TouchableOpacity>
-      </View>;
-      describe = <Text style={{ borderColor: "#dce1e4", fontSize: 15, minHeight: 60, width: '100%', borderWidth: 1, borderRadius: 5, marginTop: 0, padding: 10 }}>
-        Xin chào, mình là {props.name}. Mình biết bạn qua số điện thoại.
-      </Text>
-    } else if (props.status == '3') {
-
-    }
-
-    return (
-      <View
-        style={{ paddingTop: 15, paddingBottom: 15, paddingLeft: 15, marginTop: 10, backgroundColor: "white" }}
-        onPress={() => { }}
-        activeOpacity={0.99999}
-        underlayColor="#05adff22"
-      >
-        <View style={{ flexDirection: "row" }}>
-          <TouchableOpacity onPress={() => { goToUserPage(props.id) }}>
-            <Avatar size="lg" source={{ uri: props.img }} />
-          </TouchableOpacity>
-          <View flex={1}>
-            <TouchableOpacity onPress={() => { goToUserPage(props.id) }}>
-              <Text
-                style={{
-                  marginLeft: 15,
-                  fontSize: 18,
-                  marginTop: 6,
-                  fontWeight: '500'
-                }}
-              >
-                {props.name}
-              </Text>
+          <View style={{ flexDirection: "row" }}>
+            <TouchableOpacity onPress={() => { goToUserPage(props.id, "received", props.index) }}>
+              <Avatar size="lg" source={{ uri: props.img }} />
             </TouchableOpacity>
-            <View style={{ flexDirection: 'row', width: '100%', marginTop: 10, marginBottom: 4, paddingLeft: 14, paddingRight: 24 }}>
-              {describe}
+            <View flex={1}>
+              <TouchableOpacity onPress={() => { goToUserPage(props.id, "received", props.index) }}>
+                <Text
+                  style={{
+                    marginLeft: 15,
+                    fontSize: 18,
+                    marginTop: 6,
+                    fontWeight: '500'
+                  }}
+                >
+                  {props.name}
+                </Text>
+              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', width: '100%', marginTop: 10, marginBottom: 4, paddingLeft: 14, paddingRight: 24 }}>
+                <Text style={{ borderColor: "#dce1e4", fontSize: 15, minHeight: 60, width: '100%', borderWidth: 1, borderRadius: 5, marginTop: 0, padding: 10 }}>
+                  Xin chào, mình là {props.name}. Mình biết bạn qua số điện thoại.
+                </Text>
+              </View>
+              <View style={{ flexDirection: 'row', }}>
+                <TouchableHighlight
+                  style={{
+                    width: 104,
+                    marginTop: 9,
+                    borderRadius: 15,
+                    marginLeft: 12,
+                    height: 30
+                  }}
+                  activeOpacity={0.8}
+                  underlayColor="#3f3f3f"
+                  onPress={() => {
+                    handleAgreeRequest(props.id)
+                  }}
+                >
+                  <LinearGradient
+                    colors={["#0085ff", "#05adff"]}
+                    start={[0, 1]}
+                    end={[1, 0]}
+                    style={{
+                      width: "100%",
+                      height: 30,
+                      alignSelf: "center",
+                      borderRadius: 15,
+                    }}
+                  >
+                    <View
+                      style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                        flex: 1,
+                      }}
+                    >
+                      <Text style={{ color: "#fff", fontWeight: "500", fontSize: 15 }}>
+                        Đồng ý
+                      </Text>
+                    </View>
+                  </LinearGradient>
+                </TouchableHighlight>
+                <TouchableOpacity style={{ flexDirection: 'row', height: 30, marginRight: 16, borderRadius: 40, marginTop: 9, padding: 5, marginLeft: 14, backgroundColor: '#e6e6e6' }} onPress={() => { handleRejectRequest(props.id) }}>
+                  <Text style={{ fontSize: 15, color: 'black', width: 94, textAlign: 'center', alignSelf: "center", fontWeight: "500" }}>Từ chối</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            {button}
           </View>
         </View>
+      );
+    } else if (props.status == '3') {
+      return (
+        <View
+          style={{ paddingTop: 15, paddingBottom: 15, paddingLeft: 15, marginTop: 10, backgroundColor: "white" }}
+          onPress={() => { }}
+          activeOpacity={0.99999}
+          underlayColor="#05adff22"
+        >
+          <View style={{ flexDirection: "row" }}>
+            <TouchableOpacity onPress={() => { goToUserPage(props.id, "received", props.index) }}>
+              <Avatar size="lg" source={{ uri: props.img }} />
+            </TouchableOpacity>
+            <View flex={1}>
+              <TouchableOpacity onPress={() => { goToUserPage(props.id, "received", props.index) }}>
+                <Text
+                  style={{
+                    marginLeft: 15,
+                    fontSize: 18,
+                    marginTop: 6,
+                    fontWeight: '500'
+                  }}
+                >
+                  {props.name}
+                </Text>
+              </TouchableOpacity>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={{ fontSize: 12, marginLeft: 16, marginTop: 12, color: "#a6a6a6" }}>Đã từ chối lời mời kết bạn</Text>
+
+              </View>
+
+            </View>
+            <TouchableHighlight
+              style={{
+                width: 90,
+                marginTop: 9,
+                borderRadius: 15,
+                marginLeft: "auto",
+                marginRight: 16,
+                height: 30
+              }}
+              activeOpacity={0.8}
+              underlayColor="#3f3f3f"
+              onPress={() => {
+                handleSentRequestFromReceived(props.id)
+              }}
+            >
+              <LinearGradient
+                colors={["#0085ff", "#05adff"]}
+                start={[0, 1]}
+                end={[1, 0]}
+                style={{
+                  width: "100%",
+                  height: 30,
+                  alignSelf: "center",
+                  borderRadius: 15,
+                }}
+              >
+                <View
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flex: 1,
+                  }}
+                >
+                  <Text style={{ color: "#fff", fontWeight: "500", fontSize: 13 }}>
+                    Kết bạn
+                  </Text>
+                </View>
+              </LinearGradient>
+            </TouchableHighlight>
+          </View>
+        </View>
+      )
+    }
+    else if (props.status == '1') {
+      return (
+        <View
+          style={{ paddingTop: 15, paddingBottom: 15, paddingLeft: 15, marginTop: 10, backgroundColor: "white" }}
+          onPress={() => { }}
+          activeOpacity={0.99999}
+          underlayColor="#05adff22"
+        >
+          <View style={{ flexDirection: "row" }}>
+            <TouchableOpacity onPress={() => { goToUserPage(props.id, "received", props.index) }}>
+              <Avatar size="lg" source={{ uri: props.img }} />
+            </TouchableOpacity>
+            <View flex={1}>
+              <TouchableOpacity onPress={() => { goToUserPage(props.id, "received", props.index) }}>
+                <Text
+                  style={{
+                    marginLeft: 15,
+                    fontSize: 18,
+                    marginTop: 6,
+                    fontWeight: '500'
+                  }}
+                >
+                  {props.name}
+                </Text>
+              </TouchableOpacity>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={{ fontSize: 15, marginLeft: 16, marginTop: 12, color: "#a6a6a6" }}>Hai người đã trở thành bạn bè</Text>
+              </View>
+
+            </View>
+          </View>
+        </View>
+      )
+    }
 
 
-      </View>
-    );
+
   };
 
   const FriendReceived = (props) => {
@@ -333,11 +546,11 @@ export default function FriendRequests({ navigation }) {
         underlayColor="#05adff22"
       >
         <View style={{ flexDirection: "row" }}>
-          <TouchableOpacity onPress={() => { goToUserPage(props.id) }}>
+          <TouchableOpacity onPress={() => { goToUserPage(props.id, "sent", props.index) }}>
             <Avatar size="lg" source={{ uri: props.img }} />
           </TouchableOpacity>
           <View flex={1}>
-            <TouchableOpacity onPress={() => { goToUserPage(props.id) }}>
+            <TouchableOpacity onPress={() => { goToUserPage(props.id, "sent", props.index) }}>
               <Text
                 style={{
                   marginLeft: 15,
@@ -351,7 +564,6 @@ export default function FriendRequests({ navigation }) {
             </TouchableOpacity>
             <View style={{ flexDirection: 'row' }}>
               <Text style={{ fontSize: 12, marginLeft: 16, marginTop: 12, color: "#a6a6a6" }}>{describe}</Text>
-
             </View>
 
           </View>
@@ -373,11 +585,11 @@ export default function FriendRequests({ navigation }) {
 
   let tmp = [];
   for (let i = 0; i < ListS.length; i++) {
-    tmp.push(<FriendReceived key={i} name={ListS[i].receiver.username} img={BaseURL + ListS[i].receiver.avatar.fileName} id={ListS[i].receiver._id} status={ListS[i].status} />);
+    tmp.push(<FriendReceived key={i} index={i} name={ListS[i].receiver.username} img={BaseURL + ListS[i].receiver.avatar.fileName} id={ListS[i].receiver._id} status={ListS[i].status} />);
   }
   let tmp1 = [];
   for (let i = 0; i < ListR.length; i++) {
-    tmp1.push(<FriendSent key={i} name={ListR[i].sender.username} img={BaseURL + ListR[i].sender.avatar.fileName} id={ListR[i].sender._id} status={ListR[i].status} />);
+    tmp1.push(<FriendSent key={i} index={i} name={ListR[i].sender.username} img={BaseURL + ListR[i].sender.avatar.fileName} id={ListR[i].sender._id} status={ListR[i].status} />);
   }
   function ListSent() {
     return (
@@ -394,7 +606,7 @@ export default function FriendRequests({ navigation }) {
   function ListReceived() {
     return (
       <ScrollView
-        style={{ backgroundColor: '#ffff' }}
+      // style={{ backgroundColor: '#ffff' }}
       >
         {tmp1}
       </ScrollView>

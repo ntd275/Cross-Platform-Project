@@ -35,13 +35,21 @@ export default function ViewProfileOptionScreen({ navigation, route }) {
     try {
       accessToken = authContext.loginState.accessToken;
       const res = await Api.setRemoveFriend(accessToken, route.params.id);
-      console.log(res.data);
+      // console.log(res.data);
       appContext.setNeedUpdateViewProfileScreen(true);
+      if(route.params.from == "friend_requests"){
+        let newInfo = {};
+        newInfo.type = route.params.type;
+        newInfo.index = route.params.index;
+        newInfo.status = "3"
+        appContext.setEditFriendRequestsInfo(newInfo);
+      }
+      appContext.setNeedUpdateContact(true);
       appContext.displayMessage({
         message: "Đã xóa bạn thành công",
         type: "info",
         style: {
-          paddingLeft: Dimensions.get("window").width / 2 - 80,
+          paddingLeft: Dimensions.get("window").width / 2 - 110,
           paddingBottom: 8,
           paddingTop: 24,
         },
@@ -50,6 +58,7 @@ export default function ViewProfileOptionScreen({ navigation, route }) {
         duration: 1600,
         backgroundColor: "#008bd7",
       });
+
       navigation.goBack();
     } catch (err) {
       if (err.response && err.response.status == 401) {
