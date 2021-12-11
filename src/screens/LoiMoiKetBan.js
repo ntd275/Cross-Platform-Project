@@ -324,8 +324,8 @@ export default function FriendRequests({ navigation }) {
                 </Text>
               </TouchableOpacity>
               <View style={{ flexDirection: 'row', width: '100%', marginTop: 10, marginBottom: 4, paddingLeft: 14, paddingRight: 24 }}>
-                <Text style={{ borderColor: "#dce1e4", fontSize: 15, minHeight: 60, width: '100%', borderWidth: 1, borderRadius: 5, marginTop: 0, padding: 10 }}>
-                  Xin chào, mình là {props.name}. Mình biết bạn qua số điện thoại.
+                <Text style={{ borderColor: "#dce1e4", fontSize: 15, minHeight: 60, width: '100%', borderWidth: 1, borderRadius: 5, marginTop: 0, padding: 10, paddingRight: 22 }}>
+                  Xin chào, mình là {props.name}. Kết bạn với mình nhé!
                 </Text>
               </View>
               <View style={{ flexDirection: 'row', }}>
