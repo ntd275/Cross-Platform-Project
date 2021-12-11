@@ -348,7 +348,7 @@ export default function SearchScreen({ navigation }) {
       );
     }
     if (isRenderContact) {
-      if (people.length === 0) {
+      if (people.length === 0 && friends.length === 0) {
         return (
           <View style={{ justifyContent: "center", flexDirection: "column"}}>
             <IconList style={{marginBottom: 18, marginLeft: "auto", marginRight: "auto", marginTop: 20 }} />
