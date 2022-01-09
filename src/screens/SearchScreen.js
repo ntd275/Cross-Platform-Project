@@ -25,6 +25,7 @@ import {
   Animated,
   Easing,
 } from "react-native";
+import matchAll from 'string.prototype.matchall';
 import { marginRight, style } from "styled-system";
 
 export default function SearchScreen({ navigation }) {
@@ -67,7 +68,7 @@ export default function SearchScreen({ navigation }) {
     let userId = context.loginState.userId;
     let phonenumber = message.friend.phonenumber;
     let isread = true;
-    const index = [...content.matchAll(new RegExp(searchText, "gi"))].map(
+    const index = [...matchAll(content, new RegExp(searchText, "gi"))].map(
       (a) => a.index
     );
     const indexDraw = [];

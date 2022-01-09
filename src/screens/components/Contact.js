@@ -5,6 +5,8 @@ import IconCall from "../../../assets/call-outline.svg";
 import { Api } from "../../api/Api";
 import AuthContext from "../../components/context/AuthContext";
 import ChatContext from "../../components/context/ChatContext";
+import matchAll from 'string.prototype.matchall';
+
 export default function Contact(props) {
   const BaseURL = "http://13.76.46.159:8000/files/";
   const [userName, setuserName] = useState(props.data.username);
@@ -91,7 +93,7 @@ export default function Contact(props) {
       console.log(e);
     }
   };
-  const index = [...userName.matchAll(new RegExp(searchedText, "gi"))].map(
+  const index = [...matchAll(userName, new RegExp(searchedText, "gi"))].map(
     (a) => a.index
   );
   const indexDraw = [];

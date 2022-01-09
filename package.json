@@ -55,6 +55,7 @@
     "react-native-web": "^0.17.5",
     "rn-material-ui-textfield": "^1.0.5",
     "socket.io-client": "^4.3.2",
+    "string.prototype.matchall": "^4.0.6",
     "styled-components": "^5.3.3",
     "styled-system": "^5.1.5",
     "unimodules-permissions-interface": "^6.1.0",
