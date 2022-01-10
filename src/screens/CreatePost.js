@@ -55,7 +55,6 @@ export default function CreatePost({ navigation,route }) {
 
   const requestSend = async () => {
     if (!isSent) {
-      setIsSent(true);
       if (postText.length > 500) {
         Alert.alert(
           "Bài viết quá dài",
@@ -116,6 +115,8 @@ export default function CreatePost({ navigation,route }) {
         console.log(videos[0].length);
       }
 
+      setIsSent(true);
+      
       const onSend = (progressEvent) => {
         var percentCompleted = Math.round(
           (progressEvent.loaded * 100) / progressEvent.total
