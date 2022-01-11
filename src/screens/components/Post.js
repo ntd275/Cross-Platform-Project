@@ -235,6 +235,7 @@ export default function Post(props) {
             let res = await Api.deletePost(context.loginState.accessToken,
                 props.post._id);
             console.log(res);
+            refRBSheet.current.close();
             appContext.displayMessage({
                 message: "Đã xóa bài đăng",
                 type: "default",
@@ -245,7 +246,18 @@ export default function Post(props) {
                 position: "center",
                 backgroundColor: "#262626",
             });
-            props.navigation.navigate("TimeLineScreen");
+            appContext.setNeedUpdateTimeline(true);
+            appContext.setNeedUpdateProfile(true);
+            if (props.from.includes("postscreen")) {
+                if (props.from.includes("timeline")) {
+                 
+                    props.navigation.navigate("TimeLineScreen");
+                }
+                if (props.from.includes("profile")) {
+                    props.navigation.navigate("ProfileScreen");
+                }
+            }
+
         } catch (err) {
             if (err.response && err.response.status == 404) {
                 console.log(err.response.data.message);
